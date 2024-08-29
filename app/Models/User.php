@@ -26,6 +26,7 @@ class User extends Authenticatable
         'latitude',                     // Add this field
         'longitude',                    // Add this field
         'location',
+        'is_first_login', 
     ];
 
     /**

@@ -26,9 +26,7 @@ class AuthTest extends TestCase
             'name' => 'John Doe',
             'email' => 'john.doe@example.com',
             'phone_number' => '1234567890',
-            'location' => '123 Main St',
-            'latitude' => 40.7128,
-            'longitude' => -74.0060,
+            
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
@@ -174,9 +172,7 @@ class AuthTest extends TestCase
             'name' => 'Jane Doe',
             'email' => 'john.doe@example.com', // Duplicate email
             'phone_number' => '0987654321',
-            'location' => '123 Main St',
-            'latitude' => 40.7128,
-            'longitude' => -74.0060,
+            
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
@@ -189,9 +185,7 @@ class AuthTest extends TestCase
             'name' => 'Jane Doe',
             'email' => 'jane.doe@example.com',
             'phone_number' => '1234567890', // Duplicate phone number
-            'location' => '123 Main St',
-            'latitude' => 40.7128,
-            'longitude' => -74.0060,
+            
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
