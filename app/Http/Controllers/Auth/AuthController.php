@@ -10,56 +10,68 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Mail\Message; // Import the correct class
+use Illuminate\Mail\SentMessage; // Correct class for handling raw email assertions
+use App\Mail\ConfirmationCodeMail;
+
+
 
 class AuthController extends Controller
 {
     /**
      * Handle user registration.
      */
-    public function register(Request $request)
-    {
-        // Validate the request data
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone_number' => 'required|string|max:15|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        // Return validation errors, if any
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+    
+     public function register(Request $request)
+     {
+         // Validate the request data
+         $validator = Validator::make($request->all(), [
+             'name' => 'required|string|max:255',
+             'email' => 'required|string|email|max:255|unique:users',
+             'phone_number' => 'required|string|max:15|unique:users',
+             'password' => 'required|string|min:8|confirmed',
+         ]);
+     
+         // Return validation errors, if any
+         if ($validator->fails()) {
+             return response()->json(['errors' => $validator->errors()], 422);
+         }
+     
+         // Assign the 'user' role by default (role_id = 2)
+         $role_id = 2; // Assuming 2 is the ID for the 'user' role
+     
+         // Create the user with the 'user' role by default
+         $user = User::create([
+             'name' => $request->name,
+             'email' => $request->email,
+             'phone_number' => $request->phone_number,
+             'password' => Hash::make($request->password),
+             'role_id' => $role_id, // Automatically set role_id to 2
+         ]);
+     
+         // Generate a confirmation code
+         $confirmationCode = mt_rand(100000, 999999);
+     
+         // Save the confirmation code and its expiration time
+         $user->confirmation_code = $confirmationCode;
+         $user->confirmation_code_expires_at = Carbon::now()->addMinutes(10); // Code expires in 10 minutes
+         $user->save();
+     
+         try {
+            Mail::to($user->email)->send(new ConfirmationCodeMail($confirmationCode));
+        } catch (\Exception $e) {
+            dd($e->getMessage()); // This will output the error message to the screen
+            \Log::error('Failed to send mailable: ' . $e->getMessage());
+            return response()->json(['message' => 'Registration successful, but failed to send confirmation email. Please try again later.'], 500);
         }
-
-        // Assign the 'user' role by default (role_id = 2)
-        $role_id = 2; // Assuming 2 is the ID for the 'user' role
-
-        // Create the user with the 'user' role by default
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password),
-            'role_id' => $role_id, // Automatically set role_id to 2
-        ]);
-
-        // Generate a confirmation code
-        $confirmationCode = mt_rand(100000, 999999);
-
-        // Save the confirmation code and its expiration time
-        $user->confirmation_code = $confirmationCode;
-        $user->confirmation_code_expires_at = Carbon::now()->addMinutes(10); // Code expires in 10 minutes
-        $user->save();
-
-        // Send the confirmation code via email
-        Mail::raw("Your confirmation code is: $confirmationCode", function ($message) use ($user) {
-            $message->to($user->email)
-                    ->subject('Email Confirmation Code');
-        });
-
-        // Return a response indicating that the user needs to confirm their email
-        return response()->json(['message' => 'User registered successfully. Please check your email for the confirmation code.'], 201);
-    }
+        
+        
+     
+         // Return a response indicating that the user needs to confirm their email
+         return response()->json(['message' => 'User registered successfully. Please check your email for the confirmation code.'], 201);
+     }
+     
+    
 
     /**
      * Handle email verification.

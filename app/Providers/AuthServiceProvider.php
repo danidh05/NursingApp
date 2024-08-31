@@ -19,6 +19,9 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         User::class => UserPolicy::class,  // Map the User model to the UserPolicy
         Nurse::class => NursePolicy::class,  // Map the Nurse model to the NursePolicy
+        Request::class => RequestPolicy::class,
+        Service::class => ServicePolicy::class,
+        Category::class => CategoryPolicy::class,
 
     ];
 

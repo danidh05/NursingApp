@@ -24,7 +24,7 @@ class RoleMiddlewareTest extends TestCase
         $adminRole = Role::create(['name' => 'admin']); // Create the 'admin' role
         $admin = User::factory()->create(['role_id' => $adminRole->id]);
 
-        $response = $this->actingAs($admin)->get('/api/admin/dashboard');
+        $response = $this->actingAs($admin)->get('/api/admin/users');
         $response->assertStatus(200); // OK
     }
 
@@ -33,7 +33,7 @@ class RoleMiddlewareTest extends TestCase
         $userRole = Role::create(['name' => 'user']); // Create the 'user' role
         $user = User::factory()->create(['role_id' => $userRole->id]);
 
-        $response = $this->actingAs($user)->get('/api/admin/dashboard');
+        $response = $this->actingAs($user)->get('/api/admin/users');
         $response->assertStatus(403); // Forbidden
     }
 

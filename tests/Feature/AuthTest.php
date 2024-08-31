@@ -7,6 +7,14 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Role;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Message; // Import the correct class
+use Illuminate\Support\Testing\Fakes\MailFake; // Ensure you import the correct namespaces
+use Illuminate\Mail\SentMessage; // Correct class for handling raw email assertions
+use App\Mail\ConfirmationCodeMail;
+
+
+
 
 class AuthTest extends TestCase
 {
@@ -192,5 +200,28 @@ class AuthTest extends TestCase
 
         $response->assertStatus(422)
                  ->assertJsonValidationErrors(['phone_number']);
+    }
+    public function test_user_receives_confirmation_email_on_registration()
+    {
+        // Fake the mailer
+        Mail::fake();
+
+        // Perform the action: user registration
+        $response = $this->postJson('/api/register', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'phone_number' => '1234567890',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        // Assert that the registration was successful
+        $response->assertStatus(201)
+                 ->assertJson(['message' => 'User registered successfully. Please check your email for the confirmation code.']);
+
+        // Assert that the mailable was sent to the correct email
+        Mail::assertSent(ConfirmationCodeMail::class, function ($mail) {
+            return $mail->hasTo('john.doe@example.com');
+        });
     }
 }

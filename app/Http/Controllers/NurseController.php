@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class NurseController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the nurses (Available to both Admin and User).
      */
@@ -28,7 +31,7 @@ class NurseController extends Controller
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15|unique:nurses',
             'address' => 'required|string|max:255',
-            'profile_picture' => 'nullable|string', // Can be a URL or base64 string
+            'profile_picture' => 'nullable|string|url', // Validate as URL if applicable
         ]);
 
         $nurse = Nurse::create($validatedData);
@@ -49,15 +52,14 @@ class NurseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->authorize('update', Nurse::class); // Ensure only Admin can update
-
         $nurse = Nurse::findOrFail($id);
+        $this->authorize('update', $nurse); // Ensure only Admin can update
 
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'phone_number' => 'sometimes|string|max:15|unique:nurses,phone_number,' . $nurse->id,
             'address' => 'sometimes|string|max:255',
-            'profile_picture' => 'nullable|string',
+            'profile_picture' => 'nullable|string|url', // Validate as URL if applicable
         ]);
 
         $nurse->update($validatedData);
@@ -69,9 +71,9 @@ class NurseController extends Controller
      */
     public function destroy($id)
     {
-        $this->authorize('delete', Nurse::class); // Ensure only Admin can delete
-
         $nurse = Nurse::findOrFail($id);
+        $this->authorize('delete', $nurse); // Ensure only Admin can delete
+
         $nurse->delete();
 
         return response()->json(['message' => 'Nurse deleted successfully.'], 200);
