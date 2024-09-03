@@ -12,6 +12,8 @@ use Illuminate\Mail\Message; // Import the correct class
 use Illuminate\Support\Testing\Fakes\MailFake; // Ensure you import the correct namespaces
 use Illuminate\Mail\SentMessage; // Correct class for handling raw email assertions
 use App\Mail\ConfirmationCodeMail;
+use Laravel\Sanctum\Sanctum;
+
 
 
 
@@ -224,4 +226,22 @@ class AuthTest extends TestCase
             return $mail->hasTo('john.doe@example.com');
         });
     }
+
+  // Example test setup for creating a user with a role_id
+public function test_user_can_logout()
+{
+    // Set up roles and create a user with a role_id
+    $role = Role::where('name', 'user')->first(); // Assuming you have a Role model and 'user' role exists
+    $user = User::factory()->create(['role_id' => $role->id]); // Set role_id explicitly
+
+    Sanctum::actingAs($user); // Simulate authentication
+
+    // Act: Call the logout route
+    $response = $this->postJson('/api/logout');
+
+    // Assert: Check if logout was successful
+    $response->assertStatus(200)
+             ->assertJson(['message' => 'Logged out successfully']);
+}
+
 }

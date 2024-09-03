@@ -110,14 +110,21 @@ class UserControllerTest extends TestCase
         $response = $this->putJson("/api/users/{$user->id}", [
             'name' => 'Updated Name',
             'email' => 'updated.email@example.com',
+            'latitude' => 37.7749,
+            'longitude' => -122.4194,
         ]);
     
         $response->assertStatus(200)
                  ->assertJson(['message' => 'User updated successfully.']);
     
-        $this->assertEquals('Updated Name', $user->fresh()->name);
-        $this->assertEquals('updated.email@example.com', $user->fresh()->email);
+        $user->refresh();
+    
+        $this->assertEquals('Updated Name', $user->name);
+        $this->assertEquals('updated.email@example.com', $user->email);
+        $this->assertEquals(37.7749, $user->latitude);
+        $this->assertEquals(-122.4194, $user->longitude);
     }
+    
 
     /** 
      * Test: User cannot change their role.

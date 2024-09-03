@@ -76,38 +76,48 @@ class AuthController extends Controller
     /**
      * Handle email verification.
      */
-    public function verifyEmail(Request $request)
-    {
-        // Validate the email and confirmation code
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
-            'confirmation_code' => 'required|string',
-        ]);
+/**
+ * Handle email verification.
+ */
+public function verifyEmail(Request $request)
+{
+    // Validate the email and confirmation code
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|string|email',
+        'confirmation_code' => 'required|string',
+    ]);
 
-        // Return validation errors, if any
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Find the user by email and confirmation code
-        $user = User::where('email', $request->email)
-            ->where('confirmation_code', $request->confirmation_code)
-            ->first();
-
-        // Check if the confirmation code is invalid or expired
-        if (!$user || Carbon::now()->isAfter($user->confirmation_code_expires_at)) {
-            return response()->json(['message' => 'Invalid or expired confirmation code.'], 422);
-        }
-
-        // Mark the email as verified
-        $user->email_verified_at = Carbon::now();
-        $user->confirmation_code = null; // Clear the confirmation code
-        $user->confirmation_code_expires_at = null; // Clear the expiration time
-        $user->save();
-
-        // Return a success message
-        return response()->json(['message' => 'Email successfully verified.'], 200);
+    // Return validation errors, if any
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
     }
+
+    // Find the user by email and confirmation code
+    $user = User::where('email', $request->email)
+        ->where('confirmation_code', $request->confirmation_code)
+        ->first();
+
+    // Check if the confirmation code is invalid or expired
+    if (!$user || Carbon::now()->isAfter($user->confirmation_code_expires_at)) {
+        return response()->json(['message' => 'Invalid or expired confirmation code.'], 422);
+    }
+
+    // Mark the email as verified
+    $user->email_verified_at = Carbon::now();
+    $user->confirmation_code = null; // Clear the confirmation code
+    $user->confirmation_code_expires_at = null; // Clear the expiration time
+    $user->save();
+
+    // Generate an API token for the user
+    $token = $user->createToken('authToken')->plainTextToken;
+
+    // Return a success message along with the token
+    return response()->json([
+        'message' => 'Email successfully verified.',
+        'token' => $token, // Include the token in the response
+    ], 200);
+}
+
 
     /**
      * Handle user login.
@@ -144,6 +154,14 @@ class AuthController extends Controller
     
         // Invalid credentials
         return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        // Revoke the token that was used to authenticate the current request
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
     
 }

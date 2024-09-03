@@ -77,6 +77,8 @@ class UserController extends Controller
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
             'phone_number' => 'sometimes|required|string|max:15|unique:users,phone_number,' . $user->id,
             'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
     

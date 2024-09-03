@@ -8,7 +8,7 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\NurseController;
 use App\Http\Controllers\ServiceController; // Import the ServiceController
 use App\Http\Controllers\CategoryController;
-
+use App\Http\Controllers\NotificationsController; // Import the NotificationsController
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
@@ -17,9 +17,17 @@ Route::post('/login', [AuthController::class, 'login']);
 // Protected routes (require auth and verified email)
 Route::middleware(['auth:sanctum'])->group(function () {
 
+
+    Route::post('/logout', [AuthController::class, 'logout']); // Add this line
+
     // Routes for all authenticated users
     Route::get('/users/{id}', [UserController::class, 'show']); // Get user details
     Route::put('/users/{id}', [UserController::class, 'update']); // Update user details
+
+    // Notifications routes for authenticated users
+    Route::get('/notifications', [NotificationsController::class, 'index']); // List notifications
+    Route::post('/notifications/{id}/read', [NotificationsController::class, 'markAsRead']); // Mark a notification as read
+    Route::delete('/notifications/{id}', [NotificationsController::class, 'destroy']); // Delete a notification
     
     // Routes accessible by both users and admins
     Route::get('/nurses', [NurseController::class, 'index']); // View all nurses
