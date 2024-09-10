@@ -22,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
         Request::class => RequestPolicy::class,
         Service::class => ServicePolicy::class,
         Category::class => CategoryPolicy::class,
+        About::class => AboutPolicy::class,
+        Rating::class => NurseRatingPolicy::class,
 
     ];
 

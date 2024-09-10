@@ -18,6 +18,7 @@ class Nurse extends Model
         'phone_number',
         'address',
         'profile_picture',
+        'gender', // Add gender to fillable attributes
     ];
 
     /**
@@ -26,5 +27,15 @@ class Nurse extends Model
     public function requests()
     {
         return $this->hasMany(Request::class);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
     }
 }

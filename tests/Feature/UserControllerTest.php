@@ -80,15 +80,22 @@ class UserControllerTest extends TestCase
     /** 
      * Test: User can view their own profile.
      */
-    public function test_user_can_view_own_profile()
+    public function test_admin_can_view_user_profile()
     {
+        // Create a user with 'user' role
         $userRole = Role::where('name', 'user')->first();
         $user = User::factory()->create(['role_id' => $userRole->id]);
-
-        Sanctum::actingAs($user);
-
-        $response = $this->getJson("/api/users/{$user->id}");
-
+    
+        // Create an admin with 'admin' role
+        $adminRole = Role::where('name', 'admin')->first();
+        $admin = User::factory()->create(['role_id' => $adminRole->id]);
+    
+        // Acting as the admin
+        Sanctum::actingAs($admin);
+    
+        // Admin attempts to view the specific user's profile
+        $response = $this->getJson("/api/admin/users/{$user->id}");
+    
         $response->assertStatus(200)
                  ->assertJson([
                      'id' => $user->id,
@@ -96,7 +103,8 @@ class UserControllerTest extends TestCase
                      'name' => $user->name,
                  ]);
     }
-
+        
+    
     /** 
      * Test: User can update their own profile.
      */
@@ -194,4 +202,21 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonStructure(['active_requests', 'recent_services']);
     }
+    public function testUserCanViewOwnProfile()
+{
+    $user = User::factory()->create();
+
+    Sanctum::actingAs($user);
+
+    // Test the authenticated user fetching their own profile
+    $response = $this->getJson('/api/me'); // Use the correct endpoint for authenticated user
+
+    $response->assertStatus(200)
+             ->assertJson([
+                 'id' => $user->id,
+                 'email' => $user->email,
+                 'name' => $user->name,
+             ]);
+}
+
 }

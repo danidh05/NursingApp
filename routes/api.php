@@ -6,22 +6,26 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\NurseController;
-use App\Http\Controllers\ServiceController; // Import the ServiceController
+use App\Http\Controllers\ServiceController; 
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\NotificationsController; // Import the NotificationsController
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\AboutController;
+
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+// Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+// In routes/api.php
+Route::post('/verify-sms', [AuthController::class, 'verifySms']);//new
+
 Route::post('/login', [AuthController::class, 'login']);
 
 // Protected routes (require auth and verified email)
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    Route::post('/logout', [AuthController::class, 'logout']); // Logout route
 
-    Route::post('/logout', [AuthController::class, 'logout']); // Add this line
-
-    // Routes for all authenticated users
-    Route::get('/users/{id}', [UserController::class, 'show']); // Get user details
+    // Routes for authenticated users
+    Route::get('/me', [UserController::class, 'show']); // Fetch authenticated user's details
     Route::put('/users/{id}', [UserController::class, 'update']); // Update user details
 
     // Notifications routes for authenticated users
@@ -37,28 +41,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/services', [ServiceController::class, 'index']); // List all services
     Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
 
-         // Users and admins can view categories
-         Route::get('/categories', [CategoryController::class, 'index']);
-         Route::get('/categories/{id}', [CategoryController::class, 'show']);
+    // Users and admins can view categories
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+    Route::get('/about', [AboutController::class, 'index']);//new
     
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
         Route::get('/user/dashboard', [UserController::class, 'dashboard']);
         Route::post('/submit-location', [UserController::class, 'submitLocationOnFirstLogin']);
+        Route::get('/requests', [RequestController::class, 'index']);
 
         // Request management for users
         Route::post('/requests', [RequestController::class, 'store']); // Create a new request
         Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
 
-       
-
-
+        Route::post('/nurses/{id}/rate', [NurseController::class, 'rate']);//new
     });
     
     // Routes specific to "admin" role
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         // User management routes
         Route::get('/users', [UserController::class, 'index']); // List all users
+        Route::get('/users/{id}', [UserController::class, 'show']); // Fetch specific user details by ID
         Route::post('/users', [UserController::class, 'store']); // Create a new user
         Route::delete('/users/{id}', [UserController::class, 'destroy']); // Delete user
 
@@ -77,9 +83,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/services/{service}', [ServiceController::class, 'update']); // Update a service
         Route::delete('/services/{service}', [ServiceController::class, 'destroy']); // Delete a service
 
-
+        // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category
         Route::put('/categories/{category}', [CategoryController::class, 'update']);  // Update a category
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']); // Delete a category
+
+        Route::put('/about', [AboutController::class, 'update']);//new
     });
 });

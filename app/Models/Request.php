@@ -31,27 +31,21 @@ class Request extends Model
         'scheduled_time' => 'datetime',
     ];
 
-    /**
-     * Get the user that made the request.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+  // Define the many-to-many relationship with services
+  public function services()
+  {
+      return $this->belongsToMany(Service::class, 'request_services', 'request_id', 'service_id');
+  }
+  
 
-    /**
-     * Get the nurse assigned to the request.
-     */
-    public function nurse()
-    {
-        return $this->belongsTo(Nurse::class);
-    }
+  // Other relationships like nurse, user, etc.
+  public function nurse()
+  {
+      return $this->belongsTo(Nurse::class);
+  }
 
-    /**
-     * Get the service associated with the request.
-     */
-    public function service()
-    {
-        return $this->belongsTo(Service::class);
-    }
+  public function user()
+  {
+      return $this->belongsTo(User::class);
+  }
 }

@@ -26,9 +26,9 @@ class RequestController extends Controller
     
         // For admin, fetch all requests; for users, fetch only their own requests
         if ($user->role_id === 1) { // Assuming 1 is the admin role
-            $requests = NurseRequest::with(['user', 'nurse', 'service'])->get();
+            $requests = NurseRequest::with(['user', 'nurse', 'services'])->get();
         } else {
-            $requests = NurseRequest::with(['nurse', 'service'])
+            $requests = NurseRequest::with(['nurse', 'services'])
                 ->where('user_id', $user->id)
                 ->get();
         }
@@ -42,47 +42,63 @@ class RequestController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate input
         $validatedData = $request->validate([
             'nurse_id' => 'required|exists:nurses,id',
-            'service_id' => 'required|exists:services,id',
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'exists:services,id',
             'scheduled_time' => 'nullable|date',
             'location' => 'required|string',
+            'time_type' => 'required|in:full-time,part-time', // New field for time type
+
         ]);
     
+        // Use dd() to inspect the validated data
+        // dd($validatedData);
+    
         try {
-            // Business logic to create the request
             $user = Auth::user();
     
-            $nurseRequest = new NurseRequest(); // Correct alias
-            $nurseRequest->user_id = $user->id;
-            $nurseRequest->nurse_id = $validatedData['nurse_id'];
-            $nurseRequest->service_id = $validatedData['service_id'];
-            $nurseRequest->status = 'pending';
-            $nurseRequest->scheduled_time = $validatedData['scheduled_time'];
-            $nurseRequest->location = $validatedData['location'];
-            $nurseRequest->save();
+      // No need to set $nurseRequest->service_id here
+$nurseRequest = new NurseRequest();
+$nurseRequest->user_id = $user->id;
+$nurseRequest->nurse_id = $validatedData['nurse_id'];
+$nurseRequest->status = 'pending';
+$nurseRequest->scheduled_time = $validatedData['scheduled_time'];
+$nurseRequest->location = $validatedData['location'];
+$nurseRequest->time_type = $validatedData['time_type']; // Save the time type
+
+$nurseRequest->save();
+
+// Attach multiple services to the request
+$nurseRequest->services()->attach($validatedData['service_ids']);
+
     
-            // Retrieve latitude and longitude from the user for response
+            // Use dd() to inspect the attached services
+            // dd($nurseRequest->services);
+    
             $latitude = $user->latitude;
             $longitude = $user->longitude;
     
-            // Dispatch the event
             event(new UserRequestedService($nurseRequest));
     
             return response()->json([
                 'message' => 'Request created successfully.',
-                'request' => $nurseRequest,
+                'request' => $nurseRequest->load('services'),
                 'user_location' => [
                     'latitude' => $latitude,
                     'longitude' => $longitude,
                 ],
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Error in store method: ' . $e->getMessage());
+            // Use dd() to see the error message directly
+           // dd($e->getMessage());
+    
             return response()->json(['error' => 'Server Error'], 500);
         }
     }
+    
+    
+    
     
 
     /**
@@ -91,7 +107,7 @@ class RequestController extends Controller
     public function show($id)
     {
         // Fetch the request with all related details using eager loading
-        $nurseRequest = NurseRequest::with(['user', 'nurse', 'service'])->findOrFail($id);
+        $nurseRequest = NurseRequest::with(['user', 'nurse', 'services'])->findOrFail($id);
         
         // Ensure the user is authorized to view this request
         $this->authorize('view', $nurseRequest);
@@ -115,6 +131,8 @@ class RequestController extends Controller
             'location' => 'sometimes|string', // Optional location update
             'nurse_id' => 'sometimes|exists:nurses,id', // Optional nurse change
             'service_id' => 'sometimes|exists:services,id', // Optional service change
+            'time_type' => 'sometimes|in:full-time,part-time', // Include time_type in update validation
+
         ]);
 
         $nurseRequest->update($validatedData);

@@ -32,18 +32,19 @@ class BroadcastingTest extends TestCase
         // Fake events to capture broadcasting
         Event::fake();
 
-        // Arrange: Create a user, nurse, and service
+        // Arrange: Create a user, nurse, and services
         $user = User::factory()->create(['role_id' => 2]); // Assuming 2 is the 'user' role
         $nurse = Nurse::factory()->create();
-        $service = Service::factory()->create();
+        $services = Service::factory()->count(2)->create(); // Create multiple services
 
         Sanctum::actingAs($user);
 
-        // Act: User makes a request
+        // Act: User makes a request with multiple services
         $response = $this->postJson('/api/requests', [
             'nurse_id' => $nurse->id,
-            'service_id' => $service->id,
+            'service_ids' => $services->pluck('id')->toArray(), // Attach multiple services
             'location' => '123 Main St',
+            'time_type'=>'full-time',
             'scheduled_time' => now()->addDays(1)->toDateTimeString(),
         ]);
 
@@ -52,47 +53,47 @@ class BroadcastingTest extends TestCase
                  ->assertJson(['message' => 'Request created successfully.']);
 
         // Assert: The event was dispatched with the correct payload
-        Event::assertDispatched(UserRequestedService::class, function ($event) use ($user) {
+        Event::assertDispatched(UserRequestedService::class, function ($event) use ($user, $services) {
             return $event->request->user_id === $user->id &&
                    $event->request->nurse_id !== null &&
-                   $event->request->service_id !== null;
+                   $event->request->services->pluck('id')->sort()->values()->all() === $services->pluck('id')->sort()->values()->all(); // Check the services attached to the request
         });
     }
+
     public function test_admin_updated_request_event_is_broadcasted()
-{
-    // Fake events to capture broadcasting
-    Event::fake();
+    {
+        // Fake events to capture broadcasting
+        Event::fake();
 
-    // Arrange: Create an admin user, a regular user, and a request
-    $admin = User::factory()->create(['role_id' => 1]); // Assuming 1 is the 'admin' role
-    $user = User::factory()->create(['role_id' => 2]); // Regular user role
-    $nurse = Nurse::factory()->create();
-    $service = Service::factory()->create();
+        // Arrange: Create an admin user, a regular user, a nurse, services, and a request
+        $admin = User::factory()->create(['role_id' => 1]); // Assuming 1 is the 'admin' role
+        $user = User::factory()->create(['role_id' => 2]); // Regular user role
+        $nurse = Nurse::factory()->create();
+        $services = Service::factory()->count(2)->create(); // Create multiple services
 
-    // Create a request
-    $request = UserRequest::factory()->create([
-        'user_id' => $user->id,
-        'nurse_id' => $nurse->id,
-        'service_id' => $service->id,
-        'status' => 'pending',
-    ]);
+        // Create a request and attach services
+        $request = UserRequest::factory()->create([
+            'user_id' => $user->id,
+            'nurse_id' => $nurse->id,
+            'status' => 'pending',
+        ]);
+        $request->services()->attach($services->pluck('id')->toArray()); // Attach services to the request
 
-    Sanctum::actingAs($admin);
+        Sanctum::actingAs($admin);
 
-    // Act: Admin updates the request
-    $response = $this->putJson("/api/admin/requests/{$request->id}", [
-        'status' => 'approved',
-    ]);
+        // Act: Admin updates the request
+        $response = $this->putJson("/api/admin/requests/{$request->id}", [
+            'status' => 'approved',
+        ]);
 
-    // Assert: Check if the response is successful
-    $response->assertStatus(200)
-             ->assertJson(['message' => 'Request updated successfully.']);
+        // Assert: Check if the response is successful
+        $response->assertStatus(200)
+                 ->assertJson(['message' => 'Request updated successfully.']);
 
-    // Assert: The event was dispatched with the correct payload
-    Event::assertDispatched(AdminUpdatedRequest::class, function ($event) use ($request) {
-        return $event->request->id === $request->id &&
-               $event->request->status === 'approved';
-    });
-}
-
+        // Assert: The event was dispatched with the correct payload
+        Event::assertDispatched(AdminUpdatedRequest::class, function ($event) use ($request) {
+            return $event->request->id === $request->id &&
+                   $event->request->status === 'approved';
+        });
+    }
 }

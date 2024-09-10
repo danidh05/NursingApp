@@ -42,22 +42,27 @@ class NurseControllerTest extends TestCase
      */
     public function test_admin_can_create_nurse()
     {
-        $adminRole = Role::where('name', 'admin')->first();
-        $admin = User::factory()->create(['role_id' => $adminRole->id]);
-
+        $admin = User::factory()->create(['role_id' => 1]); // Assuming 1 is admin role
         Sanctum::actingAs($admin);
-
+    
         $response = $this->postJson('/api/admin/nurses', [
-            'name' => 'Nurse Jane',
+            'name' => 'Jane Doe',
             'phone_number' => '1234567890',
-            'address' => '123 Nurse Lane',
+            'address' => '123 Main St',
+           
+            'gender' => 'female', // Include gender in the test data
         ]);
-
+    
         $response->assertStatus(201)
-                 ->assertJson(['message' => 'Nurse added successfully.']);
-
-        $this->assertDatabaseHas('nurses', ['name' => 'Nurse Jane']);
+                 ->assertJson([
+                     'message' => 'Nurse added successfully.',
+                     'nurse' => [
+                         'name' => 'Jane Doe',
+                         'gender' => 'female',
+                     ],
+                 ]);
     }
+    
 
     /**
      * Test that an admin can update a nurse.

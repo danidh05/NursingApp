@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Nurse;
+use App\Models\Rating;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
 
 class NurseController extends Controller
 {
     use AuthorizesRequests;
+
     /**
      * Display a listing of the nurses (Available to both Admin and User).
      */
@@ -25,13 +26,14 @@ class NurseController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create', Nurse::class); // Ensure only Admin can create
+        $this->authorize('create', Nurse::class);
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15|unique:nurses',
             'address' => 'required|string|max:255',
-            'profile_picture' => 'nullable|string|url', // Validate as URL if applicable
+            'profile_picture' => 'nullable|string|url',
+            'gender' => 'required|in:male,female',
         ]);
 
         $nurse = Nurse::create($validatedData);
@@ -43,8 +45,12 @@ class NurseController extends Controller
      */
     public function show($id)
     {
-        $nurse = Nurse::findOrFail($id);
-        return response()->json(['nurse' => $nurse], 200);
+        $nurse = Nurse::with('ratings.user')->findOrFail($id);
+
+        return response()->json([
+            'nurse' => $nurse,
+            'average_rating' => $nurse->averageRating(),
+        ], 200);
     }
 
     /**
@@ -53,13 +59,14 @@ class NurseController extends Controller
     public function update(Request $request, $id)
     {
         $nurse = Nurse::findOrFail($id);
-        $this->authorize('update', $nurse); // Ensure only Admin can update
+        $this->authorize('update', $nurse);
 
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'phone_number' => 'sometimes|string|max:15|unique:nurses,phone_number,' . $nurse->id,
             'address' => 'sometimes|string|max:255',
-            'profile_picture' => 'nullable|string|url', // Validate as URL if applicable
+            'profile_picture' => 'nullable|string|url',
+            'gender' => 'sometimes|required|in:male,female',
         ]);
 
         $nurse->update($validatedData);
@@ -72,10 +79,39 @@ class NurseController extends Controller
     public function destroy($id)
     {
         $nurse = Nurse::findOrFail($id);
-        $this->authorize('delete', $nurse); // Ensure only Admin can delete
+        $this->authorize('delete', $nurse);
 
         $nurse->delete();
 
         return response()->json(['message' => 'Nurse deleted successfully.'], 200);
+    }
+
+    /**
+     * Store a new rating for a nurse.
+     */
+    public function rate(Request $request, $nurseId)
+    {
+        $request->validate([
+            'rating' => 'required|integer|between:1,5',
+            'comment' => 'nullable|string',
+        ]);
+
+        $nurse = Nurse::findOrFail($nurseId);
+
+        // Check if the user has already rated this nurse
+        $existingRating = Rating::where('nurse_id', $nurseId)->where('user_id', Auth::id())->first();
+        if ($existingRating) {
+            return response()->json(['message' => 'You have already rated this nurse.'], 422); // Change to 422 for validation error
+        }
+
+        $rating = new Rating([
+            'user_id' => Auth::id(),
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        $nurse->ratings()->save($rating);
+
+        return response()->json(['message' => 'Rating submitted successfully.', 'rating' => $rating], 201);
     }
 }

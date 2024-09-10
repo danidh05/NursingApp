@@ -31,21 +31,21 @@ class NotificationsControllerTest extends TestCase
     {
         Event::fake();
 
-        // Create a user, nurse, service, and request
+        // Create a user, nurse, and services
         $userRole = Role::where('name', 'user')->first();
         $user = User::factory()->create(['role_id' => $userRole->id]);
         $nurse = Nurse::factory()->create();
-        $service = Service::factory()->create();
+        $services = Service::factory()->count(2)->create(); // Create multiple services
 
-        // Create a request associated with the user
+        // Create a request associated with the user and attach services
         $request = NurseRequest::factory()->create([
             'user_id' => $user->id,
             'nurse_id' => $nurse->id,
-            'service_id' => $service->id,
             'status' => 'pending',
             'scheduled_time' => now()->addDays(2),
             'location' => '123 Main St',
         ]);
+        $request->services()->attach($services->pluck('id')->toArray()); // Attach services to the request
 
         Sanctum::actingAs($user);
 
@@ -68,22 +68,22 @@ class NotificationsControllerTest extends TestCase
     {
         Event::fake();
 
-        // Create an admin user, a regular user, nurse, service, and request
+        // Create an admin user, a regular user, nurse, and services
         $adminRole = Role::where('name', 'admin')->first();
         $admin = User::factory()->create(['role_id' => $adminRole->id]);
         $user = User::factory()->create(['role_id' => 2]); // Assuming 2 is the 'user' role
         $nurse = Nurse::factory()->create();
-        $service = Service::factory()->create();
+        $services = Service::factory()->count(2)->create(); // Create multiple services
 
-        // Create a request associated with the user
+        // Create a request associated with the user and attach services
         $request = NurseRequest::factory()->create([
             'user_id' => $user->id,
             'nurse_id' => $nurse->id,
-            'service_id' => $service->id,
             'status' => 'pending',
             'scheduled_time' => now()->addDays(2),
             'location' => '123 Main St',
         ]);
+        $request->services()->attach($services->pluck('id')->toArray()); // Attach services to the request
 
         Sanctum::actingAs($admin);
 

@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Request;
 use App\Models\User;
 use App\Models\Nurse;
-use App\Models\Service;
-use Illuminate\Support\Str;
 
 class RequestFactory extends Factory
 {
@@ -26,9 +24,9 @@ class RequestFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(), // Assuming there's a User factory
-            'nurse_id' => Nurse::factory(), // Assuming there's a Nurse factory
-            'service_id' => Service::factory(), // Assuming there's a Service factory
+            'user_id' => User::factory(), // Create associated User
+            'nurse_id' => Nurse::factory(), // Create associated Nurse
+            // Remove 'service_id' as services are handled via pivot table
             'status' => $this->faker->randomElement(['pending', 'completed', 'canceled']), // Example statuses
             'scheduled_time' => $this->faker->dateTimeBetween('now', '+1 month'), // Random time in the future
             'location' => $this->faker->address, // Random address

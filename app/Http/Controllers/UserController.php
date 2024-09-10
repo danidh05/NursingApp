@@ -55,11 +55,20 @@ class UserController extends Controller
     /**
      * Display a user's details (Admin or the user themselves).
      */
-    public function show($id)
+    public function show(Request $request, $id = null)
     {
-        $user = User::findOrFail($id);
-        $this->authorize('view', $user);
-
+        // Check if an ID is provided, if not, fetch the authenticated user's details
+        if ($id) {
+            // Fetch the user by the provided ID
+            $user = User::findOrFail($id);
+    
+            // Ensure only admins can view other users' details
+            $this->authorize('view', $user);
+        } else {
+            // Fetch the authenticated user's details
+            $user = $request->user();
+        }
+    
         return response()->json($user, 200);
     }
 
