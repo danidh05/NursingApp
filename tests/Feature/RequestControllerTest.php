@@ -269,4 +269,36 @@ public function test_user_can_create_request_with_multiple_services()
 
         $response->assertStatus(403); // Forbidden for users
     }
+    public function test_user_cannot_create_request_without_location()
+    {
+        // Arrange: Create a user without location data
+        $userRole = Role::where('name', 'user')->first();
+        $user = User::factory()->create([
+            'role_id' => $userRole->id,
+            'latitude' => null, // Missing latitude
+            'longitude' => null, // Missing longitude
+        ]);
+
+        Sanctum::actingAs($user);
+
+        // Create a nurse and services for the request
+        $nurse = Nurse::factory()->create();
+        $services = Service::factory()->count(2)->create();
+
+        // Act: Attempt to create a request
+        $response = $this->postJson('/api/requests', [
+            'nurse_id' => $nurse->id,
+            'service_ids' => $services->pluck('id')->toArray(),
+            'scheduled_time' => now()->addDays(3),
+            'location' => 'User specified location',
+            'time_type' => 'full-time',
+        ]);
+
+        // Assert: The request should fail with a 422 status code and an appropriate error message
+        $response->assertStatus(422)
+                 ->assertJson([
+                     'message' => 'Please set your location on the map before creating a request.',
+                 ]);
+    }
+
 }

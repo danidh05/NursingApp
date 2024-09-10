@@ -31,34 +31,44 @@ class BroadcastingTest extends TestCase
     {
         // Fake events to capture broadcasting
         Event::fake();
-
+    
         // Arrange: Create a user, nurse, and services
-        $user = User::factory()->create(['role_id' => 2]); // Assuming 2 is the 'user' role
+        $user = User::factory()->create([
+            'role_id' => 2, // Assuming 2 is the 'user' role
+            'latitude' => 40.7128, // Ensure latitude is set
+            'longitude' => -74.0060, // Ensure longitude is set
+        ]);
+        
         $nurse = Nurse::factory()->create();
         $services = Service::factory()->count(2)->create(); // Create multiple services
-
+    
         Sanctum::actingAs($user);
-
+    
         // Act: User makes a request with multiple services
         $response = $this->postJson('/api/requests', [
             'nurse_id' => $nurse->id,
             'service_ids' => $services->pluck('id')->toArray(), // Attach multiple services
             'location' => '123 Main St',
-            'time_type'=>'full-time',
+            'time_type' => 'full-time', // Make sure this matches exactly with the validation
             'scheduled_time' => now()->addDays(1)->toDateTimeString(),
         ]);
-
+    
+        // Debug the response to find out why it's failing
+        dd($response->json());
+    
         // Assert: Check if the response is successful
         $response->assertStatus(201)
                  ->assertJson(['message' => 'Request created successfully.']);
-
+    
         // Assert: The event was dispatched with the correct payload
-        Event::assertDispatched(UserRequestedService::class, function ($event) use ($user, $services) {
+        Event::assertDispatched(UserRequestedService::class, function ($event) use ($user, $nurse, $services) {
             return $event->request->user_id === $user->id &&
-                   $event->request->nurse_id !== null &&
+                   $event->request->nurse_id === $nurse->id &&
                    $event->request->services->pluck('id')->sort()->values()->all() === $services->pluck('id')->sort()->values()->all(); // Check the services attached to the request
         });
     }
+    
+    
 
     public function test_admin_updated_request_event_is_broadcasted()
     {

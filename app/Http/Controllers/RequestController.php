@@ -49,32 +49,30 @@ class RequestController extends Controller
             'scheduled_time' => 'nullable|date',
             'location' => 'required|string',
             'time_type' => 'required|in:full-time,part-time', // New field for time type
-
         ]);
-    
-        // Use dd() to inspect the validated data
-        // dd($validatedData);
     
         try {
             $user = Auth::user();
     
-      // No need to set $nurseRequest->service_id here
-$nurseRequest = new NurseRequest();
-$nurseRequest->user_id = $user->id;
-$nurseRequest->nurse_id = $validatedData['nurse_id'];
-$nurseRequest->status = 'pending';
-$nurseRequest->scheduled_time = $validatedData['scheduled_time'];
-$nurseRequest->location = $validatedData['location'];
-$nurseRequest->time_type = $validatedData['time_type']; // Save the time type
-
-$nurseRequest->save();
-
-// Attach multiple services to the request
-$nurseRequest->services()->attach($validatedData['service_ids']);
-
+            // Check if the user's location is set (latitude and longitude)
+            if (is_null($user->latitude) || is_null($user->longitude)) {
+                return response()->json([
+                    'message' => 'Please set your location on the map before creating a request.',
+                ], 422); // Use 422 Unprocessable Entity for validation errors
+            }
     
-            // Use dd() to inspect the attached services
-            // dd($nurseRequest->services);
+            // Create a new nurse request
+            $nurseRequest = new NurseRequest();
+            $nurseRequest->user_id = $user->id;
+            $nurseRequest->nurse_id = $validatedData['nurse_id'];
+            $nurseRequest->status = 'pending';
+            $nurseRequest->scheduled_time = $validatedData['scheduled_time'];
+            $nurseRequest->location = $validatedData['location'];
+            $nurseRequest->time_type = $validatedData['time_type']; // Save the time type
+            $nurseRequest->save();
+    
+            // Attach multiple services to the request
+            $nurseRequest->services()->attach($validatedData['service_ids']);
     
             $latitude = $user->latitude;
             $longitude = $user->longitude;
@@ -90,12 +88,12 @@ $nurseRequest->services()->attach($validatedData['service_ids']);
                 ],
             ], 201);
         } catch (\Exception $e) {
-            // Use dd() to see the error message directly
-           // dd($e->getMessage());
-    
+            // Log the exception and return a generic error message
+            \Log::error('Error creating request: ' . $e->getMessage());
             return response()->json(['error' => 'Server Error'], 500);
         }
     }
+    
     
     
     
