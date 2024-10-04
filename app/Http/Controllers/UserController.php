@@ -131,7 +131,6 @@ class UserController extends Controller
     
         $user = Auth::user();
     
-        if ($user->is_first_login) {
             // Ensure the user is updated correctly
             $user->update([
                 'latitude' => $request->latitude,
@@ -140,7 +139,7 @@ class UserController extends Controller
             ]);
     
             return response()->json(['message' => 'Location saved successfully.'], 200);
-        }
+        
     
         return response()->json(['message' => 'Location already set.'], 400);
     }

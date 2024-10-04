@@ -19,6 +19,14 @@ Route::post('/verify-sms', [AuthController::class, 'verifySms']);//new
 
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
+
+
+// ** Password Reset Routes **
+Route::post('/send-password-reset-otp', [AuthController::class, 'sendPasswordResetOTP']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+
 // Protected routes (require auth and verified email)
 Route::middleware(['auth:sanctum'])->group(function () {
 

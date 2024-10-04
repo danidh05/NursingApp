@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,11 +22,12 @@ class User extends Authenticatable
         'phone_number',
         'password',
         'role_id',
-        'confirmation_code',
-        'confirmation_code_expires_at', // Add this field
-        'latitude',                     // Add this field
-        'longitude',                    // Add this field
+        'email_verified_at',               // Include this field to allow mass assignment
         'location',
+        'latitude',
+        'longitude',
+        'confirmation_code',
+        'confirmation_code_expires_at',
         'is_first_login', 
     ];
 
@@ -37,6 +39,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'confirmation_code',               // Optionally hide the confirmation code
     ];
 
     /**
@@ -49,10 +52,10 @@ class User extends Authenticatable
         'password' => 'hashed',
         'latitude' => 'float',
         'longitude' => 'float',
-    
+        'is_first_login' => 'boolean',     // Casting is_first_login as a boolean
+        'confirmation_code_expires_at' => 'datetime', // Ensure this timestamp is casted
     ];
-    
-    
+
     /**
      * Get the role that the user belongs to.
      */

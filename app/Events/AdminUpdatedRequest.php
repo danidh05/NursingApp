@@ -22,7 +22,7 @@ class AdminUpdatedRequest implements ShouldBroadcast
      */
     public function __construct(Request $request) // Use the correct type hint
     {
-        $this->request = $request;
+        $this->request = $request->load('user'); // Load the user relationship
     }
 
     /**
@@ -32,7 +32,7 @@ class AdminUpdatedRequest implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('user-channel.' . $this->request->user_id); // Ensure the user_id is accessible
+        return new Channel('user-channel.' . $this->request->user_id); // Broadcast on user-specific channel
     }
 
     /**
@@ -54,6 +54,7 @@ class AdminUpdatedRequest implements ShouldBroadcast
     {
         return [
             'request_id' => $this->request->id,
+            'user_id' => $this->request->user_id, // Ensure the user_id is included in the broadcast data
             'status' => $this->request->status,
             'nurse_name' => $this->request->nurse->name ?? 'N/A', // Handle nullable relationships
             'service_name' => $this->request->service->name ?? 'N/A',

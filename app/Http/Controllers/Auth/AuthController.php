@@ -3,28 +3,27 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\InfobipService; // Import the Infobip service
+use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Http; // Correct import for Http requests
+use Twilio\Rest\Client;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    protected $infobipService;
+    protected $twilioClient;
 
-    public function __construct(InfobipService $infobipService)
+    public function __construct()
     {
-        $this->infobipService = $infobipService;
+        $this->twilioClient = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
     }
-
-    /**
-     * Handle user registration.
-     */
+    // Handle user registration
     public function register(Request $request)
     {
         // Validate the request data
@@ -34,185 +33,271 @@ class AuthController extends Controller
             'phone_number' => 'required|string|max:15|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
-
+    
         // Return validation errors, if any
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
-        // Set role_id explicitly to 'user' if not provided (assuming 'user' role is id 2)
-        $role_id = Role::where('name', 'user')->first()->id ?? 2; // Default to 'user' role
-
+    
+        // Set role_id explicitly to 'user' if not provided
+        $role_id = Role::where('name', 'user')->first()->id ?? 2;
+    
         // Create the user with the 'user' role by default
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
-            'role_id' => $role_id, // Automatically set role_id to 'user' if not provided
+            'role_id' => $role_id,
         ]);
-
-        // Generate a confirmation code
-        $confirmationCode = mt_rand(100000, 999999);
-
-        // Save the confirmation code and its expiration time
-        $user->confirmation_code = $confirmationCode;
-        $user->confirmation_code_expires_at = Carbon::now()->addMinutes(10); // Code expires in 10 minutes
-        $user->save();
-
-        // Send the confirmation code via SMS using Infobip
+    
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'App YOUR_INFOPBIP_API_KEY',
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ])->post('https://peykq3.api.infobip.com/sms/2/text/advanced', [
-                'messages' => [
-                    [
-                        'destinations' => [
-                            ['to' => $user->phone_number],
-                        ],
-                        'from' => 'SenderID', // Replace with your sender ID
-                        'text' => "Your confirmation code is: $confirmationCode",
-                    ],
-                ],
-            ]);
-
-            if ($response->failed()) {
-                return response()->json(['message' => 'Registration successful, but failed to send confirmation SMS. Please try again later.'], 500);
-            }
+            $verification = $this->twilioClient->verify->v2
+                ->services(env('TWILIO_VERIFY_SERVICE_SID')) // Your Twilio Verify service SID
+                ->verifications->create(
+                    $user->phone_number, // The user's phone number
+                    "whatsapp" // Channel (WhatsApp)
+                );
         } catch (\Exception $e) {
-            \Log::error('Failed to send SMS: ' . $e->getMessage());
-            return response()->json(['message' => 'Registration successful, but failed to send confirmation SMS. Please try again later.'], 500);
+            // If OTP sending fails, delete the created user and return an error
+            $user->delete();
+            return response()->json(['error' => 'Failed to send OTP. Please try again later.'], 500);
         }
-
+            
+    
         // Return a response indicating that the user needs to confirm their phone number
-        return response()->json(['message' => 'User registered successfully. Please check your SMS for the confirmation code.'], 201);
+        return response()->json(['message' => 'User registered successfully. Please check your WhatsApp for the OTP.'], 201);
     }
+    
+    
+    
+    
 
-
-    /**
-     * Handle SMS verification.
-     */
-    public function verifySms(Request $request)
-    {
-        // Validate the phone number and confirmation code
-        $validator = Validator::make($request->all(), [
-            'phone_number' => 'required|string',
-            'confirmation_code' => 'required|string',
-        ]);
-
-        // Return validation errors, if any
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Find the user by phone number and confirmation code
-        $user = User::where('phone_number', $request->phone_number)
-            ->where('confirmation_code', $request->confirmation_code)
-            ->first();
-
-        // Check if the confirmation code is invalid or expired
-        if (!$user || Carbon::now()->isAfter($user->confirmation_code_expires_at)) {
-            return response()->json(['message' => 'Invalid or expired confirmation code.'], 422);
-        }
-
-        // Mark the user as verified
-        $user->email_verified_at = Carbon::now(); // Change this to a relevant field if different
-        $user->confirmation_code = null; // Clear the confirmation code
-        $user->confirmation_code_expires_at = null; // Clear the expiration time
-        $user->save();
-
-        // Generate an API token for the user
-        $token = $user->createToken('authToken')->plainTextToken;
-
-        // Return a success message along with the token
-        return response()->json([
-            'message' => 'Phone number successfully verified.',
-            'token' => $token, // Include the token in the response
-        ], 200);
-    }
-
-    /**
-     * Handle user login.
-     */
-/**
- * Handle user login.
- */
-public function login(Request $request)
+    // Handle WhatsApp OTP verification
+// Handle WhatsApp OTP verification
+public function verifySms(Request $request)
 {
-    // Validate login credentials
+    // Validate the request
     $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email',
-        'password' => 'required|string',
+        'phone_number' => 'required|string',
+        'verification_code' => 'required|string',
     ]);
 
-    // Return validation errors, if any
     if ($validator->fails()) {
         return response()->json(['errors' => $validator->errors()], 422);
     }
 
-    $credentials = $request->only('email', 'password');
+    // Verify the OTP using Twilio Verify API
+    try {
+        $verificationCheck = $this->twilioClient->verify->v2
+            ->services(env('TWILIO_VERIFY_SERVICE_SID'))
+            ->verificationChecks
+            ->create([
+                'to' => $request->phone_number,
+                'code' => $request->verification_code
+            ]);
 
-    // Attempt to log the user in
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
+        if ($verificationCheck->status === 'approved') {
+            // Find the user based on phone number
+            $user = User::where('phone_number', $request->phone_number)->first();
 
-        // Check if the user's phone number is verified
-        if (!$user->email_verified_at) { // Adjust field name if you use a different one for SMS verification
-            return response()->json(['message' => 'Your phone number is not verified.'], 403);
+            if ($user) {
+                // Mark the phone as verified by updating the email_verified_at field
+                $user->email_verified_at = Carbon::now();
+                $user->save();
+
+                // Generate an API token for the user
+                $token = $user->createToken('authToken')->plainTextToken;
+
+                return response()->json([
+                    'message' => 'Phone number successfully verified.',
+                    'token' => $token,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'phone_number' => $user->phone_number,
+                        'role_id' => $user->role_id,
+                    ],
+                ], 200);
+            } else {
+                return response()->json(['message' => 'User not found.'], 404);
+            }
+        } else {
+            return response()->json(['message' => 'Invalid or expired OTP.'], 422);
         }
-
-        // Create an API token
-        $token = $user->createToken('authToken')->plainTextToken;
-
-        // Return the token, user details including role_id
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role_id' => $user->role_id, // Include role_id to direct the user to the correct dashboard
-            ],
-        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Failed to verify WhatsApp OTP: ' . $e->getMessage());
+        return response()->json(['message' => 'Failed to verify OTP. Please try again later.'], 500);
     }
-
-    // Invalid credentials
-    return response()->json(['message' => 'Invalid credentials'], 401);
 }
 
 
-    public function logout(Request $request)
-    {
-        // Revoke the token that was used to authenticate the current request
-        $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully'], 200);
-    }
-    /**
-     * Test SMS sending functionality.
-     */
-    public function sendTestSms(Request $request)
+    // Handle user login
+    public function login(Request $request)
     {
-        // Validate the request data
-        $request->validate([
-            'phone_number' => 'required|string',
-            'message' => 'required|string',
+        // Validate login credentials
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
 
-        // Extract phone number and message from the request
-        $phoneNumber = $request->input('phone_number');
-        $message = $request->input('message');
-
-        // Send SMS using InfobipService
-        $response = $this->infobipService->sendSms($phoneNumber, $message);
-
-        if ($response) {
-            return response()->json(['message' => 'SMS sent successfully!', 'response' => $response], 200);
-        } else {
-            return response()->json(['message' => 'Failed to send SMS.'], 500);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            if (!$user->email_verified_at) {
+                return response()->json(['message' => 'Your phone number is not verified.'], 403);
+            }
+
+            $token = $user->createToken('authToken')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role_id' => $user->role_id,
+                ],
+            ], 200);
+        }
+
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
+    // Handle user logout
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out successfully'], 200);
+    }
+
+    // Test WhatsApp message sending functionality
+
+
+      // Send OTP for password reset
+      public function sendPasswordResetOTP(Request $request)
+      {
+          // Validate request (phone number is required)
+          $validator = Validator::make($request->all(), [
+              'phone_number' => 'required|string',
+          ]);
+  
+          if ($validator->fails()) {
+              return response()->json(['errors' => $validator->errors()], 422);
+          }
+  
+          // Find user by phone number
+          $user = User::where('phone_number', $request->phone_number)->first();
+          
+          if (!$user) {
+              return response()->json(['message' => 'User with this phone number does not exist.'], 404);
+          }
+  
+          // Generate token
+          $token = Str::random(6);  // OTP code of 6 characters
+          $expiry = Carbon::now()->addMinutes(10);  // Token expires in 10 minutes
+  
+          // Store the token in password_reset_tokens table
+          DB::table('password_reset_tokens')->updateOrInsert(
+              ['phone_number' => $request->phone_number],
+              ['token' => $token, 'created_at' => Carbon::now()]
+          );
+  
+          // Send OTP via Twilio
+          try {
+              $this->twilioClient->verify->v2->services(env('TWILIO_VERIFY_SERVICE_SID'))
+                  ->verifications->create($user->phone_number, 'whatsapp');  // Send OTP via SMS
+          } catch (\Exception $e) {
+              return response()->json(['message' => 'Failed to send OTP. Please try again later.'], 500);
+          }
+  
+          return response()->json(['message' => 'OTP sent successfully. Please check your phone.'], 200);
+      }
+  
+      // Verify OTP and Reset Password
+      public function resetPassword(Request $request)
+      {
+          // Validate request (phone_number, token, and new password)
+          $validator = Validator::make($request->all(), [
+              'phone_number' => 'required|string',
+              'token' => 'required|string',
+              'password' => 'required|string|min:8|confirmed',
+          ]);
+      
+          if ($validator->fails()) {
+              return response()->json(['errors' => $validator->errors()], 422);
+          }
+      
+          // Verify OTP via Twilio
+          try {
+              $verification = $this->twilioClient->verify->v2->services(env('TWILIO_VERIFY_SERVICE_SID'))
+                  ->verificationChecks
+                  ->create([
+                      'to' => $request->phone_number,
+                      'code' => $request->token
+                  ]);
+      
+              if ($verification->status !== 'approved') {
+                  return response()->json(['message' => 'Invalid or expired OTP.'], 400);
+              }
+          } catch (\Exception $e) {
+              return response()->json(['message' => 'Failed to verify OTP.'], 500);
+          }
+      
+          // Reset user's password
+          $user = User::where('phone_number', $request->phone_number)->first();
+          if ($user) {
+              $user->password = Hash::make($request->password);
+              $user->save();
+      
+              return response()->json(['message' => 'Password reset successfully.'], 200);
+          } else {
+              return response()->json(['message' => 'User not found.'], 404);
+          }
+      }
+      public function resendVerificationCode(Request $request)
+{
+    // Validate the phone number
+    $validator = Validator::make($request->all(), [
+        'phone_number' => 'required|string|max:15',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    // Check if the user exists with the provided phone number
+    $user = User::where('phone_number', $request->phone_number)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found.'], 404);
+    }
+
+    // Ensure the user has not already verified their phone number
+    if ($user->email_verified_at) {
+        return response()->json(['message' => 'This phone number is already verified.'], 400);
+    }
+
+    try {
+        // Resend the verification code
+        $this->twilioClient->verify->v2
+            ->services(env('TWILIO_VERIFY_SERVICE_SID'))
+            ->verifications
+            ->create($user->phone_number, 'whatsapp');  // Specify the channel, e.g., "sms" or "whatsapp"
+
+        return response()->json(['message' => 'Verification code resent successfully. Please check your phone.'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Failed to resend verification code. Please try again later.'], 500);
+    }
+}
+
+      
 }

@@ -16,7 +16,7 @@ class ServiceFactory extends Factory
             'description' => $this->faker->sentence,
             'price' => $this->faker->randomFloat(2, 10, 100),
             'discount_price' => $this->faker->optional()->randomFloat(2, 5, 80),
-            'category_id' => \App\Models\Category::factory(), // Ensure you have a CategoryFactory
+            // 'category_id' => \App\Models\Category::factory(), // Ensure you have a CategoryFactory
         ];
     }
 }

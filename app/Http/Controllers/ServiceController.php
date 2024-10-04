@@ -31,7 +31,8 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'category_id' => 'required|exists:categories,id', // Assuming there's a category table
+            'service_pic'=>'nullable|string|url'
+            //'category_id' => 'required|exists:categories,id', // Assuming there's a category table
         ]);
 
         $service = Service::create($validatedData);
@@ -59,8 +60,11 @@ class ServiceController extends Controller
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric',
-            'description' => 'sometimes|string',
-            'category_id' => 'sometimes|exists:categories,id', // Include category_id validation if needed
+            'description' => 'sometimes|nullable|string',
+             'service_pic'=>'sometimes|nullable|string|url',
+            'discount_price' => 'sometimes|nullable|numeric|min:0|lt:price',
+
+          //  'category_id' => 'sometimes|exists:categories,id', // Include category_id validation if needed
         ]);
     
         $service->update($validatedData);

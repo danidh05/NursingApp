@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Service extends Model
 {
     use HasFactory;
-     /**
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -18,7 +19,8 @@ class Service extends Model
         'description',
         'price',
         'discount_price',
-        'category_id',
+        'category_id', // You mentioned wanting to keep this for future use.
+        'service_pic'
     ];
 
     /**
@@ -40,11 +42,10 @@ class Service extends Model
     }
 
     /**
-     * Get the requests associated with the service.
+     * Define the many-to-many relationship with requests.
      */
     public function requests()
     {
-        return $this->hasMany(Request::class);
+        return $this->belongsToMany(Request::class, 'request_services', 'service_id', 'request_id');
     }
-
 }

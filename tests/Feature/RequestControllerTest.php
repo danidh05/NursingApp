@@ -85,29 +85,35 @@ class RequestControllerTest extends TestCase
  */
 public function test_user_can_create_request_with_multiple_services()
 {
-    // Setup roles and create a user
-    $userRole = Role::where('name', 'user')->first(); 
+    // Arrange: Create a role, user, and services
+    $userRole = Role::where('name', 'user')->first();
     $user = User::factory()->create([
         'role_id' => $userRole->id,
         'latitude' => 40.7128,
         'longitude' => -74.0060,
+     
     ]);
 
     Sanctum::actingAs($user);
 
-    $nurse = Nurse::factory()->create();
-    $services = Service::factory()->count(2)->create(); // Create multiple services
+    // Create multiple services without a nurse since nurse_id is optional on creation
+    $services = Service::factory()->count(2)->create();
 
-    // Create the request with multiple services and include the 'time_type' field
+    // Act: Send a POST request to create a new request without nurse_id
     $response = $this->postJson('/api/requests', [
-        'nurse_id' => $nurse->id,
+        'nurse_id' => null, // Optional nurse_id
         'service_ids' => $services->pluck('id')->toArray(),
-        'scheduled_time' => now()->addDays(3), 
+        'scheduled_time' => now()->addDays(3),
+        'ending_time' => now()->addDays(3)->addHours(1), // Add ending time
         'location' => 'User specified location',
-        'time_type' => 'full-time', // Add the time_type field
+        'time_type' => 'full-time',
+        'nurse_gender' => 'male',
+        'problem_description' => 'User has a specific issue needing attention.',
+        'full_name' => 'John Doe', // Include full_name as per new changes
+        'phone_number' => '1234567890', // Include phone_number as per new changes
     ]);
 
-    // Assert the response
+    // Assert: Check that the response status is 201 and matches the expected JSON structure
     $response->assertStatus(201)
              ->assertJson([
                  'message' => 'Request created successfully.',
@@ -118,13 +124,28 @@ public function test_user_can_create_request_with_multiple_services()
              ])
              ->assertJsonStructure([
                  'request' => [
-                     'id', 'user_id', 'nurse_id', 'status', 'location', 'time_type', // Check time_type is present
+                     'id', 'user_id', 'nurse_id', 'status', 'location', 'time_type',
+                     'problem_description', 'scheduled_time', 'ending_time', 'full_name', 'phone_number',
                      'services' => [
                          ['id', 'name'] // Ensure services are included
-                     ]
+                     ],
                  ],
              ]);
+
+    // Additional Assert: Check that the services were correctly attached to the request
+    $this->assertDatabaseHas('request_services', [
+        'request_id' => $response['request']['id'],
+        'service_id' => $services->first()->id,
+    ]);
+    $this->assertDatabaseHas('request_services', [
+        'request_id' => $response['request']['id'],
+        'service_id' => $services->last()->id,
+    ]);
 }
+
+
+
+
 
 
     /**
@@ -278,27 +299,29 @@ public function test_user_can_create_request_with_multiple_services()
             'latitude' => null, // Missing latitude
             'longitude' => null, // Missing longitude
         ]);
-
+    
         Sanctum::actingAs($user);
-
+    
         // Create a nurse and services for the request
         $nurse = Nurse::factory()->create();
         $services = Service::factory()->count(2)->create();
-
-        // Act: Attempt to create a request
+    
+        // Act: Attempt to create a request with nurse_gender included
         $response = $this->postJson('/api/requests', [
             'nurse_id' => $nurse->id,
             'service_ids' => $services->pluck('id')->toArray(),
             'scheduled_time' => now()->addDays(3),
-            'location' => 'User specified location',
+            'location' => null, // Set location as null to test location validation
             'time_type' => 'full-time',
+            'nurse_gender' => 'male', // Include the required nurse_gender field
         ]);
-
+    
         // Assert: The request should fail with a 422 status code and an appropriate error message
         $response->assertStatus(422)
                  ->assertJson([
                      'message' => 'Please set your location on the map before creating a request.',
                  ]);
     }
+    
 
 }

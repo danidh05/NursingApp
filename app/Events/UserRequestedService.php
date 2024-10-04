@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Request; // Correct model import
+use App\Models\Request;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -22,7 +22,9 @@ class UserRequestedService implements ShouldBroadcast
      */
     public function __construct(Request $request) // Correct type hint
     {
-        $this->request = $request;
+        $this->request = $request->load('user', 'services'); // Load user and services relationships
+
+        \Log::info('UserRequestedService event created for request ID: ' . $this->request->id);
     }
 
     /**
@@ -32,7 +34,7 @@ class UserRequestedService implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('admin-channel'); // Broadcasting channel for admins
+        return new Channel('admin-channel');
     }
 
     /**
@@ -52,15 +54,19 @@ class UserRequestedService implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        // Include detailed information in the notification payload
         return [
             'request_id' => $this->request->id,
-            'user_name' => $this->request->user->name ?? 'N/A', // Handle nullable relationships
-            'nurse_name' => $this->request->nurse->name ?? 'N/A',
-            'service_name' => $this->request->service->name ?? 'N/A',
+            'nurse_name' => optional($this->request->nurse)->name ?? 'N/A', 
+            'service_names' => $this->request->services->pluck('name')->toArray(),
             'status' => $this->request->status,
-            'scheduled_time' => $this->request->scheduled_time,
+            'scheduled_time' => $this->request->scheduled_time ? $this->request->scheduled_time->toDateTimeString() : null,
+            'ending_time' => $this->request->ending_time ? $this->request->ending_time->toDateTimeString() : null,
             'location' => $this->request->location,
+            'nurse_gender' => $this->request->nurse_gender,
+            'problem_description' => $this->request->problem_description,
+            'full_name' => $this->request->full_name,
+            'phone_number' => $this->request->phone_number,
+            'user_id' => $this->request->user_id,  // Ensure the user_id is broadcasted
         ];
     }
 }
