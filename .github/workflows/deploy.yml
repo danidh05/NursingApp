@@ -16,7 +16,7 @@ jobs:
       - name: Deploy via SFTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.0
         with:
-          server: sftp://${{ secrets.HOSTINGER_HOST }}
+          server: ${{ secrets.HOSTINGER_HOST }} # Make sure HOSTINGER_HOST does not include any protocol prefix like 'ftp://' or 'sftp://'
           username: ${{ secrets.HOSTINGER_USER }}
           password: ${{ secrets.HOSTINGER_PASS }}
           local-dir: ./ # Adjust if you want to deploy only specific directories
