@@ -20,5 +20,5 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           password: ${{ secrets.HOSTINGER_PASS }}
           local-dir: ./ # Adjust if you want to deploy only specific directories
-          server-dir: /public_html/
+          server-dir: ./
   # Adjust based on where your files should go on Hostinger
