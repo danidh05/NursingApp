@@ -5,9 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/test-time', function () {
-    return response()->json([
-        'current_time' => now()->toDateTimeString(),
-        'timezone' => config('app.timezone'),
-    ]);
+
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy'); // Make sure you have a view file named privacy-policy.blade.php
 });
