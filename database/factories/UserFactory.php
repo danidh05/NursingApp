@@ -32,6 +32,9 @@ class UserFactory extends Factory
             'role_id' => Role::where('name', 'user')->first()->id,
             'remember_token' => Str::random(10),
             'phone_number' => fake()->phoneNumber(),  // Generate a fake phone number
+            'location' => fake()->address(),  // Generate a fake address
+            'latitude' => fake()->latitude(),  // Generate a fake latitude
+            'longitude' => fake()->longitude(),  // Generate a fake longitude
         ];
     }
 

@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // <-- Add this line
+
 
 class Request extends Model
 {
+    use SoftDeletes; // Enables soft deletes
     use HasFactory;
 
     /**
@@ -38,7 +41,7 @@ class Request extends Model
         'scheduled_time' => 'datetime',
         'ending_time' => 'datetime', // Cast end_time to datetime.
     ];
-
+    protected $dates = ['deleted_at'];
     /**
      * Define the many-to-many relationship with services.
      */

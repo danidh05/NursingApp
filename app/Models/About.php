@@ -9,12 +9,16 @@ class About extends Model
 {
     use HasFactory;
 
-    // Add the fields that can be mass assigned
     protected $fillable = [
         'online_shop_url',
         'facebook_url',
         'instagram_url',
-        'whatsapp_number',
+        'whatsapp_numbers', // Store multiple numbers as JSON
         'description',
+        'tiktok_url', // New field
+    ];
+
+    protected $casts = [
+        'whatsapp_numbers' => 'array', // Automatically cast JSON to array
     ];
 }

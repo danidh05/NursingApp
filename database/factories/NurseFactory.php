@@ -26,6 +26,7 @@ class NurseFactory extends Factory
             'phone_number' => $this->faker->unique()->phoneNumber(),
             'address' => $this->faker->address(),
             'profile_picture' => $this->faker->imageUrl(200, 200, 'nurse', true, 'Faker'), // Optional: mock URL for the profile picture
+            'gender' => $this->faker->randomElement(['male', 'female']), // Nurse gender preference
         ];
     }
 }

@@ -49,6 +49,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/services', [ServiceController::class, 'index']); // List all services
     Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
 
+    Route::get('/requests', [RequestController::class, 'index']); // List all requests
+    Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
+    
     // Users and admins can view categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
@@ -59,11 +62,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('role:user')->group(function () {
         Route::get('/user/dashboard', [UserController::class, 'dashboard']);
         Route::post('/submit-location', [UserController::class, 'submitLocationOnFirstLogin']);
-        Route::get('/requests', [RequestController::class, 'index']);
+       
 
         // Request management for users
         Route::post('/requests', [RequestController::class, 'store']); // Create a new request
-        Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
+  
 
         Route::post('/nurses/{id}/rate', [NurseController::class, 'rate']);//new
     });
@@ -82,7 +85,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/nurses/{id}', [NurseController::class, 'destroy']); // Delete a nurse
         
         // Request management routes
-        Route::get('/requests', [RequestController::class, 'index']); // List all requests
         Route::put('/requests/{id}', [RequestController::class, 'update']); // Update a request
         Route::delete('/requests/{id}', [RequestController::class, 'destroy']); // Delete a request
 

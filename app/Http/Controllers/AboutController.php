@@ -26,21 +26,23 @@ class AboutController extends Controller
      */
     public function update(Request $request)
     {
-        $about = About::firstOrFail(); // Ensure the about record exists
-    
-        $this->authorize('update', $about); // Authorize the update action
+        $about = About::firstOrFail();
+        $this->authorize('update', $about);
     
         $validatedData = $request->validate([
             'online_shop_url' => 'nullable|url',
             'facebook_url' => 'nullable|url',
             'instagram_url' => 'nullable|url',
-            'whatsapp_number' => 'nullable|string',
+            'whatsapp_numbers' => 'nullable|array', // Validate as array
+            'whatsapp_numbers.*' => 'nullable|string', // Each item in the array should be a string
             'description' => 'nullable|string',
+            'tiktok_url' => 'nullable|url', // New field for TikTok URL
         ]);
     
         $about->update($validatedData);
     
         return response()->json(['message' => 'About Us updated successfully.', 'about' => $about], 200);
     }
+    
     
 }
