@@ -13,7 +13,7 @@ class ServiceControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']); // Ensure roles are seeded

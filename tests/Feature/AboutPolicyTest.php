@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class AboutPolicyTest extends TestCase
 {
     use RefreshDatabase;
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         

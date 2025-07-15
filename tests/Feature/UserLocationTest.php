@@ -11,10 +11,10 @@ class UserLocationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
-        // Ensure roles are seeded before each test
+    // Ensure roles are seeded before each test
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
     }
 
