@@ -1,0 +1,82 @@
+PHPUnit 11.3.1 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.12
+Configuration: C:\Users\danid\Development\Nursing\phpunit.xml
+
+[41;37mF[0m.[31;1mE[0m[31;1mE[0m[41;37mF[0m[41;37mF[0m.[31;1mE[0m[31;1mE[0m                                                           9 / 9 (100%)
+
+Time: 00:01.044, Memory: 42.00 MB
+
+[4mRequest Service (Tests\Feature\RequestService)[0m
+[31m ✘ [0mCan create request
+   [31m┐[0m
+   [31m├[0m [41;37mThe expected [App\Events\UserRequestedService] event was not dispatched.[0m
+   [31m├[0m [41;37mFailed asserting that false is true.                                    [0m
+   [31m│[0m
+   [31m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Support\Testing\Fakes\EventFake.php:144
+   [31m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:357
+   [31m│[0m C:\Users\danid\Development\Nursing\tests\Feature\RequestServiceTest.php:65
+   [31m┴[0m
+[32m ✔ [0mCan update request
+[33m ✘ [0mCan update request with time needed
+   [33m┐[0m
+   [33m├[0m [43;30mIlluminate\Database\Eloquent\ModelNotFoundException: No query results for model [App\Models\Request] 1[0m
+   [33m│[0m
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:506
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Repositories\RequestRepository.php:69
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Repositories\RequestRepository.php:42
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:38
+   [33m│[0m C:\Users\danid\Development\Nursing\tests\Feature\RequestServiceTest.php:94
+   [33m┴[0m
+[33m ✘ [0mCan get request with time needed
+   [33m┐[0m
+   [33m├[0m [43;30mIlluminate\Database\Eloquent\ModelNotFoundException: No query results for model [App\Models\Request] 1[0m
+   [33m│[0m
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:506
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Repositories\RequestRepository.php:69
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:48
+   [33m│[0m C:\Users\danid\Development\Nursing\tests\Feature\RequestServiceTest.php:116
+   [33m┴[0m
+[31m ✘ [0mCan get all requests
+   [31m┐[0m
+   [31m├[0m [41;37mFailed asserting that actual size 0 matches expected size 3.[0m
+   [31m│[0m
+   [31m│[0m C:[2m\[22mUsers[2m\[22mdanid[2m\[22mDevelopment[2m\[22mNursing[2m\[22mtests[2m\[22mFeature[2m\[22mRequestServiceTest.php[2m:[22m[34m128[0m
+   [31m┴[0m
+[31m ✘ [0mCan get filtered requests
+   [31m┐[0m
+   [31m├[0m [41;37mFailed asserting that actual size 0 matches expected size 3.[0m
+   [31m│[0m
+   [31m│[0m C:[2m\[22mUsers[2m\[22mdanid[2m\[22mDevelopment[2m\[22mNursing[2m\[22mtests[2m\[22mFeature[2m\[22mRequestServiceTest.php[2m:[22m[34m139[0m
+   [31m┴[0m
+[32m ✔ [0mCan get user requests
+[33m ✘ [0mCan soft delete request
+   [33m┐[0m
+   [33m├[0m [43;30mIlluminate\Database\Eloquent\ModelNotFoundException: No query results for model [App\Models\Request] 1[0m
+   [33m│[0m
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:506
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Repositories\RequestRepository.php:69
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Repositories\RequestRepository.php:91
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:65
+   [33m│[0m C:\Users\danid\Development\Nursing\tests\Feature\RequestServiceTest.php:157
+   [33m┴[0m
+[33m ✘ [0mUser can view soft deleted own request
+   [33m┐[0m
+   [33m├[0m [43;30mTypeError: App\DTOs\Request\RequestResponseDTO::__construct(): Argument #4 ($problem_description) must be of type string, null given, called in C:\Users\danid\Development\Nursing\app\DTOs\Request\RequestResponseDTO.php on line 33[0m
+   [33m│[0m
+   [33m│[0m C:\Users\danid\Development\Nursing\app\DTOs\Request\RequestResponseDTO.php:11
+   [33m│[0m C:\Users\danid\Development\Nursing\app\DTOs\Request\RequestResponseDTO.php:33
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:58
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Collections\Arr.php:605
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Collections\Collection.php:785
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Collection.php:344
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:58
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Cache\Repository.php:428
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Cache\CacheManager.php:440
+   [33m│[0m C:\Users\danid\Development\Nursing\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:357
+   [33m│[0m C:\Users\danid\Development\Nursing\app\Services\RequestService.php:56
+   [33m│[0m C:\Users\danid\Development\Nursing\tests\Feature\RequestServiceTest.php:172
+   [33m┴[0m
+
+[37;41mERRORS![0m
+[37;41mTests: 9[0m[37;41m, Assertions: 10[0m[37;41m, Errors: 4[0m[37;41m, Failures: 3[0m[37;41m.[0m

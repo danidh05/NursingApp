@@ -14,7 +14,7 @@ class ModifyPasswordResetTokensTable extends Migration
     {
         Schema::table('password_reset_tokens', function (Blueprint $table) {
             // Add the phone_number column and make it the new primary key
-            // $table->string('phone_number', 15)->primary();  // Adjust length if necessary
+            $table->string('phone_number', 15)->primary();  // Adjust length if necessary
 
             // Modify the email column to be nullable and non-primary
             $table->dropPrimary(['email']);

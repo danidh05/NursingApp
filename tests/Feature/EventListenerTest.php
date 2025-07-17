@@ -43,24 +43,20 @@ class EventListenerTest extends TestCase
 
         // Prepare the NotificationService mock
         $notificationServiceMock = \Mockery::mock(NotificationService::class);
-        $notificationServiceMock->shouldReceive('sendNotification')
+        $notificationServiceMock->shouldReceive('createNotification')
             ->once()
             ->with(
-                [$nurse->user_id], // Use the nurse's user ID to send the notification
-                'New Service Request',
-                'A new service request has been created by John Doe',
-                [
-                    'request_id' => $request->id,
-                    'full_name' => 'John Doe',
-                    'service_names' => [], // Include actual service names if needed
-                ]
+                \Mockery::any(), // User object
+                'Service Request Submitted',
+                'Your service request has been submitted successfully.',
+                'success'
             );
 
         // Bind the NotificationService mock to the service container
         $this->app->instance(NotificationService::class, $notificationServiceMock);
 
         // Dispatch the event
-        event(new UserRequestedService($request));
+        event(new UserRequestedService($request, $user));
 
         // You can add assertions to verify that the notification was sent
         // This is already handled by the mock's expectations
@@ -83,12 +79,12 @@ class EventListenerTest extends TestCase
         $notificationServiceMock = \Mockery::mock(NotificationService::class);
         $this->app->instance(NotificationService::class, $notificationServiceMock);
 
-        // Expect the sendNotification method to be called
-        $notificationServiceMock->shouldReceive('sendNotification')
+        // Expect the createNotification method to be called
+        $notificationServiceMock->shouldReceive('createNotification')
             ->once()
-            ->with([$user->id], 'Service Request Updated', 'Your service request has been updated.', \Mockery::any());
+            ->with(\Mockery::any(), 'Request Status Updated', 'Your request status has been updated to: approved', 'info');
 
         // Simulate the event
-        event(new AdminUpdatedRequest($nurseRequest));
+        event(new AdminUpdatedRequest($nurseRequest, $user, 'approved'));
     }
 }

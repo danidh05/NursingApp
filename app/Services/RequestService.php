@@ -3,130 +3,87 @@
 namespace App\Services;
 
 use App\DTOs\Request\CreateRequestDTO;
-use App\DTOs\Request\RequestResponseDTO;
 use App\DTOs\Request\UpdateRequestDTO;
+use App\DTOs\Request\RequestResponseDTO;
 use App\Events\UserRequestedService;
+use App\Events\AdminUpdatedRequest;
+use App\Models\Request;
+use App\Models\User;
 use App\Repositories\Interfaces\IRequestRepository;
 use App\Services\Interfaces\IRequestService;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Event;
 
 class RequestService implements IRequestService
 {
     public function __construct(
-        private readonly IRequestRepository $repository,
-        private readonly NotificationService $notificationService
+        private IRequestRepository $requestRepository
     ) {}
 
-    public function createRequest(CreateRequestDTO $dto, int $userId): RequestResponseDTO
+    public function createRequest(array $data, User $user): RequestResponseDTO
     {
-        try {
-            DB::beginTransaction();
-
-            $request = $this->repository->create([
-                ...$dto->toArray(),
-                'user_id' => $userId,
-                'status' => 'pending'
-            ]);
-
-            // Dispatch event for notifications
-            event(new UserRequestedService($request));
-
-            DB::commit();
-
-            return RequestResponseDTO::fromModel($request);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to create request', ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
-
-    public function updateRequest(int $requestId, UpdateRequestDTO $dto): RequestResponseDTO
-    {
-        try {
-            DB::beginTransaction();
-
-            $request = $this->repository->findOrFail($requestId);
-            $data = $dto->toArray();
-
-            // Handle time_needed_to_arrive caching if provided
-            if (isset($data['time_needed_to_arrive'])) {
-                $cacheKey = 'time_needed_to_arrive_' . $requestId;
-                $cacheValue = [
-                    'time_needed' => $data['time_needed_to_arrive'],
-                    'start_time' => now(),
-                ];
-                Cache::put($cacheKey, $cacheValue, 3600);
-                unset($data['time_needed_to_arrive']);
-            }
-
-            $request = $this->repository->update($request, $data);
-
-            DB::commit();
-
-            return RequestResponseDTO::fromModel($request);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to update request', ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
-
-    public function deleteRequest(int $requestId): bool
-    {
-        try {
-            DB::beginTransaction();
-
-            $request = $this->repository->findOrFail($requestId);
-            $result = $this->repository->delete($request);
-
-            DB::commit();
-
-            return $result;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete request', ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
-
-    public function getRequest(int $requestId): RequestResponseDTO
-    {
-        $request = $this->repository->findOrFail($requestId);
+        // Remove any manual transaction management - let Laravel handle it
+        $dto = CreateRequestDTO::fromArray($data);
         
-        // Get cached time_needed_to_arrive if exists
-        $cacheKey = 'time_needed_to_arrive_' . $requestId;
-        $cachedData = Cache::get($cacheKey);
+        $request = $this->requestRepository->create($dto, $user);
         
-        if ($cachedData) {
-            $timeNeededToArrive = $cachedData['time_needed'];
-            $startTime = $cachedData['start_time'];
-            
-            // Calculate the elapsed time in minutes since the cache was created
-            $elapsedTime = now()->diffInMinutes($startTime);
-            
-            // Calculate the remaining time (initial time - elapsed time)
-            $remainingTime = max($timeNeededToArrive - $elapsedTime, 0);
-            
-            // Add to response data
-            $request->time_needed_to_arrive = $remainingTime;
-        }
-
+        // Dispatch event
+        Event::dispatch(new UserRequestedService($request, $user));
+        
+        // Clear cache after creation
+        Cache::forget("user_requests_{$user->id}");
+        
         return RequestResponseDTO::fromModel($request);
     }
 
-    public function getAllRequests(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function updateRequest(int $id, array $data, User $user): RequestResponseDTO
     {
-        return $this->repository->getAll($filters, $perPage)
-            ->through(fn($request) => RequestResponseDTO::fromModel($request));
+        $dto = UpdateRequestDTO::fromArray($data);
+        // Fetch the request and capture original status BEFORE update
+        $request = $this->requestRepository->findById($id, $user);
+        $originalStatus = $request->status;
+
+        $request = $this->requestRepository->update($id, $dto, $user);
+
+        // Dispatch event if status changed
+        if (isset($data['status']) && $data['status'] !== $originalStatus) {
+            Event::dispatch(new AdminUpdatedRequest($request, $user, $data['status']));
+        }
+        // Cache time_needed_to_arrive if provided
+        if (isset($data['time_needed_to_arrive'])) {
+            $cacheKey = 'time_needed_to_arrive_' . $request->id;
+            Cache::put($cacheKey, [
+                'time_needed' => $data['time_needed_to_arrive'],
+                'start_time' => now()
+            ], 3600);
+        }
+        // Clear cache after update
+        Cache::forget("user_requests_{$user->id}");
+        return RequestResponseDTO::fromModel($request);
     }
 
-    public function getUserRequests(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getRequest(int $id, User $user): RequestResponseDTO
     {
-        return $this->repository->getAllByUser($userId, $filters, $perPage)
-            ->through(fn($request) => RequestResponseDTO::fromModel($request));
+        $request = $this->requestRepository->findById($id, $user);
+        return RequestResponseDTO::fromModel($request);
+    }
+
+    public function getAllRequests(User $user): array
+    {
+        $cacheKey = "user_requests_{$user->id}";
+        
+        return Cache::remember($cacheKey, 3600, function () use ($user) {
+            $requests = $this->requestRepository->getAll($user);
+            return $requests->map(fn($request) => RequestResponseDTO::fromModel($request))->toArray();
+        });
+    }
+
+    public function softDeleteRequest(int $id, User $user): void
+    {
+        // Remove any manual transaction management
+        $this->requestRepository->softDelete($id, $user);
+        
+        // Clear cache after deletion
+        Cache::forget("user_requests_{$user->id}");
     }
 } 

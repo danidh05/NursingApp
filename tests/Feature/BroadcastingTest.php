@@ -53,6 +53,8 @@ class BroadcastingTest extends TestCase
             'scheduled_time' => now()->addDays(3),
             'ending_time' => now()->addDays(3)->addHours(2), // Consistent naming
             'location' => 'User specified location',
+            'latitude' => 40.7128,
+            'longitude' => -74.0060,
             'time_type' => 'full-time',
             'nurse_gender' => 'male',
             'problem_description' => 'Example problem description',
@@ -66,7 +68,12 @@ class BroadcastingTest extends TestCase
     
         // Assert: Check if the response is successful
         $response->assertStatus(201)
-                 ->assertJson(['message' => 'Request created successfully.']);
+                 ->assertJsonStructure([
+                     'id', 'user_id', 'full_name', 'phone_number', 'problem_description',
+                     'status', 'time_needed_to_arrive', 'nurse_gender', 'time_type',
+                     'scheduled_time', 'location', 'latitude', 'longitude', 'deleted_at',
+                     'created_at', 'updated_at', 'user', 'services'
+                 ]);
     
         // Assert that the event was dispatched with the correct payload
         Event::assertDispatched(UserRequestedService::class, function ($event) use ($user) {
@@ -85,9 +92,13 @@ class BroadcastingTest extends TestCase
 
         // Arrange: Create an admin user, a regular user, a nurse, services, and a request
         $admin = User::factory()->create(['role_id' => 1]); // Assuming 1 is the 'admin' role
+        $admin->load('role'); // Ensure role is loaded
         $user = User::factory()->create(['role_id' => 2]); // Regular user role
         $nurse = Nurse::factory()->create();
         $services = Service::factory()->count(2)->create(); // Create multiple services
+
+        // Debug: Check admin role
+        \Log::info("Admin user ID: {$admin->id}, Role ID: {$admin->role_id}, Role name: {$admin->role->name}");
 
         // Create a request and attach services
         $request = UserRequest::factory()->create([
@@ -104,9 +115,18 @@ class BroadcastingTest extends TestCase
             'status' => 'approved',
         ]);
 
+        // Debug: Check response
+        \Log::info("Response status: " . $response->status());
+        \Log::info("Response content: " . $response->content());
+
         // Assert: Check if the response is successful
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'Request updated successfully.']);
+                 ->assertJsonStructure([
+                     'id', 'user_id', 'full_name', 'phone_number', 'problem_description',
+                     'status', 'time_needed_to_arrive', 'nurse_gender', 'time_type',
+                     'scheduled_time', 'location', 'latitude', 'longitude', 'deleted_at',
+                     'created_at', 'updated_at', 'user', 'services'
+                 ]);
 
         // Assert: The event was dispatched with the correct payload
         Event::assertDispatched(AdminUpdatedRequest::class, function ($event) use ($request) {

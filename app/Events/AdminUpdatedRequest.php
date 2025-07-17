@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Request; // Correct model import
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -14,15 +15,21 @@ class AdminUpdatedRequest implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $request;
+    public $user;
+    public $status;
 
     /**
      * Create a new event instance.
      *
      * @param \App\Models\Request $request
+     * @param \App\Models\User $user
+     * @param string $status
      */
-    public function __construct(Request $request) // Use the correct type hint
+    public function __construct(Request $request, User $user, string $status)
     {
-        $this->request = $request->load('user'); // Load the user relationship
+        $this->request = $request->load('user');
+        $this->user = $user;
+        $this->status = $status;
     }
 
     /**

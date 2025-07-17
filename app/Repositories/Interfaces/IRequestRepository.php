@@ -2,19 +2,17 @@
 
 namespace App\Repositories\Interfaces;
 
+use App\DTOs\Request\CreateRequestDTO;
+use App\DTOs\Request\UpdateRequestDTO;
 use App\Models\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 interface IRequestRepository
 {
-    public function create(array $data): Request;
-    public function update(Request $request, array $data): Request;
-    public function delete(Request $request): bool;
-    public function find(int $id): ?Request;
-    public function findOrFail(int $id): Request;
-    public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator;
-    public function getAllByUser(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator;
-    public function attachServices(Request $request, array $serviceIds): void;
-    public function updateServices(Request $request, array $serviceIds): void;
+    public function create(CreateRequestDTO $dto, User $user): Request;
+    public function update(int $id, UpdateRequestDTO $dto, User $user): Request;
+    public function findById(int $id, User $user): Request;
+    public function getAll(User $user): Collection;
+    public function softDelete(int $id, User $user): void;
 } 

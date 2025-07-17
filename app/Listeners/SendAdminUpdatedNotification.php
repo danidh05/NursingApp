@@ -11,47 +11,18 @@ class SendAdminUpdatedNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    protected $notificationService;
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
 
-    /**
-     * Create the event listener.
-     *
-     * @param NotificationService $notificationService
-     */
-    public function __construct(NotificationService $notificationService)
+    public function handle(AdminUpdatedRequest $event): void
     {
-        $this->notificationService = $notificationService;
-    }
-
-    /**
-     * Handle the event.
-     *
-     * @param AdminUpdatedRequest $event
-     * @return void
-     */
-    public function handle(AdminUpdatedRequest $event)
-    {
-        \Log::info('SendAdminUpdatedNotification listener triggered for request ID: ' . $event->request->id);
-
-        // Ensure the user is loaded
-        $event->request->load('user');
-
-        // Log the user object to confirm it's available
-        \Log::info('User associated with request: ', ['user' => $event->request->user]);
-
-        // Check if the request has a valid user assigned
-        if (is_null($event->request->user)) {
-            \Log::error('No user assigned to request ID: ' . $event->request->id);
-            return; // Exit the listener if no user is assigned
-        }
-
-        // Define the notification details
-        $title = 'Service Request Updated';
-        $message = 'Your service request has been updated by an admin.';
-
-        // Send the notification to the user
-        $this->notificationService->sendNotification([$event->request->user->id], $title, $message);
-
-        \Log::info('Notification sent successfully for request ID: ' . $event->request->id);
+        // Remove any manual transaction management
+        $this->notificationService->createNotification(
+            $event->user,
+            'Request Status Updated',
+            "Your request status has been updated to: {$event->status}",
+            'info'
+        );
     }
 }

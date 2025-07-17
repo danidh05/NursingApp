@@ -2,92 +2,107 @@
 
 namespace App\Repositories;
 
+use App\DTOs\Request\CreateRequestDTO;
+use App\DTOs\Request\UpdateRequestDTO;
 use App\Models\Request;
+use App\Models\User;
 use App\Repositories\Interfaces\IRequestRepository;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class RequestRepository implements IRequestRepository
 {
-    public function create(array $data): Request
+    public function create(CreateRequestDTO $dto, User $user): Request
     {
-        $request = Request::create($data);
+        // Remove any manual transaction management - let Laravel handle it
+        $request = Request::create([
+            'user_id' => $user->id,
+            'full_name' => $dto->full_name,
+            'phone_number' => $dto->phone_number,
+            'problem_description' => $dto->problem_description,
+            'nurse_gender' => $dto->nurse_gender,
+            'time_type' => $dto->time_type,
+            'scheduled_time' => $dto->scheduled_time,
+            'location' => $dto->location,
+            'latitude' => $dto->latitude,
+            'longitude' => $dto->longitude,
+            'status' => 'pending',
+        ]);
+
+        // Attach services
+        if (!empty($dto->service_ids)) {
+            $request->services()->attach($dto->service_ids);
+        }
+
+        return $request->load('services', 'user');
+    }
+
+    public function update(int $id, UpdateRequestDTO $dto, User $user): Request
+    {
+        // Remove any manual transaction management
+        // For updates, admins should be able to update any request
+        if ($user->role->name === 'admin') {
+            $request = Request::with(['services', 'user.role'])->whereNull('deleted_at')->findOrFail($id);
+        } else {
+            $request = $this->findById($id, $user);
+        }
         
-        if (isset($data['service_ids'])) {
-            $this->attachServices($request, $data['service_ids']);
+        $updateData = array_filter([
+            'full_name' => $dto->full_name,
+            'phone_number' => $dto->phone_number,
+            'problem_description' => $dto->problem_description,
+            'status' => $dto->status,
+            'time_needed_to_arrive' => $dto->time_needed_to_arrive,
+            'nurse_gender' => $dto->nurse_gender,
+            'time_type' => $dto->time_type,
+            'scheduled_time' => $dto->scheduled_time,
+        ], fn($value) => $value !== null);
+
+        $request->update($updateData);
+
+        return $request->load('services', 'user');
+    }
+
+    public function findById(int $id, User $user): Request
+    {
+        $query = Request::with(['services', 'user.role']);
+        // Ensure user role is loaded
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+        if ($user->role->name === 'admin') {
+            $request = $query->whereNull('deleted_at')->findOrFail($id);
+        } else {
+            $request = $query->withTrashed()->where('user_id', $user->id)->findOrFail($id);
+        }
+        return $request;
+    }
+
+    public function getAll(User $user): Collection
+    {
+        $query = Request::with(['services', 'user.role']);
+
+        // Ensure user role is loaded
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
         }
 
-        return $request->load('services');
-    }
-
-    public function update(Request $request, array $data): Request
-    {
-        $request->update($data);
-
-        if (isset($data['service_ids'])) {
-            $this->updateServices($request, $data['service_ids']);
+        if ($user->role->name === 'admin') {
+            // Admin sees all non-deleted requests
+            return $query->whereNull('deleted_at')->get();
+        } else {
+            // User sees only their own requests (including soft deleted)
+            return $query->where('user_id', $user->id)->get();
         }
-
-        return $request->load('services');
     }
 
-    public function delete(Request $request): bool
+    public function softDelete(int $id, User $user): void
     {
-        return $request->delete();
-    }
-
-    public function find(int $id): ?Request
-    {
-        return Request::with(['services', 'user'])->find($id);
-    }
-
-    public function findOrFail(int $id): Request
-    {
-        return Request::with(['services', 'user'])->findOrFail($id);
-    }
-
-    public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
-    {
-        $query = Request::with(['services', 'user']);
-
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+        // Remove any manual transaction management
+        $request = $this->findById($id, $user);
+        
+        if ($user->role->name === 'admin') {
+            // Only admin can soft delete
+            $request->delete();
         }
-
-        if (isset($filters['time_type'])) {
-            $query->where('time_type', $filters['time_type']);
-        }
-
-        if (isset($filters['nurse_gender'])) {
-            $query->where('nurse_gender', $filters['nurse_gender']);
-        }
-
-        return $query->latest()->paginate($perPage);
-    }
-
-    public function getAllByUser(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator
-    {
-        $query = Request::withTrashed()->with(['services'])
-            ->where('user_id', $userId);
-
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-
-        if (isset($filters['time_type'])) {
-            $query->where('time_type', $filters['time_type']);
-        }
-
-        return $query->latest()->paginate($perPage);
-    }
-
-    public function attachServices(Request $request, array $serviceIds): void
-    {
-        $request->services()->attach($serviceIds);
-    }
-
-    public function updateServices(Request $request, array $serviceIds): void
-    {
-        $request->services()->sync($serviceIds);
     }
 } 

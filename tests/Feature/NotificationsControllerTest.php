@@ -49,8 +49,8 @@ class NotificationsControllerTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        // Dispatch the UserRequestedService event with the correct request model
-        event(new UserRequestedService($request));
+        // Dispatch the event
+        event(new UserRequestedService($request, $user));
 
         // Fetch notifications via API (This assumes you are storing events as notifications)
         $response = $this->getJson('/api/notifications');
@@ -87,8 +87,8 @@ class NotificationsControllerTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        // Dispatch the AdminUpdatedRequest event with the correct request model
-        event(new AdminUpdatedRequest($request));
+        // Dispatch the AdminUpdatedRequest event
+        event(new AdminUpdatedRequest($request, $user, 'approved'));
 
         // Fetch notifications via API
         $response = $this->getJson('/api/notifications');

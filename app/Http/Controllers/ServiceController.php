@@ -10,8 +10,36 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Import AuthorizesRe
 class ServiceController extends Controller
 {
     use AuthorizesRequests; // Use the AuthorizesRequests trait
+    
     /**
-     * Display a listing of the services (Accessible by both Admin and User).
+     * @OA\Get(
+     *     path="/api/services",
+     *     summary="List all services",
+     *     description="Retrieve a list of all services. Available to both users and admins.",
+     *     tags={"Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Services list retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="services", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
      */
     public function index()
     {
@@ -20,7 +48,58 @@ class ServiceController extends Controller
     }
 
     /**
-     * Store a newly created service in storage (Admin only).
+     * @OA\Post(
+     *     path="/api/admin/services",
+     *     summary="Create a new service (Admin only)",
+     *     description="Create a new service. Only accessible by admins.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","price"},
+     *             @OA\Property(property="name", type="string", example="Home Nursing", description="Service name"),
+     *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
+     *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
+     *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
+     *             @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg", description="URL to service picture"),
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (optional)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Service created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Service created successfully."),
+     *             @OA\Property(property="service", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -41,7 +120,45 @@ class ServiceController extends Controller
     }
 
     /**
-     * Display the specified service (Accessible by both Admin and User).
+     * @OA\Get(
+     *     path="/api/services/{id}",
+     *     summary="Get service details",
+     *     description="Retrieve details of a specific service. Available to both users and admins.",
+     *     tags={"Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Service ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="service", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Service not found"
+     *     )
+     * )
      */
     public function show($id)
     {
@@ -50,7 +167,57 @@ class ServiceController extends Controller
     }
 
     /**
-     * Update the specified service in storage (Admin only).
+     * @OA\Put(
+     *     path="/api/admin/services/{id}",
+     *     summary="Update service details (Admin only)",
+     *     description="Update a service's information. Only accessible by admins.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Service ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Home Nursing", description="Service name"),
+     *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
+     *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
+     *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
+     *             @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg", description="URL to service picture"),
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Service updated successfully.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Service not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request, Service $service)
     {
@@ -72,6 +239,41 @@ class ServiceController extends Controller
         return response()->json(['message' => 'Service updated successfully.'], 200);
     }
     
+    /**
+     * @OA\Delete(
+     *     path="/api/admin/services/{id}",
+     *     summary="Delete a service (Admin only)",
+     *     description="Delete a service from the system. Only accessible by admins.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Service ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Service deleted successfully.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Service not found"
+     *     )
+     * )
+     */
     public function destroy(Service $service)
     {
         $this->authorize('delete', $service);
@@ -81,7 +283,4 @@ class ServiceController extends Controller
     
         return response()->json(['message' => 'Service deleted successfully.'], 200);
     }
-    
-
-    
 }

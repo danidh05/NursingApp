@@ -2,16 +2,24 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = User::class;
+
     /**
      * The current password being used by the factory.
      */
@@ -29,22 +37,33 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'role_id' => Role::where('name', 'user')->first()->id,
+            'role_id' => Role::firstOrCreate(['name' => 'user'])->id,
             'remember_token' => Str::random(10),
-            'phone_number' => fake()->phoneNumber(),  // Generate a fake phone number
-            'location' => fake()->address(),  // Generate a fake address
-            'latitude' => fake()->latitude(),  // Generate a fake latitude
-            'longitude' => fake()->longitude(),  // Generate a fake longitude
+            'phone_number' => fake()->phoneNumber(),
+            'location' => fake()->address(),
+            'latitude' => fake()->latitude(),
+            'longitude' => fake()->longitude(),
+            'is_first_login' => false,
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate that the user is an admin.
      */
-    public function unverified(): static
+    public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'role_id' => Role::firstOrCreate(['name' => 'admin'])->id,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a regular user.
+     */
+    public function user(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role_id' => Role::firstOrCreate(['name' => 'user'])->id,
         ]);
     }
 }

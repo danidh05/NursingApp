@@ -1,217 +1,273 @@
-## Project Name
+# Nursing Platform – Feature Overview
 
-### Laravel Backend Setup Guide
+## User Authentication & Security
 
-This guide provides step-by-step instructions to set up and deploy the Laravel backend application on a server for development and collaboration purposes.
+-   User registration with email, phone, and password
+-   Phone verification via SMS/WhatsApp OTP
+-   Secure login/logout
+-   Password reset via phone OTP
+-   Role-based access control (admin, user)
 
-### Prerequisites
+## User Management
 
-Before starting, make sure you have the following installed on your server:
+-   Users can view and update their own profile
+-   Admins can:
+    -   List all users
+    -   Create new users
+    -   Delete users
+    -   View any user's profile
 
--   **PHP** (version 8.0 or later)
--   **Composer** (latest version)
--   **MySQL** or any other supported database
--   **Web Server** (Apache, Nginx)
--   **Git** (for cloning the repository)
+## Nurse Management
 
-### Step 1: Clone the Repository
+-   Admins can:
+    -   List, create, update, and delete nurses
+-   Users can:
+    -   List all nurses
+    -   View nurse details
+    -   Rate nurses
 
-First, clone the project repository to your server:
+## Service Management
 
-```bash
-git clone https://github.com/danidh05/NursingApp.git
-cd your-repository
-```
+-   Admins can:
+    -   List, create, update, and delete services
+-   Users can:
+    -   List all services
+    -   View service details
 
-### Step 2: Set Up the Environment Configuration
+## Category Management
 
-1. **Create a `.env` File:**
+-   Admins can:
+    -   List, create, update, and delete categories
+-   Users can:
+    -   List all categories
+    -   View category details
 
-    Copy the `.env.example` file to create your `.env` file:
+## Request (Order) Management
 
-    ```bash
-    cp .env.example .env
-    ```
+-   Users can:
+    -   Create new service requests (choose nurse, services, time, location, etc.)
+    -   View all their requests (including archived/soft-deleted)
+    -   Cannot update requests after creation
+-   Admins can:
+    -   View all requests (except soft-deleted)
+    -   Update any request (status, time needed, etc.)
+    -   Soft-delete (archive) any request (removes from admin view, but user can still see)
+    -   Cannot view soft-deleted requests
 
-2. **Update the `.env` File:**
+## Request Status & Notifications
 
-    Edit the `.env` file to set up your environment variables, such as the database connection, app URL, and other configurations. Replace the placeholder values with the appropriate values for your server environment:
+-   Requests have statuses: pending, approved, rejected, completed
+-   Event broadcasting:
+    -   User request creation triggers a broadcast event
+    -   Admin request update triggers a broadcast event
+-   Notifications:
+    -   Users receive notifications for request submission and status updates
+    -   Admins and users can view and mark notifications as read
 
-    ```dotenv
-    APP_NAME=Laravel
-    APP_ENV=local
-    APP_KEY= # Will be generated in the next step
-    APP_DEBUG=true
-    APP_URL=http://your-server-url
+## About Page
 
-    DB_CONNECTION=mysql
-    DB_HOST=your_db_host
-    DB_PORT=3306
-    DB_DATABASE=your_db_name
-    DB_USERNAME=your_db_username
-    DB_PASSWORD=your_db_password
+-   Admins can update the about page
+-   Users can view the about page
 
-    # Other configurations...
-    ```
+## Location Management
 
-### Step 3: Install Composer Dependencies
+-   Users can submit and update their location (especially on first login)
 
-Run the following command to install all required Composer dependencies:
+## Dashboard
 
-```bash
-composer install
-```
+-   Users have a personal dashboard
+-   Admins have a dashboard with summary statistics
 
-### Step 4: Generate the Application Key
+## Security & Access
 
-Run the following command to generate a new application key:
-
-```bash
-php artisan key:generate
-```
-
-This command will set the `APP_KEY` value in your `.env` file.
-
-### Step 5: Run Database Migrations
-
-Set up the database schema by running the migrations:
-
-```bash
-php artisan migrate
-```
-
-### Step 6: (Optional) Run Database Seeders
-
-If you need to seed the database with initial data, run the seeders:
-
-```bash
-php artisan db:seed
-```
-
-### Step 7: Set Up File Permissions
-
-Ensure that the necessary directories have the correct write permissions:
-
-```bash
-chmod -R 775 storage
-chmod -R 775 bootstrap/cache
-```
-
-This ensures that Laravel can write to these directories.
-
-### Step 8: Configure the Web Server
-
-Configure your web server (Apache or Nginx) to point to the `public` directory of the Laravel project as the document root. Below is an example configuration for **Nginx**:
-
-```nginx
-server {
-    listen 80;
-    server_name your-server-url;
-
-    root /path-to-your-project/public;
-    index index.php index.html;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.ht {
-        deny all;
-    }
-}
-```
-
-### Step 9: Test the Application
-
-Visit the app URL in your browser (e.g., `http://your-server-url`) to verify that everything is working correctly. Check the logs in `storage/logs/laravel.log` for any errors.
-
-### Additional Notes
-
--   **Environment-Specific Settings:** Make sure that settings in `.env` file match your environment (e.g., `APP_ENV=production` for production servers).
--   **SSL Configuration:** If using HTTPS, ensure SSL certificates are properly configured.
--   **Deployments:** For ongoing development, pull the latest changes from the repository and repeat the necessary steps (`composer install`, `php artisan migrate`, etc.).
-
-### Troubleshooting
-
--   **Common Issues:** Check the `storage/logs/laravel.log` file for any application errors.
--   **Permissions Issues:** Ensure the `storage` and `bootstrap/cache` directories are writable.
-
-For further assistance, refer to the [Laravel Documentation](https://laravel.com/docs).
+-   All sensitive routes are protected by authentication and role-based middleware
+-   Only authorized users can access admin/user-specific features
 
 ---
 
-As for step 7:
-Step 7: Configure the Web Server in more detail.
+## Technical Stack
 
-What is a Web Server?
-A web server is software that serves web pages to users. It handles requests from users (e.g., when they visit a website) and returns the appropriate web content, such as HTML pages, images, or JSON data for APIs.
+-   **Framework:** Laravel 11
+-   **Database:** MySQL/PostgreSQL with migrations
+-   **Authentication:** Laravel Sanctum
+-   **SMS/WhatsApp:** Twilio integration
+-   **Testing:** PHPUnit with comprehensive test coverage
+-   **API:** RESTful API design
 
-Common web servers include:
+## Installation & Setup
 
-Apache
-Nginx
-IIS (Internet Information Services)
-LiteSpeed
-For a Laravel application, the web server will serve the application by pointing to the public directory, which is where Laravel's front controller (index.php) is located. The front controller handles all incoming requests to the Laravel application.
+1. Clone the repository
+2. Install dependencies: `composer install`
+3. Copy `.env.example` to `.env` and configure your environment
+4. Run migrations: `php artisan migrate`
+5. Seed the database: `php artisan db:seed`
+6. Start the development server: `php artisan serve`
 
-Why Do You Need to Configure a Web Server?
-To deploy your Laravel application on a server, you need a web server (like Apache or Nginx) that knows how to serve your application's files to users or clients. You configure the web server to point to the Laravel app's public directory, ensuring that all requests go through Laravel's routing and controller logic.
+## Environment Variables
 
-Step 7: Configure the Web Server Explained
-Here’s what you need to do in Step 7:
+Required environment variables:
 
-Point the Web Server to the public Directory:
+```env
+# Database
+    DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+    DB_PORT=3306
+DB_DATABASE=nursing_platform
+DB_USERNAME=root
+DB_PASSWORD=
 
-Your Laravel project has a public folder that contains the entry point (index.php) for all requests to your application.
-Configure the web server (Apache, Nginx, etc.) to use this folder as the "document root" (the directory from which web documents are served).
-Set Up Web Server Configuration (Example for Nginx):
+# Twilio (for SMS/WhatsApp)
+TWILIO_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_VERIFY_SERVICE_SID=your_twilio_verify_service_sid
 
-If you are using Nginx as your web server, you'll need to create a configuration file for your site. Below is an example of what an Nginx configuration file might look like for a Laravel application:
+# App
+APP_NAME="Nursing Platform"
+APP_ENV=local
+APP_KEY=base64:your_app_key
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+```
 
-nginx
-Copy code
-server {
-listen 80; # Listen on port 80 for HTTP requests
-server_name your-server-url; # Replace with your server's domain or IP
+## API Endpoints
 
-    # Point to the public directory of your Laravel project
-    root /path-to-your-project/public;
-    index index.php index.html;
+### Authentication
 
-    # Handle requests
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+-   `POST /api/register` - User registration
+-   `POST /api/verify-sms` - Phone verification
+-   `POST /api/login` - User login
+-   `POST /api/logout` - User logout
+-   `POST /api/send-password-reset-otp` - Send password reset OTP
+-   `POST /api/reset-password` - Reset password
 
-    # Process PHP scripts
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;  # Adjust PHP version as needed
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
+### User Management
 
-    # Deny access to .htaccess files (Apache-specific files)
-    location ~ /\.ht {
-        deny all;
-    }
+-   `GET /api/me` - Get current user profile
+-   `PUT /api/users/{id}` - Update user profile
+-   `GET /api/user/dashboard` - User dashboard
+-   `POST /api/submit-location` - Submit user location
 
-}
-server_name: Replace your-server-url with your domain or IP address.
-root: Replace /path-to-your-project/public with the full path to the public directory of your Laravel application.
-fastcgi_pass: Ensure this points to the correct socket or port for PHP-FPM (PHP FastCGI Process Manager).
-Reload the Web Server:
+### Admin Routes (Protected)
 
-After creating or updating the configuration file, reload or restart the web server to apply the changes. For Nginx, you would run:
-bash
-Copy code
-sudo service nginx reload
-Summary
-Configuring the web server ensures that all incoming HTTP requests to your server are directed to the correct location (the public directory of your Laravel application) and that PHP scripts are processed correctly. This setup is crucial for running any web application, including those built with Laravel.
+-   `GET /api/admin/users` - List all users
+-   `POST /api/admin/users` - Create user
+-   `DELETE /api/admin/users/{id}` - Delete user
+-   `GET /api/admin/users/{id}` - View user profile
+
+### Nurse Management
+
+-   `GET /api/nurses` - List all nurses (all users)
+-   `GET /api/nurses/{id}` - View nurse details (all users)
+-   `POST /api/admin/nurses` - Create nurse (admin only)
+-   `PUT /api/admin/nurses/{id}` - Update nurse (admin only)
+-   `DELETE /api/admin/nurses/{id}` - Delete nurse (admin only)
+-   `POST /api/nurses/{id}/rate` - Rate nurse (users only)
+
+### Service Management
+
+-   `GET /api/services` - List all services (all users)
+-   `GET /api/services/{id}` - View service details (all users)
+-   `POST /api/admin/services` - Create service (admin only)
+-   `PUT /api/admin/services/{id}` - Update service (admin only)
+-   `DELETE /api/admin/services/{id}` - Delete service (admin only)
+
+### Category Management
+
+-   `GET /api/categories` - List all categories (all users)
+-   `GET /api/categories/{id}` - View category details (all users)
+-   `POST /api/admin/categories` - Create category (admin only)
+-   `PUT /api/admin/categories/{id}` - Update category (admin only)
+-   `DELETE /api/admin/categories/{id}` - Delete category (admin only)
+
+### Request Management
+
+-   `GET /api/requests` - List requests (user sees own, admin sees all)
+-   `GET /api/requests/{id}` - View request details
+-   `POST /api/requests` - Create request (users only)
+-   `PUT /api/admin/requests/{id}` - Update request (admin only)
+-   `DELETE /api/admin/requests/{id}` - Soft delete request (admin only)
+
+### Notifications
+
+-   `GET /api/notifications` - List user notifications
+-   `POST /api/notifications/{id}/read` - Mark notification as read
+-   `DELETE /api/notifications/{id}` - Delete notification
+
+### About Page
+
+-   `GET /api/about` - View about page (all users)
+-   `PUT /api/admin/about` - Update about page (admin only)
+
+## Testing
+
+Run the test suite:
+
+```bash
+php artisan test
+```
+
+The application includes comprehensive test coverage for:
+
+-   Authentication flows
+-   User management
+-   Nurse management
+-   Service management
+-   Request management
+-   Notifications
+-   Role-based access control
+-   Event broadcasting
+
+## Business Logic Features
+
+### Request Workflow
+
+1. User creates a service request with nurse, services, time, and location
+2. Request is created with 'pending' status
+3. Admin reviews and can update status to 'approved', 'rejected', or 'completed'
+4. Admin can set time needed for arrival
+5. Notifications are sent to users for status changes
+6. Requests can be soft-deleted by admins (archived but still visible to users)
+
+### User Experience
+
+-   Users must verify their phone before accessing the platform
+-   Users can only view and manage their own requests
+-   Users can rate nurses after service completion
+-   Location tracking for service delivery
+-   Real-time notifications for request updates
+
+### Admin Experience
+
+-   Full CRUD operations on all entities
+-   Request management with status updates
+-   User management and oversight
+-   Dashboard with summary statistics
+-   Cannot view soft-deleted requests (clean admin interface)
+
+## Security Features
+
+-   Phone verification required for all users
+-   Role-based middleware protecting sensitive routes
+-   Soft deletion for data integrity
+-   Input validation on all endpoints
+-   Secure password handling with hashing
+-   API token authentication via Sanctum
+
+---
+
+## Test Coverage
+
+All features above are covered by automated tests, ensuring:
+
+-   Correct business logic
+-   Proper access control
+-   Robust request/response validation
+-   Event and notification dispatching
+-   Database integrity
+-   API endpoint functionality
+
+**Current Test Status:** 77 tests passing (252 assertions)
+
+---
+
+_This document reflects the current, fully-tested feature set of the Nursing Platform as of today._

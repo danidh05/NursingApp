@@ -73,6 +73,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Routes specific to "admin" role
     Route::middleware('role:admin')->prefix('admin')->group(function () {
+        // Admin dashboard
+        Route::get('/dashboard', [UserController::class, 'adminDashboard']); // Admin dashboard
+        
         // User management routes
         Route::get('/users', [UserController::class, 'index']); // List all users
         Route::get('/users/{id}', [UserController::class, 'show']); // Fetch specific user details by ID

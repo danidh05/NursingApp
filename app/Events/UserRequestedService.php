@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Request;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -14,15 +15,18 @@ class UserRequestedService implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $request;
+    public $user;
 
     /**
      * Create a new event instance.
      *
      * @param \App\Models\Request $request
+     * @param \App\Models\User $user
      */
-    public function __construct(Request $request) // Correct type hint
+    public function __construct(Request $request, User $user)
     {
-        $this->request = $request->load('user', 'services'); // Load user and services relationships
+        $this->request = $request->load('user', 'services');
+        $this->user = $user;
 
         \Log::info('UserRequestedService event created for request ID: ' . $this->request->id);
     }

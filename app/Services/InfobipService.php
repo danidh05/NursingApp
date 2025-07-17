@@ -3,43 +3,41 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class InfobipService
 {
-    protected $baseUrl;
-    protected $apiKey;
+    private string $baseUrl;
+    private string $apiKey;
 
     public function __construct()
     {
-        $this->baseUrl = 'https://peykq3.api.infobip.com/sms/2/text/advanced';
-        $this->apiKey = env('INFOBIP_API_KEY'); // Make sure your API key is set in the .env file
+        $this->baseUrl = config('services.infobip.base_url');
+        $this->apiKey = config('services.infobip.api_key');
     }
 
-    public function sendSms($to, $message)
+    public function sendSMS(string $to, string $message): bool
     {
         try {
+            // Remove any manual transaction management
             $response = Http::withHeaders([
-                'Authorization' => 'App ' . $this->apiKey,
+                'Authorization' => "App {$this->apiKey}",
                 'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ])->post($this->baseUrl, [
+            ])->post("{$this->baseUrl}/sms/2/text/advanced", [
                 'messages' => [
                     [
-                        'destinations' => [['to' => $to]],
-                        'from' => '447491163443', // Adjust the sender ID or phone number as needed
-                        'text' => $message,
+                        'from' => config('services.infobip.from'),
+                        'destinations' => [
+                            ['to' => $to]
+                        ],
+                        'text' => $message
                     ]
                 ]
             ]);
 
-            if ($response->successful()) {
-                return $response->json(); // Return the response if successful
-            } else {
-                \Log::error('Unexpected HTTP status: ' . $response->status() . ' ' . $response->body());
-                return false;
-            }
+            return $response->successful();
         } catch (\Exception $e) {
-            \Log::error('Infobip SMS sending failed: ' . $e->getMessage());
+            Log::error('Infobip SMS failed: ' . $e->getMessage());
             return false;
         }
     }

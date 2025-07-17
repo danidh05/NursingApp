@@ -30,7 +30,7 @@ class AuthTest extends TestCase
             ->once()
             ->with('+96178919829')
             ->andReturn(true);
-
+    
         $this->app->instance(TwilioService::class, $mockTwilioService);
 
         // Send the registration request
@@ -64,7 +64,7 @@ class AuthTest extends TestCase
             ->once()
             ->with('+96178919829', '123456')
             ->andReturn(true);
-
+    
         $this->app->instance(TwilioService::class, $mockTwilioService);
 
         // Send verification request
@@ -75,7 +75,7 @@ class AuthTest extends TestCase
 
         // Assert the phone verification was successful
         $response->assertStatus(200)
-                ->assertJson(['message' => 'Phone number successfully verified.']);
+                 ->assertJson(['message' => 'Phone number successfully verified.']);
 
         // Check that the user's phone number is marked as verified
         $this->assertNotNull($user->fresh()->email_verified_at);
@@ -98,7 +98,7 @@ class AuthTest extends TestCase
             ->once()
             ->with('+96178919829', '654321')
             ->andReturn(false);
-
+    
         $this->app->instance(TwilioService::class, $mockTwilioService);
 
         // Send verification request with invalid code
@@ -109,7 +109,7 @@ class AuthTest extends TestCase
 
         // Assert that verification failed
         $response->assertStatus(422)
-                ->assertJson(['message' => 'Invalid or expired OTP.']);
+                 ->assertJson(['message' => 'Invalid or expired OTP.']);
     }
 
     public function test_user_cannot_verify_sms_with_expired_code()
@@ -129,7 +129,7 @@ class AuthTest extends TestCase
             ->once()
             ->with('+96178919829', '123456')
             ->andReturn(false);
-
+    
         $this->app->instance(TwilioService::class, $mockTwilioService);
 
         // Send verification request with expired code
@@ -140,7 +140,7 @@ class AuthTest extends TestCase
 
         // Assert that verification failed due to expiration
         $response->assertStatus(422)
-                ->assertJson(['message' => 'Invalid or expired OTP.']);
+                 ->assertJson(['message' => 'Invalid or expired OTP.']);
     }
 
     public function test_user_cannot_login_without_verified_phone()
@@ -161,7 +161,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(403)
-                ->assertJson(['message' => 'Your phone number is not verified.']);
+                 ->assertJson(['message' => 'Your phone number is not verified.']);
     }
 
     public function test_user_can_login()
@@ -228,7 +228,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['email']);
+                 ->assertJsonValidationErrors(['email']);
 
         // Attempt to register with the same phone number
         $response = $this->postJson('/api/register', [
@@ -240,6 +240,6 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['phone_number']);
+                 ->assertJsonValidationErrors(['phone_number']);
     }
 }
