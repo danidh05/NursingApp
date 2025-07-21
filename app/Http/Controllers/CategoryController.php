@@ -26,6 +26,7 @@ class CategoryController extends Controller
      *             @OA\Property(property="categories", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg", nullable=true, description="Firebase Storage URL for category image"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
@@ -70,6 +71,7 @@ class CategoryController extends Controller
      *             @OA\Property(property="category", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg", nullable=true, description="Firebase Storage URL for category image"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             )

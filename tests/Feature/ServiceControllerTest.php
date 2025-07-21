@@ -17,6 +17,7 @@ class ServiceControllerTest extends TestCase
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']); // Ensure roles are seeded
+        $this->artisan('db:seed', ['--class' => 'TestDataSeeder']); // Seed categories and other test data
     }
 
     /**
@@ -27,11 +28,11 @@ class ServiceControllerTest extends TestCase
         $admin = User::factory()->create(['role_id' => 1]); // Assuming role_id 1 is admin
         Sanctum::actingAs($admin);
 
-        Service::factory()->count(3)->create();
+        // Note: Services are already created by TestDataSeeder
 
         $response = $this->getJson('/api/services');
         $response->assertStatus(200)
-                 ->assertJsonStructure(['services' => [['id', 'name', 'price', 'description']]]);
+                 ->assertJsonStructure(['services' => [['id', 'name', 'price', 'description', 'category_id']]]);
     }
 
     /**
@@ -44,35 +45,27 @@ class ServiceControllerTest extends TestCase
         $admin = User::factory()->create(['role_id' => $adminRole->id]);
         Sanctum::actingAs($admin);
 
-        // Act: Send a POST request to create a new service without category_id
+        // Get a valid category_id
+        $category = \App\Models\Category::first();
+
+        // Act: Send a POST request to create a new service with required category_id
         $response = $this->postJson('/api/admin/services', [
             'name' => 'New Service',
             'price' => 100,
-            'description' => 'Service description.',
-            'service_pic'=>'https://images.app.goo.gl/U8rVW2qT1GwMxkuP8',
-            'discount_price' => 90
-            // No category_id needed since it's now nullable
+            'description' => 'A test service',
+            'category_id' => $category->id, // Now required
         ]);
 
-        // Assert: Check the response and database state
-        $response->assertStatus(201) // Check if the response status is 201 Created
-                 ->assertJson([
-                     'message' => 'Service created successfully.',
-                     'service' => [
-                         'name' => 'New Service',
-                         'price' => '100.00', // Match the string representation in JSON
-                         'description' => 'Service description.',
-                         // We won't explicitly check for 'category_id' here if it's not included in the response
-                     ],
-                 ]);
-
-        // Assert that the service exists in the database
+        // Assert: Check if the service was created successfully
+        $response->assertStatus(201)
+                 ->assertJson(['message' => 'Service created successfully.'])
+                 ->assertJsonStructure(['service' => ['id', 'name', 'price', 'description', 'category_id']]);
+        
+        // Verify the service exists in the database with correct category_id
         $this->assertDatabaseHas('services', [
             'name' => 'New Service',
-            'price' => 100, // The database should still store it as a numeric value
-            'description' => 'Service description.',
-            'discount_price' => 90
-
+            'price' => 100,
+            'category_id' => $category->id
         ]);
     }
 
@@ -86,25 +79,27 @@ class ServiceControllerTest extends TestCase
         $admin = User::factory()->create(['role_id' => $adminRole->id]);
         Sanctum::actingAs($admin);
 
-        // Create the service with initial data
+        // Get valid categories
+        $category1 = \App\Models\Category::first();
+        $category2 = \App\Models\Category::skip(1)->first();
+
+        // Create the service with initial data and valid category
         $service = Service::factory()->create([
             'name' => 'Old Service',
             'price' => 100,
             'description' => 'Old description.',
-            'category_id' => null, // Start with no category
-            'service_pic'=>'photo2.jpg',
+            'category_id' => $category1->id, // Use valid category
+            'service_pic' => 'photo2.jpg',
             'discount_price' => 92
-
         ]);
 
         // Act: Send a PUT request to update the service
         $response = $this->putJson("/api/admin/services/{$service->id}", [
-            'name' => 'Updated Service', // Ensure this matches the controller's validation requirements
-            'price' => 150, // Example price change
+            'name' => 'Updated Service',
+            'price' => 150,
             'description' => 'Updated description.',
+            'category_id' => $category2->id, // Update to different category
             'discount_price' => 92
-
-            // No category_id since it's not mandatory
         ]);
 
         // Assert: Check response and database for the updated service details
@@ -116,7 +111,7 @@ class ServiceControllerTest extends TestCase
         $this->assertEquals('Updated Service', $updatedService->name);
         $this->assertEquals(150, $updatedService->price);
         $this->assertEquals('Updated description.', $updatedService->description);
-        $this->assertNull($updatedService->category_id); // Ensure category_id remains null
+        $this->assertEquals($category2->id, $updatedService->category_id); // Ensure category was updated
     }
 
     /**
@@ -225,10 +220,11 @@ class ServiceControllerTest extends TestCase
         $response = $this->postJson('/api/admin/services', [
             'name' => '', // Invalid: required field
             'price' => -10, // Invalid: price cannot be negative
+            // Missing category_id - now required
         ]);
 
-        // Assert: Check for validation errors
+        // Assert: Check for validation errors including category_id
         $response->assertStatus(422) // Unprocessable Entity
-                 ->assertJsonValidationErrors(['name', 'price']); // Removed 'category_id' since it's not required
+                 ->assertJsonValidationErrors(['name', 'price', 'category_id']); // Now includes category_id as required
     }
 }

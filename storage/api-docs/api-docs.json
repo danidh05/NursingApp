@@ -964,6 +964,12 @@
                                                         "type": "string",
                                                         "example": "Home Care"
                                                     },
+                                                    "image_url": {
+                                                        "description": "Firebase Storage URL for category image",
+                                                        "type": "string",
+                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg",
+                                                        "nullable": true
+                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "date-time"
@@ -1032,6 +1038,12 @@
                                                 "name": {
                                                     "type": "string",
                                                     "example": "Home Care"
+                                                },
+                                                "image_url": {
+                                                    "description": "Firebase Storage URL for category image",
+                                                    "type": "string",
+                                                    "example": "https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg",
+                                                    "nullable": true
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -3154,7 +3166,8 @@
                             "schema": {
                                 "required": [
                                     "name",
-                                    "price"
+                                    "price",
+                                    "category_id"
                                 ],
                                 "properties": {
                                     "name": {
@@ -3180,12 +3193,13 @@
                                         "example": 45
                                     },
                                     "service_pic": {
-                                        "description": "URL to service picture",
+                                        "description": "URL to service picture (stored as URL string, not file upload)",
                                         "type": "string",
+                                        "format": "url",
                                         "example": "https://example.com/service.jpg"
                                     },
                                     "category_id": {
-                                        "description": "Category ID (optional)",
+                                        "description": "Category ID (REQUIRED - must be valid category)",
                                         "type": "integer",
                                         "example": 1
                                     }
@@ -3423,12 +3437,13 @@
                                         "example": 45
                                     },
                                     "service_pic": {
-                                        "description": "URL to service picture",
+                                        "description": "URL to service picture (stored as URL string, not file upload)",
                                         "type": "string",
+                                        "format": "url",
                                         "example": "https://example.com/service.jpg"
                                     },
                                     "category_id": {
-                                        "description": "Category ID",
+                                        "description": "Category ID (must be valid category if provided)",
                                         "type": "integer",
                                         "example": 1
                                     }

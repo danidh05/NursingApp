@@ -7,6 +7,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Import AuthorizesRequests
 
+/**
+ * Service Controller
+ * 
+ * Manages nursing services with the following features:
+ * 
+ * ## Service Pictures (service_pic)
+ * - Stored as URL strings in database (NOT file uploads)
+ * - Validation: Must be valid URL format
+ * - No file upload functionality - use external image hosting
+ * - Field is nullable/optional
+ * 
+ * ## Categories (category_id)
+ * - REQUIRED field for service creation
+ * - Available categories: 1=Home Care, 2=Emergency Care, 3=Elderly Care, 4=Post-Surgery Care, 5=Chronic Disease Management
+ * - Must reference existing category ID
+ * 
+ * ## Pricing
+ * - Regular price (required)
+ * - Optional discount_price (must be less than regular price)
+ */
 class ServiceController extends Controller
 {
     use AuthorizesRequests; // Use the AuthorizesRequests trait
@@ -57,13 +77,13 @@ class ServiceController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","price"},
+     *             required={"name","price","category_id"},
      *             @OA\Property(property="name", type="string", example="Home Nursing", description="Service name"),
      *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
      *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
      *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
-     *             @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg", description="URL to service picture"),
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (optional)")
+     *             @OA\Property(property="service_pic", type="string", format="url", example="https://example.com/service.jpg", description="URL to service picture (stored as URL string, not file upload)"),
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (REQUIRED - must be valid category)")
      *         )
      *     ),
      *     @OA\Response(
@@ -110,8 +130,8 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'service_pic'=>'nullable|string|url'
-            //'category_id' => 'required|exists:categories,id', // Assuming there's a category table
+            'service_pic'=>'nullable|string|url',
+            'category_id' => 'required|exists:categories,id' // Assuming there's a category table
         ]);
 
         $service = Service::create($validatedData);
@@ -187,8 +207,8 @@ class ServiceController extends Controller
      *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
      *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
      *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
-     *             @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg", description="URL to service picture"),
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID")
+     *             @OA\Property(property="service_pic", type="string", format="url", example="https://example.com/service.jpg", description="URL to service picture (stored as URL string, not file upload)"),
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (must be valid category if provided)")
      *         )
      *     ),
      *     @OA\Response(
@@ -231,7 +251,7 @@ class ServiceController extends Controller
              'service_pic'=>'sometimes|nullable|string|url',
             'discount_price' => 'sometimes|nullable|numeric|min:0|lt:price',
 
-          //  'category_id' => 'sometimes|exists:categories,id', // Include category_id validation if needed
+           'category_id' => 'sometimes|exists:categories,id', // Include category_id validation if needed
         ]);
     
         $service->update($validatedData);
