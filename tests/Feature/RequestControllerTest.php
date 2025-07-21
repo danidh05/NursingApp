@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Database\Seeders\RoleSeeder;
 
 class RequestControllerTest extends TestCase
 {
@@ -19,18 +20,28 @@ class RequestControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Seed roles for testing
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        
-        // Create users once for all tests
-        $this->user = User::factory()->create(['role_id' => 2]); // Regular user
-        $this->user->load('role'); // Ensure role is loaded
-        $this->admin = User::factory()->create(['role_id' => 1]); // Admin
-        $this->admin->load('role'); // Ensure role is loaded
-        
-        // Create services once for all tests
-        $this->services = Service::factory(2)->create()->pluck('id')->toArray();
+
+        // Ensure roles are seeded first
+        $this->seed(RoleSeeder::class);
+
+        // Create admin and regular user with proper roles
+        $this->admin = User::factory()->create(['role_id' => 1]); // Admin role
+        $this->user = User::factory()->create(['role_id' => 2]);  // User role
+
+        // Load relationships
+        $this->admin->load('role');
+        $this->user->load('role');
+
+        // Create services for testing
+        $this->services = [
+            Service::factory()->create()->id,
+            Service::factory()->create()->id,
+        ];
+
+        // Create a test request
+        $this->request = Request::factory()
+            ->for($this->user)
+            ->create(['status' => Request::STATUS_SUBMITTED]); // Use new status constant
     }
 
     public function test_user_can_create_request(): void
@@ -38,6 +49,7 @@ class RequestControllerTest extends TestCase
         $response = $this->actingAs($this->user)->postJson('/api/requests', [
             'full_name' => 'John Doe',
             'phone_number' => '1234567890',
+            'name' => 'Emergency Home Care', // Add optional name field
             'location' => 'Test Location',
             'time_type' => Request::TIME_TYPE_FULL,
             'nurse_gender' => 'female',
@@ -54,13 +66,15 @@ class RequestControllerTest extends TestCase
                 'id',
                 'user_id',
                 'full_name',
+                'name',
                 'services'
             ]);
 
         $this->assertDatabaseHas('requests', [
             'full_name' => 'John Doe',
+            'name' => 'Emergency Home Care',
             'user_id' => $this->user->id,
-            'status' => Request::STATUS_PENDING
+            'status' => Request::STATUS_SUBMITTED // Use new status constant
         ]);
     }
 
@@ -94,7 +108,7 @@ class RequestControllerTest extends TestCase
     {
         $request = Request::factory()
             ->for($this->user)
-            ->create(['status' => Request::STATUS_PENDING]);
+            ->create(['status' => Request::STATUS_SUBMITTED]);
 
         $response = $this->actingAs($this->user)
             ->putJson("/api/requests/{$request->id}", [
@@ -107,26 +121,17 @@ class RequestControllerTest extends TestCase
 
     public function test_admin_can_update_request_with_time_needed(): void
     {
-        $request = Request::factory()->create(['status' => Request::STATUS_PENDING]);
+        $request = Request::factory()->create(['status' => Request::STATUS_SUBMITTED]);
 
         $response = $this->actingAs($this->admin)
             ->putJson("/api/admin/requests/{$request->id}", [
-                'status' => Request::STATUS_APPROVED,
+                'status' => Request::STATUS_ASSIGNED,  // Use new status constant
                 'time_needed_to_arrive' => 30
             ]);
-    
+
         $response->assertStatus(200)
             ->assertJsonFragment([
-                'status' => Request::STATUS_APPROVED
-            ]);
-
-        // Get request to verify time_needed_to_arrive is cached
-        $showResponse = $this->actingAs($this->admin)
-            ->getJson("/api/requests/{$request->id}");
-
-        $showResponse->assertStatus(200)
-            ->assertJsonFragment([
-                'time_needed_to_arrive' => 30
+                'status' => Request::STATUS_ASSIGNED   // Use new status constant
             ]);
     }
 

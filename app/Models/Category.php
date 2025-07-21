@@ -13,7 +13,7 @@ class Category extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'image_url'];
 
     /**
      * Get the services for the category.

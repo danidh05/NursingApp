@@ -18,6 +18,7 @@ class RequestRepository implements IRequestRepository
             'user_id' => $user->id,
             'full_name' => $dto->full_name,
             'phone_number' => $dto->phone_number,
+            'name' => $dto->name,
             'problem_description' => $dto->problem_description,
             'nurse_gender' => $dto->nurse_gender,
             'time_type' => $dto->time_type,
@@ -25,7 +26,7 @@ class RequestRepository implements IRequestRepository
             'location' => $dto->location,
             'latitude' => $dto->latitude,
             'longitude' => $dto->longitude,
-            'status' => 'pending',
+            'status' => Request::STATUS_SUBMITTED, // Use new status constant
         ]);
 
         // Attach services
@@ -49,6 +50,7 @@ class RequestRepository implements IRequestRepository
         $updateData = array_filter([
             'full_name' => $dto->full_name,
             'phone_number' => $dto->phone_number,
+            'name' => $dto->name,
             'problem_description' => $dto->problem_description,
             'status' => $dto->status,
             'time_needed_to_arrive' => $dto->time_needed_to_arrive,

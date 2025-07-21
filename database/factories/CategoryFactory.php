@@ -13,6 +13,7 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => $this->faker->word,  // Example: 'Medical'
+            'image_url' => $this->faker->optional()->url, // Optional image URL
         ];
     }
 }

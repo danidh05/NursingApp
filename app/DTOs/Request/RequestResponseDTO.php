@@ -13,6 +13,7 @@ class RequestResponseDTO
         public int $user_id,
         public string $full_name,
         public string $phone_number,
+        public ?string $name,
         public ?string $problem_description,
         public string $status,
         public ?int $time_needed_to_arrive,
@@ -20,8 +21,8 @@ class RequestResponseDTO
         public ?string $time_type,
         public ?string $scheduled_time,
         public string $location,
-        public ?float $latitude,
-        public ?float $longitude,
+        public ?float $latitude,      // This comes from user info, not database
+        public ?float $longitude,     // This comes from user info, not database
         public ?Carbon $deleted_at,
         public Carbon $created_at,
         public Carbon $updated_at,
@@ -31,16 +32,15 @@ class RequestResponseDTO
 
     public static function fromModel(Request $request): self
     {
-        // Get cached time_needed_to_arrive if available
-        $timeNeededToArrive = $request->time_needed_to_arrive;
+        // Get cached time_needed_to_arrive if available and calculate remaining time
+        $timeNeededToArrive = null;
         $cacheKey = 'time_needed_to_arrive_' . $request->id;
         $cachedData = \Cache::get($cacheKey);
         
         if ($cachedData) {
-            $elapsedMinutes = now()->diffInMinutes($cachedData['start_time']);
+            // Calculate elapsed time correctly - start time should be the first parameter
+            $elapsedMinutes = $cachedData['start_time']->diffInMinutes(now());
             $timeNeededToArrive = max(0, $cachedData['time_needed'] - $elapsedMinutes);
-        } else {
-            $timeNeededToArrive = null;
         }
         
         return new self(
@@ -48,6 +48,7 @@ class RequestResponseDTO
             user_id: $request->user_id,
             full_name: $request->full_name,
             phone_number: $request->phone_number,
+            name: $request->name,
             problem_description: $request->problem_description,
             status: $request->status,
             time_needed_to_arrive: $timeNeededToArrive,
@@ -55,8 +56,8 @@ class RequestResponseDTO
             time_type: $request->time_type,
             scheduled_time: $request->scheduled_time,
             location: $request->location,
-            latitude: $request->latitude,
-            longitude: $request->longitude,
+            latitude: $request->user->latitude ?? null,    // Get from user info
+            longitude: $request->user->longitude ?? null,  // Get from user info
             deleted_at: $request->deleted_at,
             created_at: $request->created_at,
             updated_at: $request->updated_at,

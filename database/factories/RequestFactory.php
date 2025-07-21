@@ -26,15 +26,22 @@ class RequestFactory extends Factory
         return [
             'user_id' => User::factory(), // Create associated User
             'nurse_id' => Nurse::factory(), // Create associated Nurse
-            'status' => $this->faker->randomElement(['pending', 'approved', 'completed', 'canceled']), // Example statuses
+            'status' => $this->faker->randomElement([
+                NurseRequest::STATUS_SUBMITTED,
+                NurseRequest::STATUS_ASSIGNED,
+                NurseRequest::STATUS_IN_PROGRESS,
+                NurseRequest::STATUS_COMPLETED,
+                NurseRequest::STATUS_CANCELED
+            ]), // Use new status constants
             'scheduled_time' => $this->faker->dateTimeBetween('now', '+1 month'), // Random future time
             'ending_time' => $this->faker->optional()->dateTimeBetween('now', '+2 months'), // Optional ending time
             'location' => $this->faker->address, // Random address
             'time_type' => $this->faker->randomElement(['full-time', 'part-time']), // Time type for the request
             'problem_description' => $this->faker->optional()->sentence(), // Optional problem description
-            'nurse_gender' => $this->faker->randomElement(['male', 'female']), // Nurse gender preference
+            'nurse_gender' => $this->faker->randomElement(['male', 'female', 'any']), // Nurse gender preference
             'full_name' => $this->faker->name(), // Full name of the patient/user
             'phone_number' => $this->faker->phoneNumber(), // Contact phone number
+            'name' => $this->faker->optional()->sentence(3), // Optional request name/title
             'created_at' => now(),
             'updated_at' => now(),
             'deleted_at' => null, // By default, requests are not soft deleted

@@ -19,6 +19,40 @@ Route::post('/verify-sms', [AuthController::class, 'verifySms']);//new
 
 Route::post('/login', [AuthController::class, 'login']);
 
+// Temporary debug routes - REMOVE AFTER TESTING
+Route::get('/test-firebase', function () {
+    try {
+        $firebase = app(\App\Services\FirebaseStorageService::class);
+        $bucket = \Kreait\Laravel\Firebase\Facades\Firebase::storage()->getBucket();
+        
+        return response()->json([
+            'success' => true,
+            'bucket_name' => $bucket->name(),
+            'bucket_exists' => $bucket->exists(),
+            'project_id' => config('firebase.projects.app.storage.default_bucket'),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});
+
+Route::middleware(['auth:sanctum'])->get('/debug-auth', function (Request $request) {
+    $user = auth()->user()->load('role');
+    return response()->json([
+        'user' => [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role_id' => $user->role_id,
+            'role_name' => $user->role?->name,
+        ],
+        'token' => $request->bearerToken(),
+        'auth_check' => auth()->check(),
+    ]);
+});
+
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 
 

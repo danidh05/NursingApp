@@ -11,11 +11,16 @@ class Request extends Model
     use SoftDeletes;
     use HasFactory;
 
-    // Define status constants
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'approved';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_CANCELED = 'canceled';
+    // Define status constants for order tracking
+    public const STATUS_SUBMITTED = 'submitted';        // User submitted the request
+    public const STATUS_ASSIGNED = 'assigned';          // Admin accepted and assigned a nurse
+    public const STATUS_IN_PROGRESS = 'in_progress';    // Nurse arrived (time_needed_to_arrive = 0)
+    public const STATUS_COMPLETED = 'completed';        // Request finished and closed
+
+    // Legacy status for backward compatibility
+    public const STATUS_PENDING = 'pending';   // Will be mapped to SUBMITTED
+    public const STATUS_APPROVED = 'approved'; // Will be mapped to ASSIGNED
+    public const STATUS_CANCELED = 'canceled'; // For cancelled requests
 
     // Define time type constants
     public const TIME_TYPE_FULL = 'full-time';
@@ -38,6 +43,7 @@ class Request extends Model
         'nurse_gender',
         'full_name',
         'phone_number',
+        'name', // Optional request name/title
     ];
 
     /**
@@ -53,17 +59,34 @@ class Request extends Model
     protected $dates = ['deleted_at'];
 
     /**
-     * Get all valid status values.
+     * Get all valid status values for the new tracking system.
      *
      * @return array
      */
     public static function getValidStatuses(): array
     {
         return [
-            self::STATUS_PENDING,
-            self::STATUS_APPROVED,
+            self::STATUS_SUBMITTED,
+            self::STATUS_ASSIGNED,
+            self::STATUS_IN_PROGRESS,
             self::STATUS_COMPLETED,
-            self::STATUS_CANCELED,
+            self::STATUS_CANCELED, // For cancelled requests
+        ];
+    }
+
+    /**
+     * Get status flow description.
+     *
+     * @return array
+     */
+    public static function getStatusFlow(): array
+    {
+        return [
+            self::STATUS_SUBMITTED => 'Request submitted by user',
+            self::STATUS_ASSIGNED => 'Admin accepted and assigned nurse',
+            self::STATUS_IN_PROGRESS => 'Nurse arrived at location',
+            self::STATUS_COMPLETED => 'Service completed successfully',
+            self::STATUS_CANCELED => 'Request was cancelled',
         ];
     }
 
@@ -103,5 +126,15 @@ class Request extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Auto-update status when nurse arrives
+     */
+    public function checkAndUpdateStatusOnArrival(): void
+    {
+        if ($this->status === self::STATUS_ASSIGNED && $this->hasNurseArrived()) {
+            $this->update(['status' => self::STATUS_IN_PROGRESS]);
+        }
     }
 }

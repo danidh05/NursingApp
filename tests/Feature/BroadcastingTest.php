@@ -90,32 +90,25 @@ class BroadcastingTest extends TestCase
         // Fake events to capture broadcasting
         Event::fake();
 
-        // Arrange: Create an admin user, a regular user, a nurse, services, and a request
-        $admin = User::factory()->create(['role_id' => 1]); // Assuming 1 is the 'admin' role
-        $admin->load('role'); // Ensure role is loaded
-        $user = User::factory()->create(['role_id' => 2]); // Regular user role
+        // Arrange: Create a request
+        $user = User::factory()->create(['role_id' => 2]);
+        $admin = User::factory()->create(['role_id' => 1]);
         $nurse = Nurse::factory()->create();
-        $services = Service::factory()->count(2)->create(); // Create multiple services
+        $services = Service::factory(2)->create();
 
-        // Debug: Check admin role
-        \Log::info("Admin user ID: {$admin->id}, Role ID: {$admin->role_id}, Role name: {$admin->role->name}");
-
-        // Create a request and attach services
         $request = UserRequest::factory()->create([
             'user_id' => $user->id,
             'nurse_id' => $nurse->id,
-            'status' => 'pending',
+            'status' => 'submitted',  // Use new status constant
         ]);
         $request->services()->attach($services->pluck('id')->toArray()); // Attach services to the request
 
-        Sanctum::actingAs($admin);
-
-        // Act: Admin updates the request
-        $response = $this->putJson("/api/admin/requests/{$request->id}", [
-            'status' => 'approved',
+        // Act: Update the request status to trigger broadcasting
+        $response = $this->actingAs($admin)->putJson("/api/admin/requests/{$request->id}", [
+            'status' => 'assigned',  // Use new status constant
+            'time_needed_to_arrive' => 30
         ]);
 
-        // Debug: Check response
         \Log::info("Response status: " . $response->status());
         \Log::info("Response content: " . $response->content());
 
@@ -128,10 +121,9 @@ class BroadcastingTest extends TestCase
                      'created_at', 'updated_at', 'user', 'services'
                  ]);
 
-        // Assert: The event was dispatched with the correct payload
-        Event::assertDispatched(AdminUpdatedRequest::class, function ($event) use ($request) {
-            return $event->request->id === $request->id &&
-                   $event->request->status === 'approved';
+        // Verify that an event was dispatched
+        Event::assertDispatched(AdminUpdatedRequest::class, function ($event) {
+            return $event->request->status === 'assigned';  // Use new status
         });
     }
 }

@@ -1070,12 +1070,12 @@
                     "Admin"
                 ],
                 "summary": "Create a new category (Admin only)",
-                "description": "Create a new category. Only accessible by admins.",
+                "description": "Create a new category with optional image. Only accessible by admins. If image upload fails, a 422 error is returned with a message.",
                 "operationId": "ac7cc88e7117004bc914f1d2169c5444",
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name"
@@ -1085,6 +1085,11 @@
                                         "description": "Category name",
                                         "type": "string",
                                         "example": "Home Care"
+                                    },
+                                    "image": {
+                                        "description": "Category image (optional, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -1113,6 +1118,11 @@
                                                     "type": "string",
                                                     "example": "Home Care"
                                                 },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "https://firebasestorage.googleapis.com/v0/b/...",
+                                                    "nullable": true
+                                                },
                                                 "created_at": {
                                                     "type": "string",
                                                     "format": "date-time"
@@ -1137,13 +1147,18 @@
                         "description": "Forbidden - Admin role required"
                     },
                     "422": {
-                        "description": "Validation error",
+                        "description": "Validation error or failed image upload",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to upload image: ..."
+                                        },
                                         "errors": {
-                                            "type": "object"
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -1182,7 +1197,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name"
@@ -1192,6 +1207,11 @@
                                         "description": "Category name",
                                         "type": "string",
                                         "example": "Home Care"
+                                    },
+                                    "image": {
+                                        "description": "Category image (optional, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -1209,6 +1229,32 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Category updated successfully."
+                                        },
+                                        "category": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Home Care"
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "https://firebasestorage.googleapis.com/v0/b/...",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2168,8 +2214,8 @@
                 "tags": [
                     "Requests"
                 ],
-                "summary": "List all requests",
-                "description": "Retrieve all requests. Users see only their own requests, admins see all requests.",
+                "summary": "List all requests with 4-stage tracking",
+                "description": "Retrieve all requests with comprehensive order tracking. Users see only their own requests, admins see all requests. Latitude/longitude come from user location info, time_needed_to_arrive is cached and decreases over time.",
                 "operationId": "d8762545247b9ed012f00e992cbfa665",
                 "responses": {
                     "200": {
@@ -2196,19 +2242,27 @@
                                                 "type": "string",
                                                 "example": "+1234567890"
                                             },
+                                            "name": {
+                                                "description": "Optional request title/name",
+                                                "type": "string",
+                                                "example": "Emergency Home Care",
+                                                "nullable": true
+                                            },
                                             "problem_description": {
                                                 "type": "string",
                                                 "example": "Need nursing care for elderly parent"
                                             },
                                             "status": {
+                                                "description": "4-stage order tracking: submitted → assigned → in_progress → completed",
                                                 "type": "string",
                                                 "enum": [
-                                                    "pending",
-                                                    "approved",
-                                                    "rejected",
-                                                    "completed"
+                                                    "submitted",
+                                                    "assigned",
+                                                    "in_progress",
+                                                    "completed",
+                                                    "canceled"
                                                 ],
-                                                "example": "pending"
+                                                "example": "submitted"
                                             },
                                             "nurse_gender": {
                                                 "type": "string",
@@ -2237,19 +2291,24 @@
                                                 "example": "123 Main St, New York"
                                             },
                                             "latitude": {
+                                                "description": "From user location info, not stored in requests table",
                                                 "type": "number",
                                                 "format": "float",
-                                                "example": 40.7128
+                                                "example": 40.7128,
+                                                "nullable": true
                                             },
                                             "longitude": {
+                                                "description": "From user location info, not stored in requests table",
                                                 "type": "number",
                                                 "format": "float",
-                                                "example": -74.006
+                                                "example": -74.006,
+                                                "nullable": true
                                             },
                                             "time_needed_to_arrive": {
-                                                "description": "Time in minutes",
+                                                "description": "Cached time in minutes, decreases over time, auto-updates status to in_progress when reaches 0",
                                                 "type": "integer",
-                                                "example": 30
+                                                "example": 30,
+                                                "nullable": true
                                             },
                                             "created_at": {
                                                 "type": "string",
@@ -2328,6 +2387,11 @@
                                         "description": "Contact phone number",
                                         "type": "string",
                                         "example": "+1234567890"
+                                    },
+                                    "name": {
+                                        "description": "Optional request name/title",
+                                        "type": "string",
+                                        "example": "Emergency Home Care"
                                     },
                                     "problem_description": {
                                         "description": "Description of the care needed",
@@ -2416,13 +2480,25 @@
                                             "type": "string",
                                             "example": "+1234567890"
                                         },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Emergency Home Care",
+                                            "nullable": true
+                                        },
                                         "problem_description": {
                                             "type": "string",
                                             "example": "Need nursing care for elderly parent"
                                         },
                                         "status": {
                                             "type": "string",
-                                            "example": "pending"
+                                            "enum": [
+                                                "submitted",
+                                                "assigned",
+                                                "in_progress",
+                                                "completed",
+                                                "canceled"
+                                            ],
+                                            "example": "submitted"
                                         },
                                         "nurse_gender": {
                                             "type": "string",
@@ -2519,8 +2595,8 @@
                 "tags": [
                     "Requests"
                 ],
-                "summary": "Get request details",
-                "description": "Retrieve details of a specific request. Users can only view their own requests, admins can view any request.",
+                "summary": "Get request details with order tracking",
+                "description": "Retrieve details of a specific request with 4-stage order tracking. Users can only view their own requests, admins can view any request. Real-time time_needed_to_arrive countdown and automatic status progression.",
                 "operationId": "6c4f2a70cb6d6ec470c9eff7499c9bce",
                 "parameters": [
                     {
@@ -2557,19 +2633,27 @@
                                             "type": "string",
                                             "example": "+1234567890"
                                         },
+                                        "name": {
+                                            "description": "Optional request title/name",
+                                            "type": "string",
+                                            "example": "Emergency Home Care",
+                                            "nullable": true
+                                        },
                                         "problem_description": {
                                             "type": "string",
                                             "example": "Need nursing care for elderly parent"
                                         },
                                         "status": {
+                                            "description": "Current stage in 4-stage tracking system",
                                             "type": "string",
                                             "enum": [
-                                                "pending",
-                                                "approved",
-                                                "rejected",
-                                                "completed"
+                                                "submitted",
+                                                "assigned",
+                                                "in_progress",
+                                                "completed",
+                                                "canceled"
                                             ],
-                                            "example": "pending"
+                                            "example": "assigned"
                                         },
                                         "nurse_gender": {
                                             "type": "string",
@@ -2598,19 +2682,24 @@
                                             "example": "123 Main St, New York"
                                         },
                                         "latitude": {
+                                            "description": "From user's location settings",
                                             "type": "number",
                                             "format": "float",
-                                            "example": 40.7128
+                                            "example": 40.7128,
+                                            "nullable": true
                                         },
                                         "longitude": {
+                                            "description": "From user's location settings",
                                             "type": "number",
                                             "format": "float",
-                                            "example": -74.006
+                                            "example": -74.006,
+                                            "nullable": true
                                         },
                                         "time_needed_to_arrive": {
-                                            "description": "Time in minutes",
+                                            "description": "Live countdown in minutes, auto-triggers status change to in_progress when reaches 0",
                                             "type": "integer",
-                                            "example": 30
+                                            "example": 30,
+                                            "nullable": true
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -2654,6 +2743,18 @@
                                                 "email": {
                                                     "type": "string",
                                                     "example": "john@example.com"
+                                                },
+                                                "latitude": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 40.7128,
+                                                    "nullable": true
+                                                },
+                                                "longitude": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": -74.006,
+                                                    "nullable": true
                                                 }
                                             },
                                             "type": "object"
@@ -2717,6 +2818,11 @@
                                         "type": "string",
                                         "example": "+1234567890"
                                     },
+                                    "name": {
+                                        "description": "Optional request name/title",
+                                        "type": "string",
+                                        "example": "Emergency Home Care"
+                                    },
                                     "problem_description": {
                                         "description": "Description of the care needed",
                                         "type": "string",
@@ -2726,12 +2832,13 @@
                                         "description": "Request status",
                                         "type": "string",
                                         "enum": [
-                                            "pending",
-                                            "approved",
-                                            "rejected",
-                                            "completed"
+                                            "submitted",
+                                            "assigned",
+                                            "in_progress",
+                                            "completed",
+                                            "canceled"
                                         ],
-                                        "example": "approved"
+                                        "example": "assigned"
                                     },
                                     "time_needed_to_arrive": {
                                         "description": "Time in minutes needed to arrive",
@@ -2792,13 +2899,18 @@
                                             "type": "string",
                                             "example": "+1234567890"
                                         },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Emergency Home Care",
+                                            "nullable": true
+                                        },
                                         "problem_description": {
                                             "type": "string",
                                             "example": "Need nursing care for elderly parent"
                                         },
                                         "status": {
                                             "type": "string",
-                                            "example": "approved"
+                                            "example": "assigned"
                                         },
                                         "nurse_gender": {
                                             "type": "string",

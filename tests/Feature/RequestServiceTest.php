@@ -59,7 +59,7 @@ class RequestServiceTest extends TestCase
         $this->assertDatabaseHas('requests', [
             'full_name' => 'John Doe',
             'user_id' => $this->user->id,
-            'status' => Request::STATUS_PENDING
+            'status' => Request::STATUS_SUBMITTED
         ]);
 
         Event::assertDispatched(UserRequestedService::class);
@@ -69,7 +69,7 @@ class RequestServiceTest extends TestCase
     {
         $request = Request::factory()
             ->for($this->user)
-            ->create(['status' => Request::STATUS_PENDING]);
+            ->create(['status' => Request::STATUS_SUBMITTED]);
 
         $data = [
             'full_name' => 'Updated Name',
@@ -84,16 +84,16 @@ class RequestServiceTest extends TestCase
 
     public function test_can_update_request_with_time_needed(): void
     {
-        $request = Request::factory()->for($this->user)->create(['status' => Request::STATUS_PENDING]);
+        $request = Request::factory()->for($this->user)->create(['status' => Request::STATUS_SUBMITTED]);
 
         $data = [
-            'status' => Request::STATUS_APPROVED,
+            'status' => Request::STATUS_ASSIGNED,
             'time_needed_to_arrive' => 30
         ];
 
         $response = $this->service->updateRequest($request->id, $data, $this->user);
 
-        $this->assertEquals(Request::STATUS_APPROVED, $response->status);
+        $this->assertEquals(Request::STATUS_ASSIGNED, $response->status);
 
         // Verify cache
         $cacheKey = 'time_needed_to_arrive_' . $request->id;
@@ -137,8 +137,8 @@ class RequestServiceTest extends TestCase
 
     public function test_can_get_filtered_requests(): void
     {
-        Request::factory(2)->for($this->user)->create(['status' => Request::STATUS_PENDING]);
-        Request::factory()->for($this->user)->create(['status' => Request::STATUS_APPROVED]);
+        Request::factory(2)->for($this->user)->create(['status' => Request::STATUS_SUBMITTED]);
+        Request::factory()->for($this->user)->create(['status' => Request::STATUS_ASSIGNED]);
 
         $response = $this->service->getAllRequests($this->user);
 

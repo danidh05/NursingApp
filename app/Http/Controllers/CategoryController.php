@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Services\FirebaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -94,14 +95,18 @@ class CategoryController extends Controller
      * @OA\Post(
      *     path="/api/admin/categories",
      *     summary="Create a new category (Admin only)",
-     *     description="Create a new category. Only accessible by admins.",
+     *     description="Create a new category with optional image. Only accessible by admins. If image upload fails, a 422 error is returned with a message.",
      *     tags={"Admin"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name"},
-     *             @OA\Property(property="name", type="string", example="Home Care", description="Category name")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name"},
+     *                 @OA\Property(property="name", type="string", example="Home Care", description="Category name"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Category image (optional, max 2MB)")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -112,6 +117,7 @@ class CategoryController extends Controller
      *             @OA\Property(property="category", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/...", nullable=true),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             )
@@ -127,25 +133,47 @@ class CategoryController extends Controller
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error",
+     *         description="Validation error or failed image upload",
      *         @OA\JsonContent(
-     *             @OA\Property(property="errors", type="object")
+     *             @OA\Property(property="message", type="string", example="Failed to upload image: ..."),
+     *             @OA\Property(property="errors", type="object", nullable=true)
      *         )
      *     )
      * )
      */
-    public function store(Request $request)
+    public function store(Request $request, FirebaseStorageService $firebaseStorage)
     {
-        $this->authorize('create', Category::class); // Ensure only admins can create
+        $this->authorize('create', Category::class);
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048', // 2MB max
         ]);
 
-        $category = Category::create($validatedData);
+        $categoryData = ['name' => $validatedData['name']];
 
-        return response()->json(['message' => 'Category created successfully.', 'category' => $category], 201);
+        // Handle image upload if provided
+        if ($request->hasFile('image')) {
+            try {
+                $imageUrl = $firebaseStorage->uploadFile($request->file('image'), 'category-images');
+                $categoryData['image_url'] = $imageUrl;
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to upload image: ' . $e->getMessage()
+                ], 422);
+            }
+        }
+
+        $category = Category::create($categoryData);
+
+        return response()->json([
+            'message' => 'Category created successfully.',
+            'category' => $category,
+        ], 201);
     }
+    
+    
+    
 
     /**
      * @OA\Put(
@@ -163,16 +191,27 @@ class CategoryController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name"},
-     *             @OA\Property(property="name", type="string", example="Home Care", description="Category name")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name"},
+     *                 @OA\Property(property="name", type="string", example="Home Care", description="Category name"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Category image (optional, max 2MB)")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Category updated successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Category updated successfully.")
+     *             @OA\Property(property="message", type="string", example="Category updated successfully."),
+     *             @OA\Property(property="category", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/...", nullable=true),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -196,20 +235,34 @@ class CategoryController extends Controller
      *     )
      * )
      */
-   public function update(Request $request, Category $category)
+   public function update(Request $request, Category $category, FirebaseStorageService $firebaseStorage)
 {
     // Ensure the update policy is being authorized
     $this->authorize('update', $category);
 
     // Validate request data
     $validatedData = $request->validate([
-        'name' => 'required|string|max:255', // Make sure this matches the expected structure
+        'name' => 'required|string|max:255',
+        'image' => 'nullable|image|max:2048', // 2MB max
     ]);
 
-    // Update the category with validated data
-    $category->update($validatedData);
+    $updateData = ['name' => $validatedData['name']];
 
-    return response()->json(['message' => 'Category updated successfully.'], 200);
+    // Handle image upload if provided
+    if ($request->hasFile('image')) {
+        // Delete old image if exists
+        if ($category->image_url) {
+            $firebaseStorage->deleteFile($category->image_url);
+        }
+        
+        $imageUrl = $firebaseStorage->uploadFile($request->file('image'), 'category-images');
+        $updateData['image_url'] = $imageUrl;
+    }
+
+    // Update the category with validated data
+    $category->update($updateData);
+
+    return response()->json(['message' => 'Category updated successfully.', 'category' => $category], 200);
 }
 
 
@@ -255,12 +308,17 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category, FirebaseStorageService $firebaseStorage)
     {
         $this->authorize('delete', $category); // Ensure only admins can delete
 
         if ($category->services()->count()) {
             return response()->json(['message' => 'Cannot delete category with associated services.'], 400);
+        }
+
+        // Delete image from Firebase if exists
+        if ($category->image_url) {
+            $firebaseStorage->deleteFile($category->image_url);
         }
 
         $category->delete();

@@ -45,10 +45,19 @@ class RequestService implements IRequestService
 
         $request = $this->requestRepository->update($id, $dto, $user);
 
+        // Auto-update status to 'in_progress' if nurse arrived (time_needed_to_arrive = 0) and status is 'assigned'
+        if (isset($data['time_needed_to_arrive']) && $data['time_needed_to_arrive'] === 0) {
+            if ($request->status === Request::STATUS_ASSIGNED) {
+                $request->update(['status' => Request::STATUS_IN_PROGRESS]);
+                \Log::info("Auto-updated request {$id} status to 'in_progress' - nurse arrived");
+            }
+        }
+
         // Dispatch event if status changed
         if (isset($data['status']) && $data['status'] !== $originalStatus) {
             Event::dispatch(new AdminUpdatedRequest($request, $user, $data['status']));
         }
+        
         // Cache time_needed_to_arrive if provided
         if (isset($data['time_needed_to_arrive'])) {
             $cacheKey = 'time_needed_to_arrive_' . $request->id;
@@ -57,6 +66,7 @@ class RequestService implements IRequestService
                 'start_time' => now()
             ], 3600);
         }
+        
         // Clear cache after update
         Cache::forget("user_requests_{$user->id}");
         return RequestResponseDTO::fromModel($request);
