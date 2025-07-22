@@ -15,7 +15,7 @@ return new class extends Migration
             $table->text('problem_description')->nullable()->after('location'); // Add problem_description field
             $table->string('full_name')->nullable()->after('user_id');          // Add full_name field
             $table->string('phone_number')->nullable()->after('full_name');     // Add phone_number field
-            $table->string('name')->nullable()->after('phone_number');          // Add optional request name/title
+              // Add optional request name/title
             $table->timestamp('ending_time')->nullable()->after('scheduled_time'); // Add ending_time field
         });
     }

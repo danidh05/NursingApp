@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Interfaces\IRequestRepository;
 use App\Repositories\RequestRepository;
+use App\Repositories\Interfaces\ISliderRepository;
+use App\Repositories\SliderRepository;
+use App\Repositories\Interfaces\IPopupRepository;
+use App\Repositories\PopupRepository;
 use App\Services\Interfaces\IRequestService;
 use App\Services\RequestService;
 use App\Services\TwilioService;
@@ -22,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Register Request Service
         $this->app->bind(IRequestService::class, RequestService::class);
+
+        // Register Slider Repository
+        $this->app->bind(ISliderRepository::class, SliderRepository::class);
+
+        // Register Popup Repository
+        $this->app->bind(IPopupRepository::class, PopupRepository::class);
 
         // Register TwilioService with proper client based on environment
         $this->app->bind(TwilioService::class, function ($app) {

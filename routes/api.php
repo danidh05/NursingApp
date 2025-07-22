@@ -10,6 +10,10 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\Api\SliderController as ApiSliderController;
+use App\Http\Controllers\Api\PopupController as ApiPopupController;
+use App\Http\Controllers\Admin\SliderController as AdminSliderController;
+use App\Http\Controllers\Admin\PopupController as AdminPopupController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -55,7 +59,6 @@ Route::middleware(['auth:sanctum'])->get('/debug-auth', function (Request $reque
 
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 
-
 // ** Password Reset Routes **
 Route::post('/send-password-reset-otp', [AuthController::class, 'sendPasswordResetOTP']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -91,6 +94,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
     Route::get('/about', [AboutController::class, 'index']);//new
+    
+    // Content APIs accessible by both users and admins
+    Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
+    Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
     
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
@@ -136,5 +143,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']); // Delete a category
 
         Route::put('/about', [AboutController::class, 'update']);//new
+
+        // Slider management routes
+        Route::get('/sliders', [AdminSliderController::class, 'index']); // List all sliders
+        Route::post('/sliders', [AdminSliderController::class, 'store']); // Create a new slider
+        Route::get('/sliders/{id}', [AdminSliderController::class, 'show']); // Get a specific slider
+        Route::put('/sliders/{id}', [AdminSliderController::class, 'update']); // Update a slider
+        Route::delete('/sliders/{id}', [AdminSliderController::class, 'destroy']); // Delete a slider
+
+        // Popup management routes
+        Route::get('/popups', [AdminPopupController::class, 'index']); // List all popups
+        Route::post('/popups', [AdminPopupController::class, 'store']); // Create a new popup
+        Route::get('/popups/{id}', [AdminPopupController::class, 'show']); // Get a specific popup
+        Route::put('/popups/{id}', [AdminPopupController::class, 'update']); // Update a popup
+        Route::delete('/popups/{id}', [AdminPopupController::class, 'destroy']); // Delete a popup
     });
 });

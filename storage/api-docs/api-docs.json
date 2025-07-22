@@ -251,6 +251,1366 @@
                 ]
             }
         },
+        "/api/admin/popups": {
+            "get": {
+                "tags": [
+                    "Admin - Popups"
+                ],
+                "summary": "List all popups (Admin)",
+                "description": "Retrieve all popups for admin management. Accessible only to administrators.",
+                "operationId": "a0ce6928013a4595410723c103ef15b8",
+                "responses": {
+                    "200": {
+                        "description": "Popups retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "popups": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Welcome to Our App"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "We are excited to announce our new features..."
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "info",
+                                                            "warning",
+                                                            "promo"
+                                                        ],
+                                                        "example": "info"
+                                                    },
+                                                    "start_date": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "end_date": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Popups"
+                ],
+                "summary": "Create a new popup (Admin)",
+                "description": "Create a new popup with image upload and scheduling options. Accessible only to administrators.",
+                "operationId": "aa7b13903d4c303cf419fe5ab4dd5da0",
+                "requestBody": {
+                    "description": "Popup creation data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image",
+                                    "title",
+                                    "content",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Popup image file (JPG, JPEG, PNG, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Welcome to Our App"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "We are excited to announce our new features and improvements."
+                                    },
+                                    "type": {
+                                        "description": "Popup type",
+                                        "type": "string",
+                                        "enum": [
+                                            "info",
+                                            "warning",
+                                            "promo"
+                                        ],
+                                        "example": "info"
+                                    },
+                                    "start_date": {
+                                        "description": "When popup becomes active (null = immediately)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T10:00:00Z",
+                                        "nullable": true
+                                    },
+                                    "end_date": {
+                                        "description": "When popup expires (null = never)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-30T10:00:00Z",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "description": "Whether popup is enabled",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Popup created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup created successfully."
+                                        },
+                                        "popup": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "content": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/popups/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Popups"
+                ],
+                "summary": "Get specific popup (Admin)",
+                "description": "Retrieve a specific popup by ID. Accessible only to administrators.",
+                "operationId": "e3ad210a5316a598bfb4046edc151ef0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Popup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Popup retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "popup": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "content": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Popup not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Popups"
+                ],
+                "summary": "Update popup (Admin)",
+                "description": "Update an existing popup. Image upload is optional. Accessible only to administrators.",
+                "operationId": "e0715e47bb74a1346ff1bae8cedc602e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Popup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Popup update data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "content",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "New popup image file (optional, JPG, JPEG, PNG, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated Welcome Message"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Updated content with new information."
+                                    },
+                                    "type": {
+                                        "description": "Popup type",
+                                        "type": "string",
+                                        "enum": [
+                                            "info",
+                                            "warning",
+                                            "promo"
+                                        ],
+                                        "example": "promo"
+                                    },
+                                    "start_date": {
+                                        "description": "When popup becomes active",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T10:00:00Z",
+                                        "nullable": true
+                                    },
+                                    "end_date": {
+                                        "description": "When popup expires",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-30T10:00:00Z",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "description": "Whether popup is enabled",
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Popup updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup updated successfully."
+                                        },
+                                        "popup": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "content": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Popup not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Popups"
+                ],
+                "summary": "Delete popup (Admin)",
+                "description": "Delete a popup and its associated image from Firebase. Accessible only to administrators.",
+                "operationId": "bf9f56e5bd37b76dfbf447a06517d8d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Popup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Popup deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Popup not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Popup not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "422": {
+                        "description": "Failed to delete popup",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to delete popup: [error details]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/sliders": {
+            "get": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "List all sliders (Admin)",
+                "description": "Retrieve all sliders for admin management. Accessible only to administrators.",
+                "operationId": "0203a75141b61447e3c2236425a03b47",
+                "responses": {
+                    "200": {
+                        "description": "Sliders retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sliders": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../slider-images/image.jpg"
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Professional Nursing Care",
+                                                        "nullable": true
+                                                    },
+                                                    "subtitle": {
+                                                        "type": "string",
+                                                        "example": "Trusted by thousands of families",
+                                                        "nullable": true
+                                                    },
+                                                    "position": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "link": {
+                                                        "type": "string",
+                                                        "example": "https://example.com",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "Create a new slider (Admin)",
+                "description": "Create a new slider with image upload. Accessible only to administrators.",
+                "operationId": "ac1b9f62b56f5e03e2fed6cb391c3067",
+                "requestBody": {
+                    "description": "Slider creation data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image",
+                                    "position"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Slider image file (JPG, JPEG, PNG, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Professional Nursing Care",
+                                        "nullable": true
+                                    },
+                                    "subtitle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Trusted by thousands of families",
+                                        "nullable": true
+                                    },
+                                    "position": {
+                                        "description": "Display order position",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 1
+                                    },
+                                    "link": {
+                                        "description": "Optional click URL",
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://example.com",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Slider created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider created successfully."
+                                        },
+                                        "slider": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "subtitle": {
+                                                    "type": "string"
+                                                },
+                                                "position": {
+                                                    "type": "integer"
+                                                },
+                                                "link": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/sliders/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "Get specific slider (Admin)",
+                "description": "Retrieve a specific slider by ID. Accessible only to administrators.",
+                "operationId": "a3d13c65f99ee3a230ee67dcecee5218",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Slider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Slider retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "slider": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "subtitle": {
+                                                    "type": "string"
+                                                },
+                                                "position": {
+                                                    "type": "integer"
+                                                },
+                                                "link": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Slider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "Update slider (Admin)",
+                "description": "Update an existing slider. Image upload is optional. Accessible only to administrators.",
+                "operationId": "1676a38618d2abe8c2606f7b295c59f2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Slider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Slider update data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "position"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "New slider image file (optional, JPG, JPEG, PNG, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated Professional Nursing Care",
+                                        "nullable": true
+                                    },
+                                    "subtitle": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated subtitle",
+                                        "nullable": true
+                                    },
+                                    "position": {
+                                        "description": "Display order position",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 2
+                                    },
+                                    "link": {
+                                        "description": "Optional click URL",
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://updated-example.com",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Slider updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider updated successfully."
+                                        },
+                                        "slider": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "subtitle": {
+                                                    "type": "string"
+                                                },
+                                                "position": {
+                                                    "type": "integer"
+                                                },
+                                                "link": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Slider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "Delete slider (Admin)",
+                "description": "Delete a slider and its associated image from Firebase. Accessible only to administrators.",
+                "operationId": "1667771a46eb8b60ae726d43f60001c5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Slider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Slider deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Slider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slider not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "422": {
+                        "description": "Failed to delete slider",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to delete slider: [error details]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/popups": {
+            "get": {
+                "tags": [
+                    "Popups"
+                ],
+                "summary": "Get active popup for app launch",
+                "description": "Retrieve the currently active popup for app opening. Returns the most recent active popup where start_date is null or <= now, end_date is null or > now, and is_active = true. Accessible to both users and admins.",
+                "operationId": "3bc4c7787781e9b75be8d55fc1f49bec",
+                "responses": {
+                    "200": {
+                        "description": "Active popup retrieved successfully or no active popup available",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "properties": {
+                                                "popup": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "image": {
+                                                            "description": "Firebase Storage URL for popup image",
+                                                            "type": "string",
+                                                            "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"
+                                                        },
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Welcome to Our App"
+                                                        },
+                                                        "content": {
+                                                            "type": "string",
+                                                            "example": "We are excited to announce our new features..."
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "info",
+                                                                "warning",
+                                                                "promo"
+                                                            ],
+                                                            "example": "info"
+                                                        },
+                                                        "start_date": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2024-01-15T10:00:00Z",
+                                                            "nullable": true
+                                                        },
+                                                        "end_date": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2024-01-30T10:00:00Z",
+                                                            "nullable": true
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "properties": {
+                                                "popup": {
+                                                    "type": "null",
+                                                    "example": null
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No active popup available"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sliders": {
+            "get": {
+                "tags": [
+                    "Sliders"
+                ],
+                "summary": "Get homepage sliders",
+                "description": "Retrieve all active sliders ordered by position for homepage display. Accessible to both users and admins.",
+                "operationId": "949813c66d58cc2d0d1ee4d40eb5f228",
+                "responses": {
+                    "200": {
+                        "description": "Sliders retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sliders": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "image": {
+                                                        "description": "Firebase Storage URL for slider image",
+                                                        "type": "string",
+                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../slider-images/image.jpg"
+                                                    },
+                                                    "title": {
+                                                        "description": "Slider title",
+                                                        "type": "string",
+                                                        "example": "Professional Nursing Care",
+                                                        "nullable": true
+                                                    },
+                                                    "subtitle": {
+                                                        "description": "Slider subtitle",
+                                                        "type": "string",
+                                                        "example": "Trusted by thousands of families",
+                                                        "nullable": true
+                                                    },
+                                                    "position": {
+                                                        "description": "Display order position",
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "link": {
+                                                        "description": "Optional click URL",
+                                                        "type": "string",
+                                                        "example": "https://example.com",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -4494,6 +5854,22 @@
         {
             "name": "Admin",
             "description": "Admin-only management endpoints"
+        },
+        {
+            "name": "Admin - Popups",
+            "description": "Admin - Popups"
+        },
+        {
+            "name": "Admin - Sliders",
+            "description": "Admin - Sliders"
+        },
+        {
+            "name": "Popups",
+            "description": "Popups"
+        },
+        {
+            "name": "Sliders",
+            "description": "Sliders"
         }
     ]
 }
