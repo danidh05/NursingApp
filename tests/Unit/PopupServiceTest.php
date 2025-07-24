@@ -87,8 +87,9 @@ class PopupServiceTest extends TestCase
         ]);
         
         $this->mockRepository
-            ->shouldReceive('getActive')
+            ->shouldReceive('getActiveForUser')
             ->once()
+            ->with(null)
             ->andReturn($activePopup);
 
         // Act
@@ -102,8 +103,9 @@ class PopupServiceTest extends TestCase
     {
         // Arrange
         $this->mockRepository
-            ->shouldReceive('getActive')
+            ->shouldReceive('getActiveForUser')
             ->once()
+            ->with(null)
             ->andReturn(null);
 
         // Act

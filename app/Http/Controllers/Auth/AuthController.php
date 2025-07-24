@@ -33,12 +33,14 @@ class AuthController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","email","phone_number","password","password_confirmation"},
+     *             required={"name","email","phone_number","password","password_confirmation","area_id"},
      *             @OA\Property(property="name", type="string", example="John Doe", description="User's full name"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com", description="User's email address"),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="User's phone number"),
      *             @OA\Property(property="password", type="string", minLength=8, example="password123", description="User's password"),
-     *             @OA\Property(property="password_confirmation", type="string", example="password123", description="Password confirmation")
+     *             @OA\Property(property="password_confirmation", type="string", example="password123", description="Password confirmation"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date (YYYY-MM-DD) - optional, used for birthday notifications"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID (required for region-based pricing)")
      *         )
      *     ),
      *     @OA\Response(
@@ -72,6 +74,8 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone_number' => 'required|string|max:15|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'birth_date' => 'nullable|date|before:today',
+            'area_id' => 'required|exists:areas,id',
         ]);
     
         // Return validation errors, if any
@@ -89,6 +93,8 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'role_id' => $role_id,
+            'birth_date' => $request->birth_date,
+            'area_id' => $request->area_id,
         ]);
     
         if (!$this->twilioService->sendVerificationCode($user->phone_number)) {

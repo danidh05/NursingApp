@@ -19,16 +19,16 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'phone_number',
+        'birth_date',
         'password',
+        'phone_number',
         'role_id',
-        'email_verified_at',               // Include this field to allow mass assignment
-        'location',
         'latitude',
         'longitude',
-        'confirmation_code',
-        'confirmation_code_expires_at',
+        'location',
         'is_first_login', 
+        'email_verified_at',
+        'area_id',
     ];
 
     /**
@@ -39,7 +39,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'confirmation_code',               // Optionally hide the confirmation code
     ];
 
     /**
@@ -47,14 +46,17 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-    protected $casts = [
+    protected function casts(): array
+    {
+        return [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+            'birth_date' => 'date',
         'latitude' => 'float',
         'longitude' => 'float',
-        'is_first_login' => 'boolean',     // Casting is_first_login as a boolean
-        'confirmation_code_expires_at' => 'datetime', // Ensure this timestamp is casted
+            'is_first_login' => 'boolean',
     ];
+    }
 
     /**
      * Get the role that the user belongs to.
@@ -78,5 +80,13 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Get the area that the user belongs to.
+     */
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Popup;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,81 +19,97 @@ class PopupFactory extends Factory
     public function definition(): array
     {
         return [
-            'image' => $this->faker->imageUrl(800, 600, 'medical', true, 'Healthcare'),
-            'title' => $this->faker->randomElement([
-                'New Service Available!',
-                'Special Offer',
-                'Important Health Update',
-                'Welcome to Our App',
-                'Emergency Services Available'
-            ]),
-            'content' => $this->faker->randomElement([
-                'We are excited to announce our new home nursing services. Professional care delivered to your doorstep.',
-                'Limited time offer: Get 20% off on your first nursing service booking. Book now!',
-                'Stay updated with the latest health guidelines and safety measures for your wellbeing.',
-                'Welcome to our healthcare app. Your trusted partner in health and wellness.',
-                'Our emergency nursing services are now available 24/7. Contact us anytime for urgent care.'
-            ]),
-            'type' => $this->faker->randomElement(['info', 'warning', 'promo']),
-            'start_date' => $this->faker->optional(0.6)->dateTimeBetween('-1 week', '+1 week'),
-            'end_date' => $this->faker->optional(0.6)->dateTimeBetween('+1 week', '+1 month'),
+            'image' => $this->faker->imageUrl(800, 600, 'business'),
+            'title' => $this->faker->sentence(3),
+            'content' => $this->faker->paragraph(),
+            'type' => $this->faker->randomElement([Popup::TYPE_INFO, Popup::TYPE_WARNING, Popup::TYPE_PROMO]),
+            'start_date' => null,
+            'end_date' => null,
             'is_active' => $this->faker->boolean(80), // 80% chance of being active
+            'user_id' => null, // Global popup by default
         ];
     }
 
     /**
-     * Create an active popup (no date restrictions)
+     * Indicate that the popup is for a specific user.
      */
-    public function active(): static
+    public function forUser(User $user): Factory
     {
-        return $this->state(fn (array $attributes) => [
-            'start_date' => null,
-            'end_date' => null,
+        return $this->state(function (array $attributes) use ($user) {
+            return [
+                'user_id' => $user->id,
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the popup is a birthday popup.
+     */
+    public function birthday(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'title' => '🎉 Happy Birthday!',
+                'content' => 'We hope you have a wonderful day filled with joy and happiness! 🎂',
+                'type' => Popup::TYPE_BIRTHDAY,
+                'start_date' => now()->startOfDay(),
+                'end_date' => now()->endOfDay(),
             'is_active' => true,
-        ]);
+            ];
+        });
     }
 
     /**
-     * Create an inactive popup
+     * Indicate that the popup is currently active.
      */
-    public function inactive(): static
+    public function active(): Factory
     {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
-        ]);
+        return $this->state(function (array $attributes) {
+            return [
+                'is_active' => true,
+                'start_date' => now()->subHour(),
+                'end_date' => now()->addHour(),
+            ];
+        });
     }
 
     /**
-     * Create a popup with specific type
+     * Indicate that the popup is inactive.
      */
-    public function type(string $type): static
+    public function inactive(): Factory
     {
-        return $this->state(fn (array $attributes) => [
-            'type' => $type,
-        ]);
+        return $this->state(function (array $attributes) {
+            return [
+                'is_active' => false,
+            ];
+        });
     }
 
     /**
-     * Create a popup that's currently active (within date range)
+     * Indicate that the popup is scheduled for the future.
      */
-    public function currentlyActive(): static
+    public function scheduled(): Factory
     {
-        return $this->state(fn (array $attributes) => [
-            'start_date' => now()->subDays(1),
-            'end_date' => now()->addDays(7),
+        return $this->state(function (array $attributes) {
+            return [
+                'start_date' => now()->addDay(),
+                'end_date' => now()->addDays(2),
             'is_active' => true,
-        ]);
+            ];
+        });
     }
 
     /**
-     * Create a popup that's expired
+     * Indicate that the popup is expired.
      */
-    public function expired(): static
+    public function expired(): Factory
     {
-        return $this->state(fn (array $attributes) => [
-            'start_date' => now()->subDays(10),
-            'end_date' => now()->subDays(1),
+        return $this->state(function (array $attributes) {
+            return [
+                'start_date' => now()->subDays(2),
+                'end_date' => now()->subDay(),
             'is_active' => true,
-        ]);
+            ];
+        });
     }
 }

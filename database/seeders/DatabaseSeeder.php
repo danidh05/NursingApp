@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Call the comprehensive test data seeder
         $this->call([
             RoleSeeder::class,
+            AreaSeeder::class,
             TestDataSeeder::class,
         ]);
     }

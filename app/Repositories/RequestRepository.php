@@ -23,9 +23,8 @@ class RequestRepository implements IRequestRepository
             'nurse_gender' => $dto->nurse_gender,
             'time_type' => $dto->time_type,
             'scheduled_time' => $dto->scheduled_time,
+            'ending_time' => $dto->ending_time,
             'location' => $dto->location,
-            'latitude' => $dto->latitude,
-            'longitude' => $dto->longitude,
             'status' => Request::STATUS_SUBMITTED, // Use new status constant
         ]);
 

@@ -10,6 +10,12 @@ class Popup extends Model
 {
     use HasFactory;
 
+    // Add constants for popup types
+    public const TYPE_INFO = 'info';
+    public const TYPE_WARNING = 'warning';
+    public const TYPE_PROMO = 'promo';
+    public const TYPE_BIRTHDAY = 'birthday';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -23,6 +29,7 @@ class Popup extends Model
         'start_date',
         'end_date',
         'is_active',
+        'user_id',
     ];
 
     /**
@@ -37,9 +44,17 @@ class Popup extends Model
     ];
 
     /**
-     * Scope to get only active popups.
+     * Get the user this popup is for (if any).
      */
-    public function scopeActive($query)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope to get only active popups for a specific user or global ones.
+     */
+        public function scopeActiveForUser($query, ?User $user = null)
     {
         $now = now();
         
@@ -50,7 +65,13 @@ class Popup extends Model
             })
             ->where(function ($q) use ($now) {
                 $q->whereNull('end_date')
-                  ->orWhere('end_date', '>', $now); // Use > instead of >= to avoid edge case
+                  ->orWhere('end_date', '>', $now);
+            })
+            ->where(function ($q) use ($user) {
+                $q->whereNull('user_id') // Global popups
+                  ->when($user, function ($q) use ($user) {
+                      $q->orWhere('user_id', $user->id); // User-specific popups
+                  });
             });
     }
 

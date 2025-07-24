@@ -18,8 +18,9 @@ class AuthTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Seed roles before each test
+        // Seed roles and areas before each test
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+        $this->artisan('db:seed', ['--class' => 'AreaSeeder']);
     }
 
     public function test_user_can_register()
@@ -33,6 +34,9 @@ class AuthTest extends TestCase
     
         $this->app->instance(TwilioService::class, $mockTwilioService);
 
+        // Get a valid area for registration
+        $area = \App\Models\Area::first();
+        
         // Send the registration request
         $response = $this->postJson('/api/register', [
             'name' => 'John Doe',
@@ -40,6 +44,8 @@ class AuthTest extends TestCase
             'phone_number' => '+96178919829',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'birth_date' => '1990-05-15',
+            'area_id' => $area->id,
         ]);
 
         // Assert that registration is successful
@@ -218,6 +224,9 @@ class AuthTest extends TestCase
             'role_id' => Role::where('name', 'user')->first()->id,
         ]);
 
+        // Get a valid area for registration
+        $area = \App\Models\Area::first();
+        
         // Attempt to register with the same email
         $response = $this->postJson('/api/register', [
             'name' => 'Jane Doe',
@@ -225,6 +234,8 @@ class AuthTest extends TestCase
             'phone_number' => '+96178919830',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'birth_date' => '1985-03-20',
+            'area_id' => $area->id,
         ]);
 
         $response->assertStatus(422)
@@ -237,6 +248,8 @@ class AuthTest extends TestCase
             'phone_number' => '+96178919829',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'birth_date' => '1985-03-20',
+            'area_id' => $area->id,
         ]);
 
         $response->assertStatus(422)

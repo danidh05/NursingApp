@@ -61,7 +61,8 @@ class PopupController extends Controller
     {
         $this->authorize('viewAny', \App\Models\Popup::class);
         
-        $popup = $this->popupService->getActivePopup();
+        $user = auth()->user();
+        $popup = $this->popupService->getActivePopup($user);
         
         if ($popup) {
             return response()->json(['popup' => $popup], 200);

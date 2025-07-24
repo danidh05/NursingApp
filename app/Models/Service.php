@@ -48,4 +48,22 @@ class Service extends Model
     {
         return $this->belongsToMany(Request::class, 'request_services', 'service_id', 'request_id');
     }
+
+    /**
+     * Get the area prices for this service.
+     */
+    public function areaPrices()
+    {
+        return $this->hasMany(ServiceAreaPrice::class);
+    }
+
+    /**
+     * Get the areas for this service through pricing.
+     */
+    public function areas()
+    {
+        return $this->belongsToMany(Area::class, 'service_area_price')
+                    ->withPivot('price')
+                    ->withTimestamps();
+    }
 }

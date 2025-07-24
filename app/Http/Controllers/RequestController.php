@@ -7,6 +7,7 @@ use App\Services\RequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CreateRequestRequest;
 
 /**
  * Request Controller - 4-Stage Order Tracking System
@@ -95,7 +96,7 @@ class RequestController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"full_name","phone_number","problem_description","service_ids","location","latitude","longitude"},
+     *             required={"full_name","phone_number","problem_description","service_ids","location"},
      *             @OA\Property(property="full_name", type="string", example="John Doe", description="Full name of the person needing care"),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="Contact phone number"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
@@ -103,10 +104,9 @@ class RequestController extends Controller
      *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Array of service IDs"),
      *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Preferred nurse gender"),
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
-     *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Scheduled time for service"),
-     *             @OA\Property(property="location", type="string", example="123 Main St, New York", description="Service location address"),
-     *             @OA\Property(property="latitude", type="number", format="float", example=40.7128, description="Latitude coordinate"),
-     *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060, description="Longitude coordinate")
+     *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),
+     *             @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Required only for scheduled appointments (not immediate requests)"),
+     *             @OA\Property(property="location", type="string", example="123 Main St, New York", description="Service location address")
      *         )
      *     ),
      *     @OA\Response(
@@ -152,22 +152,9 @@ class RequestController extends Controller
      *     )
      * )
      */
-    public function store(HttpRequest $httpRequest): JsonResponse
+    public function store(CreateRequestRequest $httpRequest): JsonResponse
     {
-        $validated = $httpRequest->validate([
-            'full_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'name' => 'nullable|string|max:255',
-            'problem_description' => 'required|string',
-            'service_ids' => 'required|array|min:1',
-            'service_ids.*' => 'exists:services,id',
-            'nurse_gender' => 'nullable|string|in:male,female,any',
-            'time_type' => 'nullable|string|in:full-time,part-time',
-            'scheduled_time' => 'nullable|date|after:now',
-            'location' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+        $validated = $httpRequest->validated();
 
         $request = $this->requestService->createRequest($validated, Auth::user());
         

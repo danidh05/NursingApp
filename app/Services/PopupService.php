@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Popup;
+use App\Models\User;
 use App\Repositories\Interfaces\IPopupRepository;
 use App\Services\FirebaseStorageService;
 use Illuminate\Http\UploadedFile;
@@ -25,9 +26,9 @@ class PopupService
         return $this->popupRepository->findById($id);
     }
 
-    public function getActivePopup(): ?Popup
+    public function getActivePopup(?User $user = null): ?Popup
     {
-        return $this->popupRepository->getActive();
+        return $this->popupRepository->getActiveForUser($user);
     }
 
     public function createPopup(array $data): Popup

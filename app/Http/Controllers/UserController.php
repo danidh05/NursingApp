@@ -128,6 +128,8 @@ class UserController extends Controller
      *             @OA\Property(property="location", type="string", example="New York", description="User's location"),
      *             @OA\Property(property="latitude", type="number", format="float", example=40.7128, description="Latitude coordinate"),
      *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060, description="Longitude coordinate"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date (YYYY-MM-DD) - used for birthday notifications"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID for region-based pricing"),
      *             @OA\Property(property="password", type="string", example="newpassword123", description="New password"),
      *             @OA\Property(property="password_confirmation", type="string", example="newpassword123", description="Password confirmation")
      *         )
@@ -143,6 +145,8 @@ class UserController extends Controller
      *                 @OA\Property(property="email", type="string", example="john@example.com"),
      *                 @OA\Property(property="phone_number", type="string", example="+1234567890"),
      *                 @OA\Property(property="role_id", type="integer", example=2),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date"),
+     *                 @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID"),
      *                 @OA\Property(property="location", type="string", example="New York"),
      *                 @OA\Property(property="latitude", type="number", format="float", example=40.7128),
      *                 @OA\Property(property="longitude", type="number", format="float", example=-74.0060),
@@ -188,6 +192,8 @@ class UserController extends Controller
             'location' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'birth_date' => 'nullable|date|before:today',
+            'area_id' => 'nullable|exists:areas,id',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
     
@@ -436,6 +442,8 @@ class UserController extends Controller
      *             @OA\Property(property="email", type="string", format="email", example="jane@example.com", description="User's email address"),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="User's phone number"),
      *             @OA\Property(property="location", type="string", example="Los Angeles", description="User's location"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date (YYYY-MM-DD) - optional, used for birthday notifications"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID (optional)"),
      *             @OA\Property(property="password", type="string", minLength=8, example="password123", description="User's password"),
      *             @OA\Property(property="password_confirmation", type="string", example="password123", description="Password confirmation"),
      *             @OA\Property(property="role_id", type="integer", example=2, description="User role ID (optional, defaults to user)")
@@ -452,6 +460,8 @@ class UserController extends Controller
      *                 @OA\Property(property="email", type="string", example="jane@example.com"),
      *                 @OA\Property(property="phone_number", type="string", example="+1234567890"),
      *                 @OA\Property(property="role_id", type="integer", example=2),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date"),
+     *                 @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID"),
      *                 @OA\Property(property="location", type="string", example="Los Angeles"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
@@ -485,6 +495,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone_number' => 'required|string|max:15|unique:users',
             'location' => 'nullable|string|max:255',
+            'birth_date' => 'nullable|date|before:today',
+            'area_id' => 'nullable|exists:areas,id',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -493,6 +505,8 @@ class UserController extends Controller
             'email' => $validatedData['email'],
             'phone_number' => $validatedData['phone_number'],
             'location' => $validatedData['location'] ?? null,
+            'birth_date' => $validatedData['birth_date'] ?? null,
+            'area_id' => $validatedData['area_id'] ?? null,
             'password' => Hash::make($validatedData['password']),
             'role_id' => $request->role_id ?? 2, // Admin can specify role, default to 'user'
         ]);

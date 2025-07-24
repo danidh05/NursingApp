@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\SliderController as ApiSliderController;
 use App\Http\Controllers\Api\PopupController as ApiPopupController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\Admin\PopupController as AdminPopupController;
+use App\Http\Controllers\Admin\ServiceAreaPriceController;
+use App\Http\Controllers\AreaController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -22,6 +24,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-sms', [AuthController::class, 'verifySms']);//new
 
 Route::post('/login', [AuthController::class, 'login']);
+
+// Public area routes
+Route::get('/areas', [AreaController::class, 'index']);
 
 // Temporary debug routes - REMOVE AFTER TESTING
 Route::get('/test-firebase', function () {
@@ -43,19 +48,7 @@ Route::get('/test-firebase', function () {
     }
 });
 
-Route::middleware(['auth:sanctum'])->get('/debug-auth', function (Request $request) {
-    $user = auth()->user()->load('role');
-    return response()->json([
-        'user' => [
-            'id' => $user->id,
-            'email' => $user->email,
-            'role_id' => $user->role_id,
-            'role_name' => $user->role?->name,
-        ],
-        'token' => $request->bearerToken(),
-        'auth_check' => auth()->check(),
-    ]);
-});
+
 
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 
@@ -157,5 +150,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/popups/{id}', [AdminPopupController::class, 'show']); // Get a specific popup
         Route::put('/popups/{id}', [AdminPopupController::class, 'update']); // Update a popup
         Route::delete('/popups/{id}', [AdminPopupController::class, 'destroy']); // Delete a popup
+
+        // Service Area Price management routes
+        Route::get('/service-area-prices', [ServiceAreaPriceController::class, 'index']); // List all service area prices
+        Route::post('/service-area-prices', [ServiceAreaPriceController::class, 'store']); // Create a new service area price
+        Route::put('/service-area-prices/{id}', [ServiceAreaPriceController::class, 'update']); // Update a service area price
+        Route::delete('/service-area-prices/{id}', [ServiceAreaPriceController::class, 'destroy']); // Delete a service area price
+        Route::get('/service-area-prices/service/{serviceId}', [ServiceAreaPriceController::class, 'getServicePrices']); // Get prices for a specific service
     });
 });

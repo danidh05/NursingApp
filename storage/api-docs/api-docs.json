@@ -869,6 +869,422 @@
                 ]
             }
         },
+        "/api/admin/service-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Region Pricing"
+                ],
+                "summary": "List all service area prices (Admin only)",
+                "description": "Retrieve a list of all service area prices for admin management.",
+                "operationId": "7ed692d3a0a358d795dd28c0a728bdac",
+                "responses": {
+                    "200": {
+                        "description": "Service area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "service_area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "service_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "service": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Home Nursing"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Region Pricing"
+                ],
+                "summary": "Create service area price (Admin only)",
+                "description": "Create a new service area price for region-based pricing.",
+                "operationId": "2216ed54b3648f6523e6c91cf9837f2a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "service_id",
+                                    "area_id",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "service_id": {
+                                        "description": "Service ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "description": "Area ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "price": {
+                                        "description": "Price for this service in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Service area price created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service area price created successfully."
+                                        },
+                                        "service_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "service_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/service-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Region Pricing"
+                ],
+                "summary": "Update service area price (Admin only)",
+                "description": "Update an existing service area price.",
+                "operationId": "524e9b75839d3c455c5a2728744e5b1a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "description": "New price for this service in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 120
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Service area price updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service area price updated successfully."
+                                        },
+                                        "service_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "service_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service area price not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Region Pricing"
+                ],
+                "summary": "Delete service area price (Admin only)",
+                "description": "Delete a service area price.",
+                "operationId": "e86f7f5022bb49082c721955aa8d7baf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service area price deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service area price deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service area price not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/service-area-prices/service/{serviceId}": {
+            "get": {
+                "tags": [
+                    "Admin - Region Pricing"
+                ],
+                "summary": "Get prices for a specific service (Admin only)",
+                "description": "Retrieve all area prices for a specific service.",
+                "operationId": "83170e5fb1eee1d9c699f6027391992e",
+                "parameters": [
+                    {
+                        "name": "serviceId",
+                        "in": "path",
+                        "description": "Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "service": {
+                                            "type": "object"
+                                        },
+                                        "area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/sliders": {
             "get": {
                 "tags": [
@@ -1611,6 +2027,54 @@
                 ]
             }
         },
+        "/api/areas": {
+            "get": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "List all areas",
+                "description": "Retrieve a list of all available areas for user registration and profile updates.",
+                "operationId": "f16518e18a005a2f966b63c0e1745342",
+                "responses": {
+                    "200": {
+                        "description": "Areas list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "areas": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Beirut"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -1629,7 +2093,8 @@
                                     "email",
                                     "phone_number",
                                     "password",
-                                    "password_confirmation"
+                                    "password_confirmation",
+                                    "area_id"
                                 ],
                                 "properties": {
                                     "name": {
@@ -1658,6 +2123,17 @@
                                         "description": "Password confirmation",
                                         "type": "string",
                                         "example": "password123"
+                                    },
+                                    "birth_date": {
+                                        "description": "User's birth date (YYYY-MM-DD) - optional, used for birthday notifications",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-05-15"
+                                    },
+                                    "area_id": {
+                                        "description": "User's area/region ID (required for region-based pricing)",
+                                        "type": "integer",
+                                        "example": 1
                                     }
                                 },
                                 "type": "object"
@@ -3745,9 +4221,7 @@
                                     "phone_number",
                                     "problem_description",
                                     "service_ids",
-                                    "location",
-                                    "latitude",
-                                    "longitude"
+                                    "location"
                                 ],
                                 "properties": {
                                     "full_name": {
@@ -3801,27 +4275,21 @@
                                         "example": "full-time"
                                     },
                                     "scheduled_time": {
-                                        "description": "Scheduled time for service",
+                                        "description": "For immediate requests: use now(). For scheduled: use future time",
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2024-01-15T10:00:00Z"
+                                    },
+                                    "ending_time": {
+                                        "description": "Required only for scheduled appointments (not immediate requests)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T12:00:00Z"
                                     },
                                     "location": {
                                         "description": "Service location address",
                                         "type": "string",
                                         "example": "123 Main St, New York"
-                                    },
-                                    "latitude": {
-                                        "description": "Latitude coordinate",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 40.7128
-                                    },
-                                    "longitude": {
-                                        "description": "Longitude coordinate",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": -74.006
                                     }
                                 },
                                 "type": "object"
@@ -4438,8 +4906,8 @@
                 "tags": [
                     "Services"
                 ],
-                "summary": "List all services",
-                "description": "Retrieve a list of all services. Available to both users and admins.",
+                "summary": "List all services with area-based pricing",
+                "description": "Retrieve a list of all services with pricing based on user's area. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
                 "operationId": "4c175c5d6594b4a5112bbe15a46e2bb4",
                 "responses": {
                     "200": {
@@ -4465,9 +4933,10 @@
                                                         "example": "Professional nursing care at home"
                                                     },
                                                     "price": {
+                                                        "description": "Area-specific price if user has area and pricing exists, otherwise original price",
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 50
+                                                        "example": 120
                                                     },
                                                     "discount_price": {
                                                         "type": "number",
@@ -4481,6 +4950,11 @@
                                                     "category_id": {
                                                         "type": "integer",
                                                         "example": 1
+                                                    },
+                                                    "area_name": {
+                                                        "description": "Area name (only included when showing area-specific pricing)",
+                                                        "type": "string",
+                                                        "example": "Beirut"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -5153,6 +5627,17 @@
                                         "format": "float",
                                         "example": -74.006
                                     },
+                                    "birth_date": {
+                                        "description": "User's birth date (YYYY-MM-DD) - used for birthday notifications",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-05-15"
+                                    },
+                                    "area_id": {
+                                        "description": "User's area/region ID for region-based pricing",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "password": {
                                         "description": "New password",
                                         "type": "string",
@@ -5201,6 +5686,17 @@
                                                 "role_id": {
                                                     "type": "integer",
                                                     "example": 2
+                                                },
+                                                "birth_date": {
+                                                    "description": "User's birth date",
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "1990-05-15"
+                                                },
+                                                "area_id": {
+                                                    "description": "User's area/region ID",
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
                                                 "location": {
                                                     "type": "string",
@@ -5649,6 +6145,17 @@
                                         "type": "string",
                                         "example": "Los Angeles"
                                     },
+                                    "birth_date": {
+                                        "description": "User's birth date (YYYY-MM-DD) - optional, used for birthday notifications",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-05-15"
+                                    },
+                                    "area_id": {
+                                        "description": "User's area/region ID (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "password": {
                                         "description": "User's password",
                                         "type": "string",
@@ -5703,6 +6210,17 @@
                                                 "role_id": {
                                                     "type": "integer",
                                                     "example": 2
+                                                },
+                                                "birth_date": {
+                                                    "description": "User's birth date",
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "1990-05-15"
+                                                },
+                                                "area_id": {
+                                                    "description": "User's area/region ID",
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
                                                 "location": {
                                                     "type": "string",
@@ -5860,6 +6378,10 @@
             "description": "Admin - Popups"
         },
         {
+            "name": "Admin - Region Pricing",
+            "description": "Admin - Region Pricing"
+        },
+        {
             "name": "Admin - Sliders",
             "description": "Admin - Sliders"
         },
@@ -5870,6 +6392,10 @@
         {
             "name": "Sliders",
             "description": "Sliders"
+        },
+        {
+            "name": "Areas",
+            "description": "Areas"
         }
     ]
 }

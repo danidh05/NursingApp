@@ -34,8 +34,8 @@ class ServiceController extends Controller
     /**
      * @OA\Get(
      *     path="/api/services",
-     *     summary="List all services",
-     *     description="Retrieve a list of all services. Available to both users and admins.",
+     *     summary="List all services with area-based pricing",
+     *     description="Retrieve a list of all services with pricing based on user's area. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
      *     tags={"Services"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -46,10 +46,11 @@ class ServiceController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Nursing"),
      *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
-     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="price", type="number", format="float", example=120.00, description="Area-specific price if user has area and pricing exists, otherwise original price"),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
      *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
      *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
@@ -63,7 +64,35 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::all();
+        $user = Auth::user()->fresh();
+        $userAreaId = $user->area_id;
+
+        $services = Service::with(['areaPrices' => function ($query) use ($userAreaId) {
+            if ($userAreaId) {
+                $query->where('area_id', $userAreaId);
+            }
+        }])->get();
+
+        // Transform the response to include area-specific pricing
+        $services->transform(function ($service) use ($userAreaId) {
+            $areaPrice = $service->areaPrices->first();
+            
+            if ($userAreaId && $areaPrice) {
+                // User has area and area pricing exists - show area-specific price
+                $service->price = $areaPrice->price;
+                $service->area_name = $areaPrice->area->name;
+            } else {
+                // User has no area or no area pricing exists - show original price
+                $service->price = $service->getOriginal('price');
+                // Don't include area_name when showing original price
+            }
+            
+            // Remove the areaPrices relationship from the response
+            unset($service->areaPrices);
+            
+            return $service;
+        });
+
         return response()->json(['services' => $services], 200);
     }
 

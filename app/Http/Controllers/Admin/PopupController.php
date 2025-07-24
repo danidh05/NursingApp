@@ -279,6 +279,21 @@ class PopupController extends Controller
      */
     public function update(UpdatePopupRequest $request, int $id)
     {
+        // DEBUG: Check what's being received
+        \Log::info('Update Popup Request Data:', [
+            'all' => $request->all(),
+            'has_file' => $request->hasFile('image'),
+            'file_info' => $request->file('image') ? [
+                'name' => $request->file('image')->getClientOriginalName(),
+                'size' => $request->file('image')->getSize(),
+                'mime' => $request->file('image')->getMimeType(),
+            ] : null,
+            'content_type' => $request->header('Content-Type'),
+            'method' => $request->method(),
+            'input_method' => $request->input('_method'),
+            'headers' => $request->headers->all()
+        ]);
+        
         try {
             $popup = $this->popupService->getPopup($id);
             $this->authorize('update', $popup);

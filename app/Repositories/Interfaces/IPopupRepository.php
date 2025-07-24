@@ -3,6 +3,7 @@
 namespace App\Repositories\Interfaces;
 
 use App\Models\Popup;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 interface IPopupRepository
@@ -13,4 +14,5 @@ interface IPopupRepository
     public function update(int $id, array $data): Popup;
     public function delete(int $id): void;
     public function getActive(): ?Popup;
+    public function getActiveForUser(?User $user = null): ?Popup;
 } 

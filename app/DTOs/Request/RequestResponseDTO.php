@@ -20,6 +20,7 @@ class RequestResponseDTO
         public ?string $nurse_gender,
         public ?string $time_type,
         public ?string $scheduled_time,
+        public ?string $ending_time,
         public string $location,
         public ?float $latitude,      // This comes from user info, not database
         public ?float $longitude,     // This comes from user info, not database
@@ -55,6 +56,7 @@ class RequestResponseDTO
             nurse_gender: $request->nurse_gender,
             time_type: $request->time_type,
             scheduled_time: $request->scheduled_time,
+            ending_time: $request->ending_time,
             location: $request->location,
             latitude: $request->user->latitude ?? null,    // Get from user info
             longitude: $request->user->longitude ?? null,  // Get from user info

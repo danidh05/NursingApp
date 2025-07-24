@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sliders', function (Blueprint $table) {
-            $table->index('position', 'sliders_position_index');
+        Schema::create('areas', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sliders', function (Blueprint $table) {
-            $table->dropIndex('sliders_position_index');
-        });
+        Schema::dropIfExists('areas');
     }
 };

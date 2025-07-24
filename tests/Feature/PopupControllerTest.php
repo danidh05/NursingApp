@@ -38,7 +38,7 @@ class PopupControllerTest extends TestCase
     public function test_authenticated_user_can_view_active_popup()
     {
         // Arrange
-        Popup::factory()->currentlyActive()->create(['title' => 'Active Popup']);
+        Popup::factory()->active()->create(['title' => 'Active Popup']);
 
         // Act
         $response = $this->actingAs($this->user)
@@ -97,12 +97,12 @@ class PopupControllerTest extends TestCase
     public function test_returns_most_recent_active_popup_when_multiple_exist()
     {
         // Arrange
-        $older = Popup::factory()->currentlyActive()->create([
+        $older = Popup::factory()->active()->create([
             'title' => 'Older Popup',
             'created_at' => now()->subDays(2)
         ]);
         
-        $newer = Popup::factory()->currentlyActive()->create([
+        $newer = Popup::factory()->active()->create([
             'title' => 'Newer Popup',
             'created_at' => now()->subDay()
         ]);
