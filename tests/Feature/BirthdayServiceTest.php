@@ -6,10 +6,12 @@ use Tests\TestCase;
 use App\Services\BirthdayService;
 use App\Services\PopupService;
 use App\Services\NotificationService;
+use App\Services\OneSignalService;
 use App\Models\User;
 use App\Models\Popup;
+use App\Events\UserBirthday;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Event;
 use Mockery;
 use Carbon\Carbon;
 
@@ -20,27 +22,35 @@ class BirthdayServiceTest extends TestCase
     private BirthdayService $birthdayService;
     private $mockPopupService;
     private $mockNotificationService;
+    private $mockOneSignalService;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        // Ensure queued listeners run synchronously in tests
+        $this->app['config']->set('queue.default', 'sync');
+
         // Mock the services
         $this->mockPopupService = Mockery::mock(PopupService::class);
+        $this->mockOneSignalService = Mockery::mock(OneSignalService::class);
         $this->mockNotificationService = Mockery::mock(NotificationService::class);
+
+        // Create real NotificationService with mocked OneSignalService
+        $notificationService = new NotificationService($this->mockOneSignalService);
+
+        // Bind the mocked NotificationService to the container so listeners can use it
+        $this->app->instance(NotificationService::class, $notificationService);
 
         $this->birthdayService = new BirthdayService(
             $this->mockPopupService,
-            $this->mockNotificationService
+            $notificationService
         );
 
         // Seed roles
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+        
     }
-
-
-
-
 
     /** @test */
     public function it_can_find_users_with_birthdays_today()
@@ -154,15 +164,11 @@ class BirthdayServiceTest extends TestCase
             ->with(Mockery::type('array'))
             ->andReturn($popup);
 
-        $this->mockNotificationService
-            ->shouldReceive('createNotification')
+        // Mock OneSignal service
+        $this->mockOneSignalService
+            ->shouldReceive('sendToUser')
             ->once()
-            ->with(
-                Mockery::type(User::class),
-                'Happy Birthday! 🎉',
-                Mockery::type('string'),
-                'birthday'
-            );
+            ->andReturn(true);
 
         // Act
         $this->birthdayService->processBirthdayCelebrations();
@@ -197,9 +203,11 @@ class BirthdayServiceTest extends TestCase
             ->twice()
             ->andReturn($popup);
 
-        $this->mockNotificationService
-            ->shouldReceive('createNotification')
-            ->twice();
+        // Mock OneSignal service - should be called twice (once per user)
+        $this->mockOneSignalService
+            ->shouldReceive('sendToUser')
+            ->twice()
+            ->andReturn(true);
 
         // Act
         $this->birthdayService->processBirthdayCelebrations();
@@ -229,5 +237,47 @@ class BirthdayServiceTest extends TestCase
 
         // Clean up
         Carbon::setTestNow();
+    }
+
+    /** @test */
+    public function it_dispatches_birthday_event()
+    {
+        // Arrange
+        $birthdayUser = User::factory()->create([
+            'birth_date' => now()->format('Y-m-d'),
+            'role_id' => 2
+        ]);
+
+        $popup = new Popup([
+            'id' => 1,
+            'title' => '🎉 Happy Birthday!',
+            'content' => "Happy Birthday {$birthdayUser->name}! 🎂",
+            'type' => Popup::TYPE_BIRTHDAY,
+            'is_active' => true,
+        ]);
+
+        // Mock PopupService
+        $this->mockPopupService
+            ->shouldReceive('createPopup')
+            ->once()
+            ->with(Mockery::type('array'))
+            ->andReturn($popup);
+
+        // Mock OneSignal service
+        $this->mockOneSignalService
+            ->shouldReceive('sendToUser')
+            ->once()
+            ->andReturn(true);
+
+        // Act
+        $this->birthdayService->processBirthdayCelebrations();
+
+        // Assert - Check that the notification was created in database
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $birthdayUser->id,
+            'title' => '🎉 Happy Birthday!',
+            'message' => 'Wishing you a wonderful birthday filled with joy and happiness!',
+            'type' => 'birthday',
+        ]);
     }
 } 

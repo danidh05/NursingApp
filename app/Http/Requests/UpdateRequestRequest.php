@@ -28,6 +28,7 @@ class UpdateRequestRequest extends FormRequest
             'status' => ['sometimes', 'string', 'in:' . implode(',', Request::getValidStatuses())],
             'nurse_id' => ['sometimes', 'exists:nurses,id'],
             'time_needed_to_arrive' => ['nullable', 'integer', 'min:1'],
+            'discount_percentage' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 

@@ -41,4 +41,14 @@ return [
         'verify_service_sid' => env('TWILIO_VERIFY_SERVICE_SID'),
     ],
 
+   
+    'onesignal' => [
+    'app_id' => env('ONESIGNAL_APP_ID'),
+    'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+    'user_auth_key' => env('ONESIGNAL_USER_AUTH_KEY', ''), // optional but needed
+    'guzzle_client_timeout' => env('ONESIGNAL_TIMEOUT', 10), // optional
+    'rest_api_url' => env('ONESIGNAL_API_URL', 'https://onesignal.com/api/v1/'),
+],
+
+
 ];

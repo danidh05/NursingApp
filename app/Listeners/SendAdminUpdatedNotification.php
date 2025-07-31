@@ -17,7 +17,6 @@ class SendAdminUpdatedNotification implements ShouldQueue
 
     public function handle(AdminUpdatedRequest $event): void
     {
-        // Remove any manual transaction management
         $this->notificationService->createNotification(
             $event->user,
             'Request Status Updated',

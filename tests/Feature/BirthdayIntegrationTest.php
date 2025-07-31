@@ -8,6 +8,7 @@ use App\Models\Popup;
 use App\Services\BirthdayService;
 use App\Services\PopupService;
 use App\Services\NotificationService;
+use App\Services\OneSignalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Mockery;
@@ -20,6 +21,8 @@ class BirthdayIntegrationTest extends TestCase
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+        // Ensure queued listeners run synchronously in tests
+        $this->app['config']->set('queue.default', 'sync');
     }
 
     protected function tearDown(): void
@@ -27,6 +30,9 @@ class BirthdayIntegrationTest extends TestCase
         // Clean up any service container bindings we made
         if ($this->app->resolved(NotificationService::class)) {
             $this->app->forgetInstance(NotificationService::class);
+        }
+        if ($this->app->resolved(OneSignalService::class)) {
+            $this->app->forgetInstance(OneSignalService::class);
         }
         
         parent::tearDown();
@@ -43,18 +49,13 @@ class BirthdayIntegrationTest extends TestCase
             'role_id' => 2
         ]);
 
-        // Mock NotificationService to avoid actual notification sending
-        $mockNotificationService = Mockery::mock(NotificationService::class);
-        $mockNotificationService->shouldReceive('createNotification')
+        // Mock OneSignal service to avoid actual push notification sending
+        $mockOneSignalService = Mockery::mock(OneSignalService::class);
+        $mockOneSignalService->shouldReceive('sendToUser')
             ->once()
-            ->with(
-                Mockery::type(User::class),
-                'Happy Birthday! 🎉',
-                Mockery::type('string'),
-                'birthday'
-            );
+            ->andReturn(true);
 
-        $this->app->instance(NotificationService::class, $mockNotificationService);
+        $this->app->instance(OneSignalService::class, $mockOneSignalService);
 
         // Act: Process birthday celebrations
         $birthdayService = app(BirthdayService::class);
@@ -104,10 +105,10 @@ class BirthdayIntegrationTest extends TestCase
             'role_id' => 2
         ]);
 
-        // Mock NotificationService
-        $mockNotificationService = Mockery::mock(NotificationService::class);
-        $mockNotificationService->shouldReceive('createNotification')->twice();
-        $this->app->instance(NotificationService::class, $mockNotificationService);
+        // Mock OneSignal service
+        $mockOneSignalService = Mockery::mock(OneSignalService::class);
+        $mockOneSignalService->shouldReceive('sendToUser')->twice()->andReturn(true);
+        $this->app->instance(OneSignalService::class, $mockOneSignalService);
 
         // Act: Process birthday celebrations
         $birthdayService = app(BirthdayService::class);
@@ -155,10 +156,10 @@ class BirthdayIntegrationTest extends TestCase
             'user_id' => null,
         ]);
 
-        // Mock NotificationService (should not be called)
-        $mockNotificationService = Mockery::mock(NotificationService::class);
-        $mockNotificationService->shouldNotReceive('createNotification');
-        $this->app->instance(NotificationService::class, $mockNotificationService);
+        // Mock OneSignalService (should not be called)
+        $mockOneSignalService = Mockery::mock(OneSignalService::class);
+        $mockOneSignalService->shouldNotReceive('sendToUser');
+        $this->app->instance(OneSignalService::class, $mockOneSignalService);
 
         // Act: Process birthday celebrations
         $birthdayService = app(BirthdayService::class);

@@ -24,6 +24,9 @@ class RequestResponseDTO
         public string $location,
         public ?float $latitude,      // This comes from user info, not database
         public ?float $longitude,     // This comes from user info, not database
+        public ?float $total_price,
+        public ?float $discount_percentage,
+        public ?float $discounted_price,
         public ?Carbon $deleted_at,
         public Carbon $created_at,
         public Carbon $updated_at,
@@ -60,6 +63,9 @@ class RequestResponseDTO
             location: $request->location,
             latitude: $request->user->latitude ?? null,    // Get from user info
             longitude: $request->user->longitude ?? null,  // Get from user info
+            total_price: $request->total_price,
+            discount_percentage: $request->discount_percentage,
+            discounted_price: $request->discounted_price,
             deleted_at: $request->deleted_at,
             created_at: $request->created_at,
             updated_at: $request->updated_at,

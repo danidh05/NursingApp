@@ -324,10 +324,24 @@ class RequestController extends Controller
             'nurse_gender' => 'sometimes|string|in:male,female,any',
             'time_type' => 'sometimes|string|in:full-time,part-time',
             'scheduled_time' => 'sometimes|date|after:now',
+            'discount_percentage' => 'sometimes|nullable|numeric|min:0|max:100',
         ]);
 
         // Debug: Log the validated data
         \Log::info("Validated data: " . json_encode($validated));
+
+        // Handle discount update if provided
+        if (array_key_exists('discount_percentage', $validated)) {
+            $request = \App\Models\Request::findOrFail($id);
+            
+            // Calculate total price if not set
+            if (!$request->total_price) {
+                $this->calculateAndSetRequestPrice($request);
+            }
+            
+            // Apply or remove discount
+            $this->handleDiscountUpdate($request, $validated['discount_percentage']);
+        }
 
         $updatedRequest = $this->requestService->updateRequest($id, $validated, $user);
 
@@ -377,5 +391,56 @@ class RequestController extends Controller
         return response()->json([
             'message' => 'Request removed from admin view, but still available to users.'
         ]);
+    }
+
+
+
+    /**
+     * Calculate and set the total price for a request.
+     */
+    private function calculateAndSetRequestPrice(\App\Models\Request $request): void
+    {
+        $user = $request->user;
+        $serviceIds = $request->services->pluck('id')->toArray();
+        
+        $serviceAreaPrices = \App\Models\ServiceAreaPrice::whereIn('service_id', $serviceIds)
+                                       ->where('area_id', $user->area_id)
+                                       ->get();
+
+        $totalPrice = 0;
+        foreach ($serviceIds as $serviceId) {
+            $price = $serviceAreaPrices->where('service_id', $serviceId)->first();
+            if ($price) {
+                $totalPrice += $price->price;
+            }
+        }
+
+        $request->update([
+            'total_price' => $totalPrice,
+            'discounted_price' => $totalPrice
+        ]);
+    }
+
+    /**
+     * Handle discount percentage update for a request.
+     */
+    private function handleDiscountUpdate(\App\Models\Request $request, ?float $discountPercentage): void
+    {
+        if ($discountPercentage === null || $discountPercentage <= 0) {
+            // Remove discount
+            $request->update([
+                'discount_percentage' => null,
+                'discounted_price' => $request->total_price
+            ]);
+        } else {
+            // Apply discount
+            $discountAmount = ($request->total_price * $discountPercentage) / 100;
+            $discountedPrice = $request->total_price - $discountAmount;
+
+            $request->update([
+                'discount_percentage' => $discountPercentage,
+                'discounted_price' => max(0, $discountedPrice) // Ensure price doesn't go below 0
+            ]);
+        }
     }
 }

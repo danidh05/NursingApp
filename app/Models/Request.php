@@ -44,6 +44,9 @@ class Request extends Model
         'full_name',
         'phone_number',
         'name', // Optional request name/title
+        'discount_percentage',
+        'total_price',
+        'discounted_price',
     ];
 
     /**
@@ -54,6 +57,9 @@ class Request extends Model
     protected $casts = [
         'scheduled_time' => 'datetime',
         'ending_time' => 'datetime',
+        'discount_percentage' => 'decimal:2',
+        'total_price' => 'decimal:2',
+        'discounted_price' => 'decimal:2',
     ];
 
     protected $dates = ['deleted_at'];
@@ -136,5 +142,33 @@ class Request extends Model
         if ($this->status === self::STATUS_ASSIGNED && $this->hasNurseArrived()) {
             $this->update(['status' => self::STATUS_IN_PROGRESS]);
         }
+    }
+
+    /**
+     * Get the final price after discount (if any).
+     */
+    public function getFinalPrice(): float
+    {
+        return $this->discounted_price ?? $this->total_price ?? 0.0;
+    }
+
+    /**
+     * Check if this request has a discount applied.
+     */
+    public function hasDiscount(): bool
+    {
+        return $this->discount_percentage !== null && $this->discount_percentage > 0;
+    }
+
+    /**
+     * Get the discount amount in currency.
+     */
+    public function getDiscountAmount(): float
+    {
+        if (!$this->hasDiscount() || !$this->total_price) {
+            return 0.0;
+        }
+
+        return ($this->total_price * $this->discount_percentage) / 100;
     }
 }

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Popup;
 use App\Services\PopupService;
 use App\Services\NotificationService;
+use App\Events\UserBirthday;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -73,12 +74,8 @@ class BirthdayService
      */
     private function sendBirthdayNotification(User $user): void
     {
-        $this->notificationService->createNotification(
-            $user,
-            'Happy Birthday! 🎉',
-            "Wishing you a fantastic birthday, {$user->name}! 🎂",
-            'birthday'
-        );
+        // Dispatch the birthday event - the listener will handle the notification
+        event(new UserBirthday($user));
     }
 
     /**

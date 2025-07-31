@@ -17,7 +17,6 @@ class SendUserRequestedNotification implements ShouldQueue
 
     public function handle(UserRequestedService $event): void
     {
-        // Remove any manual transaction management
         $this->notificationService->createNotification(
             $event->user,
             'Service Request Submitted',

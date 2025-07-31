@@ -15,8 +15,10 @@ class Notification extends Model
      */
     protected $fillable = [
         'user_id',
+        'title',
         'message',
         'type',
+        'sent_by_admin_id',
         'read_at',
     ];
 
@@ -35,5 +37,21 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the admin who sent this notification (for custom notifications).
+     */
+    public function sentByAdmin()
+    {
+        return $this->belongsTo(User::class, 'sent_by_admin_id');
+    }
+
+    /**
+     * Check if this is a custom notification sent by an admin.
+     */
+    public function isCustomNotification(): bool
+    {
+        return $this->type === 'custom' && !is_null($this->sent_by_admin_id);
     }
 }

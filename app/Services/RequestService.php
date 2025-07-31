@@ -11,6 +11,7 @@ use App\Models\Request;
 use App\Models\User;
 use App\Repositories\Interfaces\IRequestRepository;
 use App\Services\Interfaces\IRequestService;
+use App\Models\ServiceAreaPrice;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 
@@ -25,7 +26,15 @@ class RequestService implements IRequestService
         // Remove any manual transaction management - let Laravel handle it
         $dto = CreateRequestDTO::fromArray($data);
         
+        // Create the request
         $request = $this->requestRepository->create($dto, $user);
+        
+        // Calculate and set total price
+        $totalPrice = $this->calculateRequestTotalPrice($request);
+        $request->update([
+            'total_price' => $totalPrice,
+            'discounted_price' => $totalPrice // Initially same as total price
+        ]);
         
         // Dispatch event
         Event::dispatch(new UserRequestedService($request, $user));
@@ -33,7 +42,33 @@ class RequestService implements IRequestService
         // Clear cache after creation
         Cache::forget("user_requests_{$user->id}");
         
+        // Reload request with services
+        $request = $request->fresh(['services', 'user']);
+        
         return RequestResponseDTO::fromModel($request);
+    }
+
+    /**
+     * Calculate the total price for a request based on its services and user's area.
+     */
+    private function calculateRequestTotalPrice(Request $request): float
+    {
+        $user = $request->user;
+        $serviceIds = $request->services->pluck('id')->toArray();
+        
+        $serviceAreaPrices = ServiceAreaPrice::whereIn('service_id', $serviceIds)
+                                           ->where('area_id', $user->area_id)
+                                           ->get();
+
+        $totalPrice = 0;
+        foreach ($serviceIds as $serviceId) {
+            $price = $serviceAreaPrices->where('service_id', $serviceId)->first();
+            if ($price) {
+                $totalPrice += $price->price;
+            }
+        }
+
+        return $totalPrice;
     }
 
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO

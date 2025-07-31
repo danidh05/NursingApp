@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\Admin\PopupController as AdminPopupController;
 use App\Http\Controllers\Admin\ServiceAreaPriceController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\FAQController;
+use App\Http\Controllers\ContactController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -28,26 +30,11 @@ Route::post('/login', [AuthController::class, 'login']);
 // Public area routes
 Route::get('/areas', [AreaController::class, 'index']);
 
-// Temporary debug routes - REMOVE AFTER TESTING
-Route::get('/test-firebase', function () {
-    try {
-        $firebase = app(\App\Services\FirebaseStorageService::class);
-        $bucket = \Kreait\Laravel\Firebase\Facades\Firebase::storage()->getBucket();
-        
-        return response()->json([
-            'success' => true,
-            'bucket_name' => $bucket->name(),
-            'bucket_exists' => $bucket->exists(),
-            'project_id' => config('firebase.projects.app.storage.default_bucket'),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-        ], 500);
-    }
+// Authenticated routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Contact form submission (requires authentication)
+    Route::post('/contact', [ContactController::class, 'store']);
 });
-
 
 
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
@@ -92,6 +79,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
     Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
     
+    // FAQ APIs accessible by both users and admins
+    Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
+    Route::get('/faqs/{id}', [FAQController::class, 'show']); // Get a specific FAQ
+    
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
         Route::get('/user/dashboard', [UserController::class, 'dashboard']);
@@ -103,6 +94,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
   
 
         Route::post('/nurses/{id}/rate', [NurseController::class, 'rate']);//new
+
+        // Contact management for users
+        // Route::post('/contact', [ContactController::class, 'store']); // Removed duplicate
     });
     
     // Routes specific to "admin" role
@@ -157,5 +151,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/service-area-prices/{id}', [ServiceAreaPriceController::class, 'update']); // Update a service area price
         Route::delete('/service-area-prices/{id}', [ServiceAreaPriceController::class, 'destroy']); // Delete a service area price
         Route::get('/service-area-prices/service/{serviceId}', [ServiceAreaPriceController::class, 'getServicePrices']); // Get prices for a specific service
+
+        // User Request History (for discount decisions)
+        Route::get('/users/{userId}/requests', [\App\Http\Controllers\Admin\UserRequestController::class, 'getUserRequests']); // View user's request history
+
+        // Custom Notification management routes
+        Route::post('/notifications/custom', [\App\Http\Controllers\Admin\CustomNotificationController::class, 'store']); // Send custom notification to user
+        Route::get('/notifications/custom', [\App\Http\Controllers\Admin\CustomNotificationController::class, 'index']); // List custom notifications sent by admin
+        Route::get('/notifications/users', [\App\Http\Controllers\Admin\CustomNotificationController::class, 'getUsers']); // Get users for notification targeting
+
+        // FAQ management routes
+        Route::get('/faqs', [\App\Http\Controllers\Admin\FAQController::class, 'index']); // List all FAQs (including inactive)
+        Route::post('/faqs', [\App\Http\Controllers\Admin\FAQController::class, 'store']); // Create a new FAQ
+        Route::get('/faqs/{id}', [\App\Http\Controllers\Admin\FAQController::class, 'show']); // Get a specific FAQ
+        Route::put('/faqs/{id}', [\App\Http\Controllers\Admin\FAQController::class, 'update']); // Update an FAQ
+        Route::delete('/faqs/{id}', [\App\Http\Controllers\Admin\FAQController::class, 'destroy']); // Delete an FAQ
+        Route::patch('/faqs/{id}/toggle', [\App\Http\Controllers\Admin\FAQController::class, 'toggleStatus']); // Toggle FAQ active status
+        Route::post('/faqs/reorder', [\App\Http\Controllers\Admin\FAQController::class, 'reorder']); // Reorder FAQs
+
+        // Area management routes
+        Route::get('/areas', [\App\Http\Controllers\Admin\AreaController::class, 'index']); // List all areas with user counts
+        Route::post('/areas', [\App\Http\Controllers\Admin\AreaController::class, 'store']); // Create a new area
+        Route::get('/areas/{id}', [\App\Http\Controllers\Admin\AreaController::class, 'show']); // Get area with details
+        Route::put('/areas/{id}', [\App\Http\Controllers\Admin\AreaController::class, 'update']); // Update an area
+        Route::delete('/areas/{id}', [\App\Http\Controllers\Admin\AreaController::class, 'destroy']); // Delete an area
+
+        // Contact management routes
+        Route::get('/contacts', [\App\Http\Controllers\Admin\ContactController::class, 'index']); // List all contact submissions
+        Route::get('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'show']); // Get specific contact submission
+        Route::delete('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy']); // Delete contact submission
     });
 });
