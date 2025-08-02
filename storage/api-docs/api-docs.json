@@ -1954,14 +1954,13 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "image",
                                     "title",
                                     "content",
                                     "type"
                                 ],
                                 "properties": {
                                     "image": {
-                                        "description": "Popup image file (JPG, JPEG, PNG, max 2MB)",
+                                        "description": "Popup image file (JPG, JPEG, PNG, max 2MB) - Optional",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -2976,12 +2975,11 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "image",
                                     "position"
                                 ],
                                 "properties": {
                                     "image": {
-                                        "description": "Slider image file (JPG, JPEG, PNG, max 2MB)",
+                                        "description": "Slider image file (JPG, JPEG, PNG, max 2MB) - Optional",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -5083,12 +5081,24 @@
                 "tags": [
                     "FAQs"
                 ],
-                "summary": "Get all active FAQs",
-                "description": "Retrieve all active FAQs ordered by their display order. Authentication required.",
+                "summary": "Get all active FAQs with translations",
+                "description": "Retrieve all active FAQs ordered by their display order with content translated based on Accept-Language header. Authentication required.",
                 "operationId": "73408674b20a8860b423db5d2b1e1758",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects FAQ content",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "List of active FAQs",
+                        "description": "List of active FAQs with translations",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5111,11 +5121,11 @@
                                                     },
                                                     "question": {
                                                         "type": "string",
-                                                        "example": "What services do you offer?"
+                                                        "example": "ما هي الخدمات التي تقدمونها؟"
                                                     },
                                                     "answer": {
                                                         "type": "string",
-                                                        "example": "We offer a wide range of nursing services including home care, elderly care, and specialized medical assistance."
+                                                        "example": "نقدم مجموعة واسعة من خدمات التمريض"
                                                     },
                                                     "order": {
                                                         "type": "integer",
@@ -5124,6 +5134,24 @@
                                                     "is_active": {
                                                         "type": "boolean",
                                                         "example": true
+                                                    },
+                                                    "translation": {
+                                                        "description": "Translation info (only included when translation exists)",
+                                                        "properties": {
+                                                            "locale": {
+                                                                "type": "string",
+                                                                "example": "ar"
+                                                            },
+                                                            "question": {
+                                                                "type": "string",
+                                                                "example": "ما هي الخدمات التي تقدمونها؟"
+                                                            },
+                                                            "answer": {
+                                                                "type": "string",
+                                                                "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -5159,8 +5187,8 @@
                 "tags": [
                     "FAQs"
                 ],
-                "summary": "Get a specific FAQ",
-                "description": "Retrieve a specific FAQ by its ID. Authentication required.",
+                "summary": "Get a specific FAQ with translations",
+                "description": "Retrieve a specific FAQ by its ID with content translated based on Accept-Language header. Authentication required.",
                 "operationId": "b9a00355ddf392c09ebc03410474a8f2",
                 "parameters": [
                     {
@@ -5172,11 +5200,21 @@
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects FAQ content",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "FAQ details",
+                        "description": "FAQ details with translations",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5197,11 +5235,11 @@
                                                 },
                                                 "question": {
                                                     "type": "string",
-                                                    "example": "What services do you offer?"
+                                                    "example": "ما هي الخدمات التي تقدمونها؟"
                                                 },
                                                 "answer": {
                                                     "type": "string",
-                                                    "example": "We offer a wide range of nursing services including home care, elderly care, and specialized medical assistance."
+                                                    "example": "نقدم مجموعة واسعة من خدمات التمريض"
                                                 },
                                                 "order": {
                                                     "type": "integer",
@@ -5210,6 +5248,24 @@
                                                 "is_active": {
                                                     "type": "boolean",
                                                     "example": true
+                                                },
+                                                "translation": {
+                                                    "description": "Translation info (only included when translation exists)",
+                                                    "properties": {
+                                                        "locale": {
+                                                            "type": "string",
+                                                            "example": "ar"
+                                                        },
+                                                        "question": {
+                                                            "type": "string",
+                                                            "example": "ما هي الخدمات التي تقدمونها؟"
+                                                        },
+                                                        "answer": {
+                                                            "type": "string",
+                                                            "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -5229,24 +5285,7 @@
                         }
                     },
                     "404": {
-                        "description": "FAQ not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "FAQ not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "FAQ not found"
                     },
                     "401": {
                         "description": "Unauthorized - Authentication required"
@@ -6955,9 +6994,21 @@
                 "tags": [
                     "Services"
                 ],
-                "summary": "List all services with area-based pricing",
-                "description": "Retrieve a list of all services with pricing based on user's area. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
+                "summary": "List all services with area-based pricing and translations",
+                "description": "Retrieve a list of all services with pricing based on user's area and content translated based on Accept-Language header. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
                 "operationId": "4c175c5d6594b4a5112bbe15a46e2bb4",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects service names",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Services list retrieved successfully",
@@ -6975,7 +7026,7 @@
                                                     },
                                                     "name": {
                                                         "type": "string",
-                                                        "example": "Home Nursing"
+                                                        "example": "رعاية التمريض المنزلية"
                                                     },
                                                     "description": {
                                                         "type": "string",
@@ -7004,6 +7055,20 @@
                                                         "description": "Area name (only included when showing area-specific pricing)",
                                                         "type": "string",
                                                         "example": "Beirut"
+                                                    },
+                                                    "translation": {
+                                                        "description": "Translation info (only included when translation exists)",
+                                                        "properties": {
+                                                            "locale": {
+                                                                "type": "string",
+                                                                "example": "ar"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "رعاية التمريض المنزلية"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -7186,8 +7251,8 @@
                 "tags": [
                     "Services"
                 ],
-                "summary": "Get service details",
-                "description": "Retrieve details of a specific service. Available to both users and admins.",
+                "summary": "Get a specific service with area-based pricing and translations",
+                "description": "Retrieve a specific service with pricing based on user's area and content translated based on Accept-Language header.",
                 "operationId": "42775b582b563bc36a9e06ae850100bf",
                 "parameters": [
                     {
@@ -7199,11 +7264,21 @@
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects service names",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Service details retrieved successfully",
+                        "description": "Service retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7216,7 +7291,7 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Home Nursing"
+                                                    "example": "رعاية التمريض المنزلية"
                                                 },
                                                 "description": {
                                                     "type": "string",
@@ -7225,7 +7300,7 @@
                                                 "price": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 50
+                                                    "example": 120
                                                 },
                                                 "discount_price": {
                                                     "type": "number",
@@ -7239,6 +7314,25 @@
                                                 "category_id": {
                                                     "type": "integer",
                                                     "example": 1
+                                                },
+                                                "area_name": {
+                                                    "description": "Area name (only included when showing area-specific pricing)",
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                },
+                                                "translation": {
+                                                    "description": "Translation info (only included when translation exists)",
+                                                    "properties": {
+                                                        "locale": {
+                                                            "type": "string",
+                                                            "example": "ar"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "رعاية التمريض المنزلية"
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -7257,11 +7351,11 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
                     "404": {
                         "description": "Service not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [

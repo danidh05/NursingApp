@@ -14,7 +14,7 @@ class StorePopupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string', 'max:5000'], // Add max length for content
             'type' => ['required', 'string', 'in:info,warning,promo'],
@@ -37,7 +37,6 @@ class StorePopupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => 'An image is required for the popup.',
             'image.image' => 'The uploaded file must be an image.',
             'image.mimes' => 'The image must be a JPG, JPEG, or PNG file.',
             'image.max' => 'The image size must not exceed 2MB.',

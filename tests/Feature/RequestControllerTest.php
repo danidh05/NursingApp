@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Database\Seeders\RoleSeeder;
+use Mockery;
 
 class RequestControllerTest extends TestCase
 {
@@ -44,8 +45,19 @@ class RequestControllerTest extends TestCase
             ->create(['status' => Request::STATUS_SUBMITTED]); // Use new status constant
     }
 
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     public function test_user_can_create_request(): void
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+
         $response = $this->actingAs($this->user)->postJson('/api/requests', [
             'full_name' => 'John Doe',
             'phone_number' => '1234567890',
@@ -121,6 +133,11 @@ class RequestControllerTest extends TestCase
 
     public function test_admin_can_update_request_with_time_needed(): void
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+
         $request = Request::factory()->create(['status' => Request::STATUS_SUBMITTED]);
 
         $response = $this->actingAs($this->admin)

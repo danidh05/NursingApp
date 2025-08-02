@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
+use Mockery;
 
 class RequestServiceTest extends TestCase
 {
@@ -36,9 +37,20 @@ class RequestServiceTest extends TestCase
         );
     }
 
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     public function test_can_create_request(): void
     {
         Event::fake();
+
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
 
         $data = [
             'full_name' => 'John Doe',
@@ -84,6 +96,11 @@ class RequestServiceTest extends TestCase
 
     public function test_can_update_request_with_time_needed(): void
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+
         $request = Request::factory()->for($this->user)->create(['status' => Request::STATUS_SUBMITTED]);
 
         $data = [

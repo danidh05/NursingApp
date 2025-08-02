@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Services\ServiceTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Import AuthorizesRequests
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * Service Controller
@@ -26,31 +27,51 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Import AuthorizesRe
  * ## Pricing
  * - Regular price (required)
  * - Optional discount_price (must be less than regular price)
+ * 
+ * ## Translations
+ * - Supports English and Arabic translations
+ * - Automatic language detection via Accept-Language header
+ * - Fallback to English when translation not available
  */
 class ServiceController extends Controller
 {
-    use AuthorizesRequests; // Use the AuthorizesRequests trait
-    
+    use AuthorizesRequests;
+
+    public function __construct(
+        private ServiceTranslationService $serviceTranslationService
+    ) {}
+
     /**
      * @OA\Get(
      *     path="/api/services",
-     *     summary="List all services with area-based pricing",
-     *     description="Retrieve a list of all services with pricing based on user's area. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
+     *     summary="List all services with area-based pricing and translations",
+     *     description="Retrieve a list of all services with pricing based on user's area and content translated based on Accept-Language header. If user has an area assigned and area-specific pricing exists, shows area price and area name. Otherwise shows original price without area information.",
      *     tags={"Services"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar) - affects service names",
+     *         required=false,
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Services list retrieved successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="services", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية"),
      *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
      *                 @OA\Property(property="price", type="number", format="float", example=120.00, description="Area-specific price if user has area and pricing exists, otherwise original price"),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
      *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
      *                 @OA\Property(property="category_id", type="integer", example=1),
      *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
+     *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
+     *                     @OA\Property(property="locale", type="string", example="ar"),
+     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية")
+     *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
@@ -66,32 +87,19 @@ class ServiceController extends Controller
     {
         $user = Auth::user()->fresh();
         $userAreaId = $user->area_id;
+        $locale = app()->getLocale();
 
         $services = Service::with(['areaPrices' => function ($query) use ($userAreaId) {
             if ($userAreaId) {
                 $query->where('area_id', $userAreaId);
             }
-        }])->get();
+        }, 'translations'])->get();
 
-        // Transform the response to include area-specific pricing
-        $services->transform(function ($service) use ($userAreaId) {
-            $areaPrice = $service->areaPrices->first();
-            
-            if ($userAreaId && $areaPrice) {
-                // User has area and area pricing exists - show area-specific price
-                $service->price = $areaPrice->price;
-                $service->area_name = $areaPrice->area->name;
-            } else {
-                // User has no area or no area pricing exists - show original price
-                $service->price = $service->getOriginal('price');
-                // Don't include area_name when showing original price
-            }
-            
-            // Remove the areaPrices relationship from the response
-            unset($service->areaPrices);
-            
-            return $service;
-        });
+        $services = $this->serviceTranslationService->getServicesWithPricingAndTranslations(
+            $services, 
+            $userAreaId, 
+            $locale
+        );
 
         return response()->json(['services' => $services], 200);
     }
@@ -171,8 +179,8 @@ class ServiceController extends Controller
     /**
      * @OA\Get(
      *     path="/api/services/{id}",
-     *     summary="Get service details",
-     *     description="Retrieve details of a specific service. Available to both users and admins.",
+     *     summary="Get a specific service with area-based pricing and translations",
+     *     description="Retrieve a specific service with pricing based on user's area and content translated based on Accept-Language header.",
      *     tags={"Services"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -182,36 +190,63 @@ class ServiceController extends Controller
      *         description="Service ID",
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar) - affects service names",
+     *         required=false,
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Service details retrieved successfully",
+     *         description="Service retrieved successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="service", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية"),
      *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
-     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="price", type="number", format="float", example=120.00),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
      *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
      *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
+     *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
+     *                     @OA\Property(property="locale", type="string", example="ar"),
+     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية")
+     *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             )
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
      *         response=404,
      *         description="Service not found"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
      *     )
      * )
      */
     public function show($id)
     {
-        $service = Service::findOrFail($id);
+        $user = Auth::user()->fresh();
+        $userAreaId = $user->area_id;
+        $locale = app()->getLocale();
+
+        $service = Service::with(['areaPrices' => function ($query) use ($userAreaId) {
+            if ($userAreaId) {
+                $query->where('area_id', $userAreaId);
+            }
+        }, 'translations'])->findOrFail($id);
+
+        $service = $this->serviceTranslationService->getServiceWithPricingAndTranslations(
+            $service, 
+            $userAreaId, 
+            $locale
+        );
+
         return response()->json(['service' => $service], 200);
     }
 

@@ -13,7 +13,7 @@ class FAQRepository implements IFAQRepository
      */
     public function getAll(): Collection
     {
-        return FAQ::ordered()->get();
+        return FAQ::with('translations')->ordered()->get();
     }
 
     /**
@@ -21,7 +21,7 @@ class FAQRepository implements IFAQRepository
      */
     public function getActive(): Collection
     {
-        return FAQ::getActiveOrdered();
+        return FAQ::with('translations')->active()->ordered()->get();
     }
 
     /**
@@ -29,7 +29,7 @@ class FAQRepository implements IFAQRepository
      */
     public function findById(int $id): ?FAQ
     {
-        return FAQ::find($id);
+        return FAQ::with('translations')->find($id);
     }
 
     /**

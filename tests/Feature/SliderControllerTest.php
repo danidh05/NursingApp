@@ -193,7 +193,7 @@ class SliderControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['image', 'position']);
+            ->assertJsonValidationErrors(['position']);
     }
 
     public function test_create_slider_validation_rejects_invalid_image()

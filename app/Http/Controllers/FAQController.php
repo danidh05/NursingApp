@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreFAQRequest;
 use App\Http\Requests\UpdateFAQRequest;
 use App\Services\FAQService;
+use App\Services\FAQTranslationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,29 +18,42 @@ use Illuminate\Http\Request;
 class FAQController extends Controller
 {
     public function __construct(
-        private FAQService $faqService
+        private FAQService $faqService,
+        private FAQTranslationService $faqTranslationService
     ) {}
 
     /**
      * @OA\Get(
      *     path="/api/faqs",
-     *     summary="Get all active FAQs",
-     *     description="Retrieve all active FAQs ordered by their display order. Authentication required.",
+     *     summary="Get all active FAQs with translations",
+     *     description="Retrieve all active FAQs ordered by their display order with content translated based on Accept-Language header. Authentication required.",
      *     tags={"FAQs"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar) - affects FAQ content",
+     *         required=false,
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="List of active FAQs",
+     *         description="List of active FAQs with translations",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="FAQs retrieved successfully"),
      *             @OA\Property(property="data", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="question", type="string", example="What services do you offer?"),
-     *                 @OA\Property(property="answer", type="string", example="We offer a wide range of nursing services including home care, elderly care, and specialized medical assistance."),
+     *                 @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                 @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض"),
      *                 @OA\Property(property="order", type="integer", example=1),
      *                 @OA\Property(property="is_active", type="boolean", example=true),
+     *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
+     *                     @OA\Property(property="locale", type="string", example="ar"),
+     *                     @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                     @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض")
+     *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
@@ -53,7 +67,10 @@ class FAQController extends Controller
      */
     public function index(): JsonResponse
     {
+        $locale = app()->getLocale();
         $faqs = $this->faqService->getActiveFAQs();
+        
+        $faqs = $this->faqTranslationService->getFAQsWithTranslations($faqs, $locale);
         
         return response()->json([
             'success' => true,
@@ -64,6 +81,7 @@ class FAQController extends Controller
                 'answer' => $faq->answer,
                 'order' => $faq->order,
                 'is_active' => $faq->is_active,
+                'translation' => $faq->translation,
                 'created_at' => $faq->created_at->toISOString(),
                 'updated_at' => $faq->updated_at->toISOString(),
             ])
@@ -73,8 +91,8 @@ class FAQController extends Controller
     /**
      * @OA\Get(
      *     path="/api/faqs/{id}",
-     *     summary="Get a specific FAQ",
-     *     description="Retrieve a specific FAQ by its ID. Authentication required.",
+     *     summary="Get a specific FAQ with translations",
+     *     description="Retrieve a specific FAQ by its ID with content translated based on Accept-Language header. Authentication required.",
      *     tags={"FAQs"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -84,19 +102,31 @@ class FAQController extends Controller
      *         description="FAQ ID",
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar) - affects FAQ content",
+     *         required=false,
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="FAQ details",
+     *         description="FAQ details with translations",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="FAQ retrieved successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="question", type="string", example="What services do you offer?"),
-     *                 @OA\Property(property="answer", type="string", example="We offer a wide range of nursing services including home care, elderly care, and specialized medical assistance."),
+     *                 @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                 @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض"),
      *                 @OA\Property(property="order", type="integer", example=1),
      *                 @OA\Property(property="is_active", type="boolean", example=true),
+     *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
+     *                     @OA\Property(property="locale", type="string", example="ar"),
+     *                     @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                     @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض")
+     *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             )
@@ -104,11 +134,7 @@ class FAQController extends Controller
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="FAQ not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="FAQ not found")
-     *         )
+     *         description="FAQ not found"
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -118,6 +144,7 @@ class FAQController extends Controller
      */
     public function show(int $id): JsonResponse
     {
+        $locale = app()->getLocale();
         $faq = $this->faqService->getFAQById($id);
         
         if (!$faq) {
@@ -127,6 +154,8 @@ class FAQController extends Controller
             ], 404);
         }
 
+        $faq = $this->faqTranslationService->getFAQWithTranslations($faq, $locale);
+        
         return response()->json([
             'success' => true,
             'message' => 'FAQ retrieved successfully',
@@ -136,6 +165,7 @@ class FAQController extends Controller
                 'answer' => $faq->answer,
                 'order' => $faq->order,
                 'is_active' => $faq->is_active,
+                'translation' => $faq->translation,
                 'created_at' => $faq->created_at->toISOString(),
                 'updated_at' => $faq->updated_at->toISOString(),
             ]

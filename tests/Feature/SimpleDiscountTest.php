@@ -11,6 +11,7 @@ use App\Models\ServiceAreaPrice;
 use App\Models\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Mockery;
 
 class SimpleDiscountTest extends TestCase
 {
@@ -60,9 +61,20 @@ class SimpleDiscountTest extends TestCase
         ]);
     }
 
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     /** @test */
     public function user_can_create_request_with_calculated_price()
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+
         Sanctum::actingAs($this->user);
 
         $requestData = [

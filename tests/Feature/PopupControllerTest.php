@@ -288,7 +288,7 @@ class PopupControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['image', 'title', 'content', 'type']);
+            ->assertJsonValidationErrors(['title', 'content', 'type']);
     }
 
     public function test_create_popup_validation_rejects_invalid_type()

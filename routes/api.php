@@ -58,13 +58,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationsController::class, 'markAsRead']); // Mark a notification as read
     Route::delete('/notifications/{id}', [NotificationsController::class, 'destroy']); // Delete a notification
     
-    // Routes accessible by both users and admins
+    // Routes accessible by both users and admins (with translation support)
     Route::get('/nurses', [NurseController::class, 'index']); // View all nurses
     Route::get('/nurses/{id}', [NurseController::class, 'show']); // View a specific nurse's details
 
-    // Services accessible by both users and admins
-    Route::get('/services', [ServiceController::class, 'index']); // List all services
-    Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
+    // Services accessible by both users and admins (with translation support)
+    Route::middleware(['auth:sanctum', 'detect.language'])->group(function () {
+        Route::get('/services', [ServiceController::class, 'index']); // List all services
+        Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
+        
+        // FAQ APIs accessible by both users and admins (with translation support)
+        Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
+        Route::get('/faqs/{id}', [FAQController::class, 'show']); // Get a specific FAQ
+    });
 
     Route::get('/requests', [RequestController::class, 'index']); // List all requests
     Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
@@ -78,10 +84,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Content APIs accessible by both users and admins
     Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
     Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
-    
-    // FAQ APIs accessible by both users and admins
-    Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
-    Route::get('/faqs/{id}', [FAQController::class, 'show']); // Get a specific FAQ
     
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {

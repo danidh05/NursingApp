@@ -39,6 +39,11 @@ class ProcessBirthdaysCommandTest extends TestCase
     /** @test */
     public function command_processes_users_with_birthdays_today()
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+
         // Arrange: Create users with birthdays today
         $user1 = User::factory()->create([
             'name' => 'John Doe',

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Request extends Model
 {
     use SoftDeletes;
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     // Define status constants for order tracking
     public const STATUS_SUBMITTED = 'submitted';        // User submitted the request

@@ -14,7 +14,7 @@ class StoreSliderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'position' => ['required', 'integer', 'min:0', 'unique:sliders,position'],
@@ -25,7 +25,6 @@ class StoreSliderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => 'An image is required for the slider.',
             'image.image' => 'The uploaded file must be an image.',
             'image.mimes' => 'The image must be a JPG, JPEG, or PNG file.',
             'image.max' => 'The image size must not exceed 2MB.',

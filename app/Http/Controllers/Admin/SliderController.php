@@ -71,8 +71,8 @@ class SliderController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"image", "position"},
-     *                 @OA\Property(property="image", type="string", format="binary", description="Slider image file (JPG, JPEG, PNG, max 2MB)"),
+     *                 required={"position"},
+     *                 @OA\Property(property="image", type="string", format="binary", description="Slider image file (JPG, JPEG, PNG, max 2MB) - Optional"),
      *                 @OA\Property(property="title", type="string", example="Professional Nursing Care", maxLength=255, nullable=true),
      *                 @OA\Property(property="subtitle", type="string", example="Trusted by thousands of families", maxLength=255, nullable=true),
      *                 @OA\Property(property="position", type="integer", example=1, minimum=0, description="Display order position"),

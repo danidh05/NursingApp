@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FAQ extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     /**
      * The table associated with the model.

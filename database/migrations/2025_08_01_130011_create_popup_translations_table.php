@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('popup_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('popup_id')->constrained()->onDelete('cascade');
+            $table->string('locale', 5); // 'en', 'ar', etc.
+            $table->string('title');
+            $table->text('content');
+            $table->timestamps();
+            
+            // Ensure unique combination of popup_id and locale
+            $table->unique(['popup_id', 'locale']);
+            $table->index(['locale']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('popup_translations');
+    }
+};

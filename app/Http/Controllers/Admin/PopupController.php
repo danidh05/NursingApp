@@ -73,8 +73,8 @@ class PopupController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"image", "title", "content", "type"},
-     *                 @OA\Property(property="image", type="string", format="binary", description="Popup image file (JPG, JPEG, PNG, max 2MB)"),
+     *                 required={"title", "content", "type"},
+     *                 @OA\Property(property="image", type="string", format="binary", description="Popup image file (JPG, JPEG, PNG, max 2MB) - Optional"),
      *                 @OA\Property(property="title", type="string", example="Welcome to Our App", maxLength=255),
      *                 @OA\Property(property="content", type="string", example="We are excited to announce our new features and improvements."),
      *                 @OA\Property(property="type", type="string", enum={"info","warning","promo"}, example="info", description="Popup type"),

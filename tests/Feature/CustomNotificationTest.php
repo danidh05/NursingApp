@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
+use Mockery;
 
 class CustomNotificationTest extends TestCase
 {
@@ -32,9 +33,20 @@ class CustomNotificationTest extends TestCase
         $this->user->save();
     }
 
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     public function test_admin_can_send_custom_notification()
     {
         Event::fake();
+        
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
         
         Sanctum::actingAs($this->admin, ['*']);
 
@@ -62,6 +74,11 @@ class CustomNotificationTest extends TestCase
 
     public function test_custom_notification_creates_database_record()
     {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotificationToExternalUser')
+            ->andReturn(['success' => true]);
+        
         Sanctum::actingAs($this->admin, ['*']);
 
         // Trigger the event directly to test the listener
