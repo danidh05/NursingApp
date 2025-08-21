@@ -22,6 +22,8 @@ use App\Policies\AboutPolicy;
 use App\Policies\NurseRatingPolicy;
 use App\Policies\SliderPolicy;
 use App\Policies\PopupPolicy;
+use App\Models\ChatThread;
+use App\Policies\ChatThreadPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,7 @@ class AuthServiceProvider extends ServiceProvider
         Rating::class => NurseRatingPolicy::class,
         Slider::class => SliderPolicy::class,
         Popup::class => PopupPolicy::class,
+        ChatThread::class => ChatThreadPolicy::class,
     ];
 
     /**

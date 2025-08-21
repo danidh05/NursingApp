@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Nursing App API Documentation",
-        "description": "API documentation for the Nursing App - A platform connecting users with nursing services",
+        "description": "API documentation for the Nursing App - A platform connecting users with nursing services.\n *     \n *     🔌 **Real-time Communication**\n *     This API also supports WebSocket channels for real-time updates.\n *     See the 'Real-time Events' tag for event schemas.\n *     \n *     **WebSocket Channels:**\n *     - Chat: private-chat.{threadId}\n *     - Full documentation in routes/channels.php\n *     \n *     **Frontend Integration:**\n *     Subscribe to channels using Laravel Echo:\n *     Echo.private('chat.123').listen('MessageCreated', callback)\n *     ",
         "contact": {
             "name": "API Support",
             "email": "support@nursingapp.com"
@@ -4949,6 +4949,354 @@
                 ]
             }
         },
+        "/api/requests/{id}/chat/open": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Open chat thread for service request",
+                "description": "Opens a new chat thread for a service request or returns existing thread. Only the request owner or an admin can open a chat thread. Creates a temporary communication channel for real-time messaging during service delivery.",
+                "operationId": "5db098a1eab2807fea1565d34849917b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service request ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chat thread opened successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Chat thread opened successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "threadId": {
+                                                    "description": "Unique chat thread identifier",
+                                                    "type": "integer",
+                                                    "example": 123
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "404": {
+                        "description": "Service request not found"
+                    },
+                    "501": {
+                        "$ref": "#/components/responses/ChatFeatureDisabled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chat/threads/{threadId}/messages": {
+            "get": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "List chat messages with pagination",
+                "description": "Retrieves paginated messages from a chat thread. Messages are ordered by ID descending (newest first) and support cursor-based pagination for efficient loading of large conversation histories.",
+                "operationId": "4b65042f8efe70802506bf1f333567d7",
+                "parameters": [
+                    {
+                        "name": "threadId",
+                        "in": "path",
+                        "description": "Chat thread ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Message ID for cursor-based pagination (exclusive)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 456
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of messages per page (max 50, default 20)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 50,
+                            "minimum": 1,
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Messages retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "messages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/ChatMessage"
+                                                    }
+                                                },
+                                                "nextCursor": {
+                                                    "description": "Next cursor for pagination (null if no more messages)",
+                                                    "type": "string",
+                                                    "example": "123",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "404": {
+                        "description": "Chat thread not found"
+                    },
+                    "501": {
+                        "$ref": "#/components/responses/ChatFeatureDisabled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Post new message to chat thread",
+                "description": "Posts a new message to a chat thread. Supports three message types: text, image, and location. For image messages, mediaPath must be a valid storage path. For location messages, lat and lng coordinates are required. Messages trigger real-time broadcasting to thread participants.",
+                "operationId": "51f350ea38d73ecdc058cf5f216d6df3",
+                "parameters": [
+                    {
+                        "name": "threadId",
+                        "in": "path",
+                        "description": "Chat thread ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessageRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message posted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message posted successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "Unique message identifier",
+                                                    "type": "integer",
+                                                    "example": 789
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "404": {
+                        "description": "Chat thread not found"
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid message data or media path",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "description": "Validation error details",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "501": {
+                        "$ref": "#/components/responses/ChatFeatureDisabled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chat/threads/{threadId}/close": {
+            "patch": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Close chat thread and trigger cleanup",
+                "description": "Closes a chat thread and triggers automatic cleanup of messages and media. Once closed, no new messages can be posted. Background job processes media deletion and optional message redaction based on configuration.",
+                "operationId": "87d05630c6d7465a650f2eb7a3e858f5",
+                "parameters": [
+                    {
+                        "name": "threadId",
+                        "in": "path",
+                        "description": "Chat thread ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chat thread closed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Chat thread closed successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "status": {
+                                                    "description": "Thread status after closure",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "open",
+                                                        "closed"
+                                                    ],
+                                                    "example": "closed"
+                                                },
+                                                "closed_at": {
+                                                    "description": "Thread closure timestamp",
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-01-20T11:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "404": {
+                        "description": "Chat thread not found"
+                    },
+                    "501": {
+                        "$ref": "#/components/responses/ChatFeatureDisabled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/contact": {
             "post": {
                 "tags": [
@@ -8471,6 +8819,280 @@
         }
     },
     "components": {
+        "schemas": {
+            "ChatMessage": {
+                "properties": {
+                    "id": {
+                        "description": "Unique message identifier",
+                        "type": "integer",
+                        "example": 789
+                    },
+                    "type": {
+                        "description": "Message type",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "image",
+                            "location"
+                        ],
+                        "example": "text"
+                    },
+                    "text": {
+                        "description": "Text content for text messages",
+                        "type": "string",
+                        "example": "Hello, how can I help?",
+                        "nullable": true
+                    },
+                    "lat": {
+                        "description": "Latitude for location messages",
+                        "type": "number",
+                        "format": "float",
+                        "example": 40.7128,
+                        "nullable": true
+                    },
+                    "lng": {
+                        "description": "Longitude for location messages",
+                        "type": "number",
+                        "format": "float",
+                        "example": -74.006,
+                        "nullable": true
+                    },
+                    "media_url": {
+                        "description": "Signed URL for image messages (temporary access)",
+                        "type": "string",
+                        "example": "https://storage.googleapis.com/bucket/chats/123/image.jpg?signed=...",
+                        "nullable": true
+                    },
+                    "sender_id": {
+                        "description": "User ID of message sender",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Message creation timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-20T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "ChatThread": {
+                "properties": {
+                    "id": {
+                        "description": "Unique thread identifier",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "request_id": {
+                        "description": "Associated service request ID",
+                        "type": "integer",
+                        "example": 456
+                    },
+                    "admin_id": {
+                        "description": "Admin user ID (if admin opened thread)",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "client_id": {
+                        "description": "Client user ID",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "status": {
+                        "description": "Thread status",
+                        "type": "string",
+                        "enum": [
+                            "open",
+                            "closed"
+                        ],
+                        "example": "open"
+                    },
+                    "opened_at": {
+                        "description": "Thread creation timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-20T10:00:00Z"
+                    },
+                    "closed_at": {
+                        "description": "Thread closure timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-20T11:00:00Z",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MessageRequest": {
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "description": "Message type",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "image",
+                            "location"
+                        ],
+                        "example": "text"
+                    },
+                    "text": {
+                        "description": "Text content (required for text messages)",
+                        "type": "string",
+                        "example": "Hello, I need assistance",
+                        "nullable": true
+                    },
+                    "lat": {
+                        "description": "Latitude coordinate (required for location messages)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 40.7128,
+                        "nullable": true
+                    },
+                    "lng": {
+                        "description": "Longitude coordinate (required for location messages)",
+                        "type": "number",
+                        "format": "float",
+                        "example": -74.006,
+                        "nullable": true
+                    },
+                    "mediaPath": {
+                        "description": "Storage path for image (required for image messages, must belong to thread)",
+                        "type": "string",
+                        "example": "chats/123/image.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MessageCreatedEvent": {
+                "properties": {
+                    "id": {
+                        "description": "Message ID",
+                        "type": "integer",
+                        "example": 789
+                    },
+                    "type": {
+                        "description": "Message type",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "image",
+                            "location"
+                        ],
+                        "example": "text"
+                    },
+                    "text": {
+                        "description": "Text content",
+                        "type": "string",
+                        "example": "Hello, how can I help?",
+                        "nullable": true
+                    },
+                    "lat": {
+                        "description": "Latitude coordinate",
+                        "type": "number",
+                        "format": "float",
+                        "example": 40.7128,
+                        "nullable": true
+                    },
+                    "lng": {
+                        "description": "Longitude coordinate",
+                        "type": "number",
+                        "format": "float",
+                        "example": -74.006,
+                        "nullable": true
+                    },
+                    "media_url": {
+                        "description": "Signed URL for media",
+                        "type": "string",
+                        "example": "https://storage.googleapis.com/bucket/chats/123/image.jpg?signed=...",
+                        "nullable": true
+                    },
+                    "sender_id": {
+                        "description": "Sender user ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Message timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-20T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "ThreadClosedEvent": {
+                "properties": {
+                    "thread_id": {
+                        "description": "Thread ID that was closed",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "closed_at": {
+                        "description": "Closure timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-20T11:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "responses": {
+            "ChatFeatureDisabled": {
+                "description": "Chat feature is disabled",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Chat feature is disabled"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "User not authenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unauthenticated"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "Forbidden": {
+                "description": "User not authorized",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "This action is unauthorized"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -8531,6 +9153,10 @@
         {
             "name": "Admin",
             "description": "Admin-only management endpoints"
+        },
+        {
+            "name": "Chat",
+            "description": "Temporary request-scoped chat endpoints for real-time communication"
         },
         {
             "name": "FAQs",

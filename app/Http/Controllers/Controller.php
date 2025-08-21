@@ -10,7 +10,20 @@ use Illuminate\Routing\Controller as BaseController;
  * @OA\Info(
  *     version="1.0.0",
  *     title="Nursing App API Documentation",
- *     description="API documentation for the Nursing App - A platform connecting users with nursing services",
+ *     description="API documentation for the Nursing App - A platform connecting users with nursing services.
+ *     
+ *     🔌 **Real-time Communication**
+ *     This API also supports WebSocket channels for real-time updates.
+ *     See the 'Real-time Events' tag for event schemas.
+ *     
+ *     **WebSocket Channels:**
+ *     - Chat: private-chat.{threadId}
+ *     - Full documentation in routes/channels.php
+ *     
+ *     **Frontend Integration:**
+ *     Subscribe to channels using Laravel Echo:
+ *     Echo.private('chat.123').listen('MessageCreated', callback)
+ *     ",
  *     @OA\Contact(
  *         email="support@nursingapp.com",
  *         name="API Support"
@@ -68,6 +81,39 @@ use Illuminate\Routing\Controller as BaseController;
  * @OA\Tag(
  *     name="Admin",
  *     description="Admin-only management endpoints"
+ * )
+ * @OA\Tag(
+ *     name="Chat",
+ *     description="Temporary request-scoped chat endpoints for real-time communication"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Real-time Events",
+ *     description="WebSocket events and broadcasting channels for real-time communication"
+ * )
+ * 
+ * @OA\Response(
+ *     response="ChatFeatureDisabled",
+ *     description="Chat feature is disabled",
+ *     @OA\JsonContent(
+ *         @OA\Property(property="message", type="string", example="Chat feature is disabled")
+ *     )
+ * )
+ * 
+ * @OA\Response(
+ *     response="Unauthorized",
+ *     description="User not authenticated",
+ *     @OA\JsonContent(
+ *         @OA\Property(property="message", type="string", example="Unauthenticated")
+ *     )
+ * )
+ * 
+ * @OA\Response(
+ *     response="Forbidden",
+ *     description="User not authorized",
+ *     @OA\JsonContent(
+ *         @OA\Property(property="message", type="string", example="This action is unauthorized")
+ *     )
  * )
  */
 class Controller extends BaseController

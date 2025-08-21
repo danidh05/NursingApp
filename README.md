@@ -54,6 +54,60 @@
     -   Soft-delete (archive) any request (removes from admin view, but user can still see)
     -   Cannot view soft-deleted requests
 
+## Temporary Request-Scoped Chat (Feature Gated)
+
+-   **Feature Flag:** Controlled by `CHAT_ENABLED` environment variable (default: `false`)
+-   **Scope:** Temporary chat threads linked to specific service requests
+-   **Participants:** Admin ↔ Client communication during request lifecycle
+-   **Message Types:** Text, images, and location sharing
+-   **Real-time:** WebSocket broadcasting via Laravel Echo/Reverb
+-   **Media Storage:** Firebase/Google Cloud Storage with signed URLs
+-   **Auto-cleanup:** Messages and media automatically purged when thread closes
+-   **Security:** Policy-based authorization, media path validation, rate limiting
+
+### **Real-time Communication (WebSockets)**
+
+The chat feature uses Laravel Broadcasting for real-time communication.
+
+#### **Channel Naming Convention**
+
+-   **Format**: `private-chat.{threadId}`
+-   **Example**: `private-chat.123` for thread ID 123
+-   **Frontend Subscription**: `Echo.private('chat.123')`
+
+#### **Events to Listen For**
+
+-   **MessageCreated**: New message in thread
+-   **ThreadClosed**: Thread closure notification
+
+#### **Frontend Integration Example**
+
+```javascript
+// Subscribe to chat thread 123
+Echo.private("chat.123")
+    .listen("MessageCreated", (event) => {
+        // Handle new message
+        console.log("New message:", event);
+    })
+    .listen("ThreadClosed", (event) => {
+        // Handle thread closure
+        console.log("Thread closed:", event);
+    });
+```
+
+#### **Security Requirements**
+
+-   All channels are private (require authentication)
+-   JWT token must be valid
+-   User must be participant in the thread
+-   Policy check: `$user->can('view', $thread)`
+
+#### **Complete Documentation**
+
+-   **API Endpoints**: See Swagger UI at `/api/documentation`
+-   **WebSocket Details**: See `routes/channels.php` for full implementation
+-   **Event Schemas**: Available in Swagger under "Real-time Events" tag
+
 ## Request Status & Notifications
 
 -   Requests have statuses: pending, approved, rejected, completed
@@ -91,6 +145,8 @@
 -   **Database:** MySQL/PostgreSQL with migrations
 -   **Authentication:** Laravel Sanctum
 -   **SMS/WhatsApp:** Twilio integration
+-   **Real-time Communication:** Laravel Broadcasting (Echo/Reverb)
+-   **Media Storage:** Firebase/Google Cloud Storage
 -   **Testing:** PHPUnit with comprehensive test coverage
 -   **API:** RESTful API design
 
@@ -127,6 +183,12 @@ APP_ENV=local
 APP_KEY=base64:your_app_key
 APP_DEBUG=true
 APP_URL=http://localhost:8000
+
+# Chat Feature (Optional)
+CHAT_ENABLED=false
+CHAT_SIGNED_URL_TTL=900
+CHAT_REDACT_MESSAGES=true
+CHAT_ALLOWED_IMAGE_MIME=image/jpeg,image/png,image/webp
 ```
 
 ## API Endpoints
@@ -187,6 +249,13 @@ APP_URL=http://localhost:8000
 -   `PUT /api/admin/requests/{id}` - Update request (admin only)
 -   `DELETE /api/admin/requests/{id}` - Soft delete request (admin only)
 
+### Chat Management (Feature Gated)
+
+-   `POST /api/requests/{id}/chat/open` - Open chat thread for request
+-   `GET /api/chat/threads/{threadId}/messages` - List chat messages with pagination
+-   `POST /api/chat/threads/{threadId}/messages` - Post new message (text/image/location)
+-   `PATCH /api/chat/threads/{threadId}/close` - Close chat thread and trigger cleanup
+
 ### Notifications
 
 -   `GET /api/notifications` - List user notifications
@@ -216,6 +285,7 @@ The application includes comprehensive test coverage for:
 -   Notifications
 -   Role-based access control
 -   Event broadcasting
+-   Chat functionality (threads, messages, media, cleanup)
 
 ## Business Logic Features
 
@@ -227,6 +297,15 @@ The application includes comprehensive test coverage for:
 4. Admin can set time needed for arrival
 5. Notifications are sent to users for status changes
 6. Requests can be soft-deleted by admins (archived but still visible to users)
+
+### Chat Workflow (Feature Gated)
+
+1. User or admin opens a chat thread for a specific request
+2. Real-time communication via WebSocket broadcasting
+3. Support for text messages, image sharing, and location coordinates
+4. Media files stored temporarily with signed URLs for security
+5. Thread closure triggers automatic cleanup of messages and media
+6. Configurable message redaction for privacy compliance
 
 ### User Experience
 
@@ -252,6 +331,10 @@ The application includes comprehensive test coverage for:
 -   Input validation on all endpoints
 -   Secure password handling with hashing
 -   API token authentication via Sanctum
+-   Chat feature gated behind environment variable
+-   Media path validation to prevent directory traversal
+-   Signed URLs with configurable TTL for media access
+-   Policy-based authorization for chat operations
 
 ---
 
@@ -266,7 +349,38 @@ All features above are covered by automated tests, ensuring:
 -   Database integrity
 -   API endpoint functionality
 
-**Current Test Status:** 77 tests passing (252 assertions)
+**Current Test Status:** 107 tests passing (355 assertions)
+
+**Chat Feature Tests:** 30 tests passing (103 assertions)
+
+---
+
+## Deployment Notes
+
+### Chat Feature Rollout
+
+The chat feature is designed for safe, gradual deployment:
+
+1. **Phase 1:** Deploy migrations and code with `CHAT_ENABLED=false`
+2. **Phase 2:** Enable in staging environment for testing
+3. **Phase 3:** Gradually enable in production with monitoring
+4. **Fallback:** Storage lifecycle rules provide cleanup if job fails
+
+### Environment Configuration
+
+```bash
+# Enable chat feature
+CHAT_ENABLED=true
+
+# Configure media URL TTL (seconds)
+CHAT_SIGNED_URL_TTL=900
+
+# Message redaction on cleanup
+CHAT_REDACT_MESSAGES=true
+
+# Allowed image MIME types
+CHAT_ALLOWED_IMAGE_MIME=image/jpeg,image/png,image/webp
+```
 
 ---
 

@@ -11,6 +11,8 @@ use App\Listeners\SendUserRequestedNotification;
 use App\Listeners\SendAdminUpdatedNotification;
 use App\Listeners\SendCustomNotification;
 use App\Listeners\SendBirthdayNotification;
+use App\Events\Chat\MessageCreated;
+use App\Events\Chat\ThreadClosed;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserBirthday::class => [
             SendBirthdayNotification::class,
+        ],
+        // Chat events are broadcast-only; listeners optional
+        MessageCreated::class => [
+        ],
+        ThreadClosed::class => [
         ],
     ];
 

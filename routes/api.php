@@ -182,5 +182,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/contacts', [\App\Http\Controllers\Admin\ContactController::class, 'index']); // List all contact submissions
         Route::get('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'show']); // Get specific contact submission
         Route::delete('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy']); // Delete contact submission
-    });
+
+            });
+
+    // Temporary request-scoped chat (feature gated) - accessible to both users and admins
+    Route::post('/requests/{id}/chat/open', [\App\Http\Controllers\ChatController::class, 'open']);
+    Route::get('/chat/threads/{threadId}/messages', [\App\Http\Controllers\ChatController::class, 'listMessages']);
+    Route::post('/chat/threads/{threadId}/messages', [\App\Http\Controllers\ChatController::class, 'postMessage']);
+    Route::patch('/chat/threads/{threadId}/close', [\App\Http\Controllers\ChatController::class, 'close']);
 });
