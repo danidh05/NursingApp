@@ -293,6 +293,12 @@ class RegionBasedPricingTest extends TestCase
     /** @test */
     public function user_can_register_with_area_selection()
     {
+        // Mock TwilioService to prevent 500 errors
+        $this->mock(\App\Services\TwilioService::class, function ($mock) {
+            $mock->shouldReceive('sendVerificationCode')
+                 ->andReturn(true);
+        });
+
         $beirut = Area::where('name', 'Beirut')->first();
 
         $response = $this->postJson('/api/register', [

@@ -62,8 +62,13 @@ class RequestController extends Controller
      *                 @OA\Property(property="latitude", type="number", format="float", example=40.7128, nullable=true, description="From user location info, not stored in requests table"),
      *                 @OA\Property(property="longitude", type="number", format="float", example=-74.0060, nullable=true, description="From user location info, not stored in requests table"),
      *                 @OA\Property(property="time_needed_to_arrive", type="integer", example=30, nullable=true, description="Cached time in minutes, decreases over time, auto-updates status to in_progress when reaches 0"),
+     *                 @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on request area"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time"),
+     *                 @OA\Property(property="area", type="object", description="Area information for the request",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Beirut")
+     *                 ),
      *                 @OA\Property(property="services", type="array", @OA\Items(
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Home Nursing"),
@@ -87,6 +92,47 @@ class RequestController extends Controller
     }
     
     /**
+     * @OA\Get(
+     *     path="/api/requests/default-area",
+     *     summary="Get user's default area for request creation",
+     *     description="Get the user's registered area to use as default in the request creation form. This allows the frontend to pre-select the user's area while still allowing them to change it.",
+     *     tags={"Requests"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Default area retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="default_area", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function getDefaultArea(): JsonResponse
+    {
+        $user = Auth::user();
+        $defaultArea = null;
+        
+        if ($user->area_id) {
+            $area = \App\Models\Area::find($user->area_id);
+            if ($area) {
+                $defaultArea = [
+                    'id' => $area->id,
+                    'name' => $area->name,
+                ];
+            }
+        }
+        
+        return response()->json(['default_area' => $defaultArea]);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/requests",
      *     summary="Create a new request",
@@ -102,6 +148,7 @@ class RequestController extends Controller
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
      *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Description of the care needed"),
      *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Array of service IDs"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing. If not provided, uses user's registered area"),
      *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Preferred nurse gender"),
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
      *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),
@@ -115,6 +162,7 @@ class RequestController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="Area ID for region-specific pricing"),
      *             @OA\Property(property="full_name", type="string", example="John Doe"),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", nullable=true),
@@ -126,8 +174,13 @@ class RequestController extends Controller
      *             @OA\Property(property="location", type="string", example="123 Main St, New York"),
      *             @OA\Property(property="latitude", type="number", format="float", example=40.7128),
      *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060),
+     *             @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on selected area"),
      *             @OA\Property(property="created_at", type="string", format="date-time"),
      *             @OA\Property(property="updated_at", type="string", format="date-time"),
+     *             @OA\Property(property="area", type="object", description="Area information for the request",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *             ),
      *             @OA\Property(property="services", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Nursing"),
@@ -193,8 +246,13 @@ class RequestController extends Controller
      *             @OA\Property(property="latitude", type="number", format="float", example=40.7128, nullable=true, description="From user's location settings"),
      *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060, nullable=true, description="From user's location settings"),
      *             @OA\Property(property="time_needed_to_arrive", type="integer", example=30, nullable=true, description="Live countdown in minutes, auto-triggers status change to in_progress when reaches 0"),
+     *             @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on request area"),
      *             @OA\Property(property="created_at", type="string", format="date-time"),
      *             @OA\Property(property="updated_at", type="string", format="date-time"),
+     *             @OA\Property(property="area", type="object", description="Area information for the request",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *                 ),
      *             @OA\Property(property="services", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Home Nursing"),
@@ -400,11 +458,10 @@ class RequestController extends Controller
      */
     private function calculateAndSetRequestPrice(\App\Models\Request $request): void
     {
-        $user = $request->user;
         $serviceIds = $request->services->pluck('id')->toArray();
         
         $serviceAreaPrices = \App\Models\ServiceAreaPrice::whereIn('service_id', $serviceIds)
-                                       ->where('area_id', $user->area_id)
+                                       ->where('area_id', $request->area_id)
                                        ->get();
 
         $totalPrice = 0;

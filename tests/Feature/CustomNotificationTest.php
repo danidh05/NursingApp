@@ -22,6 +22,9 @@ class CustomNotificationTest extends TestCase
     {
         parent::setUp();
 
+        // Set queue connection to sync for immediate execution
+        config(['queue.default' => 'sync']);
+
         // Create an admin user
         $this->admin = User::factory()->create();
         $this->admin->role_id = 1; // Admin role

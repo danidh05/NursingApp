@@ -4,11 +4,29 @@ use Illuminate\Support\Facades\Broadcast;
 
 /**
  * User-specific private channel for personal notifications
- * Channel: App.Models.User.{id}
+ * Channel: user.{id}
  * Usage: Private user notifications, profile updates, etc.
  */
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+Broadcast::channel('user.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+/**
+ * Admin notifications channel
+ * Channel: admin.notifications
+ * Usage: Admin dashboard notifications
+ */
+Broadcast::channel('admin.notifications', function ($user) {
+    return $user->role_id === 1; // Admin role
+});
+
+/**
+ * General notifications channel
+ * Channel: notifications
+ * Usage: System-wide notifications
+ */
+Broadcast::channel('notifications', function ($user) {
+    return true; // All authenticated users can access
 });
 
 /**

@@ -17,6 +17,10 @@ class ProcessBirthdaysCommandTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Set queue connection to sync for immediate execution
+        config(['queue.default' => 'sync']);
+        
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
     }
 

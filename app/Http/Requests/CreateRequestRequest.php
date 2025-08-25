@@ -21,6 +21,7 @@ class CreateRequestRequest extends FormRequest
             'problem_description' => ['required', 'string'],
             'service_ids' => ['required', 'array', 'min:1'],
             'service_ids.*' => ['exists:services,id'],
+            'area_id' => ['nullable', 'integer', 'exists:areas,id'],
             'nurse_gender' => ['nullable', 'string', 'in:male,female,any'],
             'time_type' => ['nullable', 'string', 'in:full-time,part-time'],
             'scheduled_time' => ['nullable', 'date', 'after_or_equal:' . now()->subSeconds(30)->toDateTimeString()],
@@ -44,6 +45,25 @@ class CreateRequestRequest extends FormRequest
                 
                 if ($isScheduled && empty($data['ending_time'])) {
                     $validator->errors()->add('ending_time', 'Ending time is required for scheduled appointments.');
+                }
+            }
+
+            // Validate that the selected area has pricing for all requested services
+            // If area_id is not provided, use the authenticated user's registered area
+            $areaId = $data['area_id'] ?? auth()->user()?->area_id;
+            
+            if (!empty($areaId) && !empty($data['service_ids'])) {
+                $serviceIds = $data['service_ids'];
+                
+                $missingPricing = \App\Models\ServiceAreaPrice::whereIn('service_id', $serviceIds)
+                    ->where('area_id', $areaId)
+                    ->pluck('service_id')
+                    ->toArray();
+                
+                $missingServices = array_diff($serviceIds, $missingPricing);
+                
+                if (!empty($missingServices)) {
+                    $validator->errors()->add('area_id', 'The selected area does not have pricing configured for all requested services.');
                 }
             }
         });

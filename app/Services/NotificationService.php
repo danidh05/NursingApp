@@ -18,7 +18,7 @@ class NotificationService
 
     public function createNotification(User $user, string $title, string $message, string $type = 'info', ?int $sentByAdminId = null): Notification
     {
-        // Create notification in database
+        // Create notification in database first
         $notification = Notification::create([
             'user_id' => $user->id,
             'title' => $title,
@@ -27,24 +27,34 @@ class NotificationService
             'sent_by_admin_id' => $sentByAdminId,
         ]);
 
-        // Send OneSignal push notification using user ID
-        $this->oneSignalService->sendToUser(
-            $user,
-            $title,
-            $message,
-            [
+        // Send OneSignal push notification using user ID (handle failures gracefully)
+        try {
+            $this->oneSignalService->sendToUser(
+                $user,
+                $title,
+                $message,
+                [
+                    'notification_id' => $notification->id,
+                    'notification_type' => $type,
+                    'title' => $title
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::warning('Failed to send OneSignal notification', [
                 'notification_id' => $notification->id,
-                'notification_type' => $type,
-                'title' => $title
-            ]
-        );
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            // Don't re-throw - notification was created successfully in database
+        }
 
         // Broadcast via Pusher for real-time updates when app is open
         try {
-            broadcast(new NewNotification($notification->toArray()))->toOthers();
+            broadcast(new NewNotification($notification->toArray(), $user->id))->toOthers();
         } catch (\Exception $e) {
             Log::warning('Failed to broadcast notification', [
                 'notification_id' => $notification->id,
+                'user_id' => $user->id,
                 'error' => $e->getMessage()
             ]);
         }
@@ -105,4 +115,6 @@ class NotificationService
             ->get()
             ->toArray();
     }
+
+
 }

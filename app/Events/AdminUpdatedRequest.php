@@ -4,7 +4,7 @@ namespace App\Events;
 
 use App\Models\Request; // Correct model import
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -37,9 +37,12 @@ class AdminUpdatedRequest implements ShouldBroadcast
      *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-    public function broadcastOn()
+    public function broadcastOn(): array
     {
-        return new Channel('user-channel.' . $this->request->user_id); // Broadcast on user-specific channel
+        return [
+            new PrivateChannel('user.' . $this->request->user_id), // User-specific channel
+            new PrivateChannel('admin.notifications') // Admin channel for admin dashboard
+        ];
     }
 
     /**
@@ -47,9 +50,9 @@ class AdminUpdatedRequest implements ShouldBroadcast
      *
      * @return string
      */
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
-        return 'admin.updated'; // Event alias name
+        return 'admin.updated.request';
     }
 
     /**
@@ -57,17 +60,15 @@ class AdminUpdatedRequest implements ShouldBroadcast
      *
      * @return array
      */
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
             'request_id' => $this->request->id,
-            'user_id' => $this->request->user_id, // Ensure the user_id is included in the broadcast data
-            'status' => $this->request->status,
-            'nurse_name' => $this->request->nurse->name ?? 'N/A', // Handle nullable relationships
-            'service_name' => $this->request->service->name ?? 'N/A',
-            'scheduled_time' => $this->request->scheduled_time,
-            'location' => $this->request->location,
-            'updated_at' => $this->request->updated_at->toDateTimeString(),
+            'user_id' => $this->request->user_id,
+            'status' => $this->status,
+            'updated_by_admin_id' => $this->user->id,
+            'admin_name' => $this->user->name,
+            'updated_at' => $this->request->updated_at->toISOString(),
         ];
     }
 }

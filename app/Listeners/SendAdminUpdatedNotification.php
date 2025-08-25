@@ -11,6 +11,14 @@ class SendAdminUpdatedNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    public $afterCommit = true;     // ensures DB changes are committed
+    public $tries = 3;
+    
+    public function backoff() 
+    { 
+        return [10, 60]; 
+    }
+
     public function __construct(
         private NotificationService $notificationService
     ) {}
@@ -18,9 +26,9 @@ class SendAdminUpdatedNotification implements ShouldQueue
     public function handle(AdminUpdatedRequest $event): void
     {
         $this->notificationService->createNotification(
-            $event->user,
+            $event->request->user,
             'Request Status Updated',
-            "Your request status has been updated to: {$event->status}",
+            "Your service request status has been updated to: {$event->status}",
             'info'
         );
     }

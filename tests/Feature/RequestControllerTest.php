@@ -22,12 +22,16 @@ class RequestControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Ensure roles are seeded first
+        // Ensure roles and areas are seeded first
         $this->seed(RoleSeeder::class);
+        $this->seed(\Database\Seeders\AreaSeeder::class);
 
-        // Create admin and regular user with proper roles
-        $this->admin = User::factory()->create(['role_id' => 1]); // Admin role
-        $this->user = User::factory()->create(['role_id' => 2]);  // User role
+        // Get a test area
+        $testArea = \App\Models\Area::first();
+
+        // Create admin and regular user with proper roles and area
+        $this->admin = User::factory()->create(['role_id' => 1, 'area_id' => $testArea->id]); // Admin role
+        $this->user = User::factory()->create(['role_id' => 2, 'area_id' => $testArea->id]);  // User role
 
         // Load relationships
         $this->admin->load('role');
@@ -38,6 +42,15 @@ class RequestControllerTest extends TestCase
             Service::factory()->create()->id,
             Service::factory()->create()->id,
         ];
+
+        // Create service area prices for the test services
+        foreach ($this->services as $serviceId) {
+            \App\Models\ServiceAreaPrice::create([
+                'service_id' => $serviceId,
+                'area_id' => $testArea->id,
+                'price' => 100.00, // Test price
+            ]);
+        }
 
         // Create a test request
         $this->request = Request::factory()
@@ -67,6 +80,7 @@ class RequestControllerTest extends TestCase
             'nurse_gender' => 'female',
             'service_ids' => $this->services,
             'problem_description' => 'Test problem',
+            'area_id' => $this->user->area_id, // Add required area_id field
             'scheduled_time' => now()->addDay()->toDateTimeString(),
             'ending_time' => now()->addDays(2)->toDateTimeString(),
             'latitude' => 40.7128,

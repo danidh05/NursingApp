@@ -3,7 +3,7 @@
 namespace App\Events;
 
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -39,9 +39,12 @@ class CustomNotificationSent implements ShouldBroadcast
      *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-    public function broadcastOn()
+    public function broadcastOn(): array
     {
-        return new Channel('user-channel.' . $this->user->id);
+        return [
+            new PrivateChannel('user.' . $this->user->id), // User-specific channel
+            new PrivateChannel('admin.notifications') // Admin channel for admin dashboard
+        ];
     }
 
     /**
@@ -49,9 +52,9 @@ class CustomNotificationSent implements ShouldBroadcast
      *
      * @return string
      */
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
-        return 'custom.notification';
+        return 'custom.notification.sent';
     }
 
     /**
@@ -59,7 +62,7 @@ class CustomNotificationSent implements ShouldBroadcast
      *
      * @return array
      */
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
             'user_id' => $this->user->id,

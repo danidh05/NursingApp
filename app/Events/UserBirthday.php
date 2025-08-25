@@ -3,15 +3,13 @@
 namespace App\Events;
 
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserBirthday
+class UserBirthday implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -33,7 +31,32 @@ class UserBirthday
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('user.' . $this->user->id),
+        ];
+    }
+
+    /**
+     * The event's broadcast name.
+     *
+     * @return string
+     */
+    public function broadcastAs(): string
+    {
+        return 'user.birthday';
+    }
+
+    /**
+     * The data to broadcast with the event.
+     *
+     * @return array
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'user_id' => $this->user->id,
+            'user_name' => $this->user->name,
+            'birth_date' => $this->user->birth_date,
+            'message' => '🎉 Happy Birthday! Wishing you a wonderful birthday filled with joy and happiness!',
         ];
     }
 } 

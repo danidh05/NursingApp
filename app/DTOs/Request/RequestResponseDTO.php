@@ -11,6 +11,7 @@ class RequestResponseDTO
     public function __construct(
         public int $id,
         public int $user_id,
+        public ?int $area_id,
         public string $full_name,
         public string $phone_number,
         public ?string $name,
@@ -31,6 +32,7 @@ class RequestResponseDTO
         public Carbon $created_at,
         public Carbon $updated_at,
         public User $user,
+        public ?array $area = null,
         public array $services = [],
     ) {}
 
@@ -50,6 +52,7 @@ class RequestResponseDTO
         return new self(
             id: $request->id,
             user_id: $request->user_id,
+            area_id: $request->area_id,
             full_name: $request->full_name,
             phone_number: $request->phone_number,
             name: $request->name,
@@ -70,6 +73,10 @@ class RequestResponseDTO
             created_at: $request->created_at,
             updated_at: $request->updated_at,
             user: $request->user,
+            area: $request->area ? [
+                'id' => $request->area->id,
+                'name' => $request->area->name,
+            ] : null,
             services: $request->services->toArray(),
         );
     }

@@ -19,6 +19,12 @@ class PasswordResetTest extends TestCase
     {
         parent::setUp();
         
+        // Mock TwilioService to prevent 500 errors
+        $this->mock(\App\Services\TwilioService::class, function ($mock) {
+            $mock->shouldReceive('sendVerificationCode')
+                 ->andReturn(true);
+        });
+        
         // Seed roles for testing
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
@@ -174,6 +180,13 @@ class PasswordResetTest extends TestCase
 
     public function test_user_cannot_reset_password_for_nonexistent_user(): void
     {
+        // Mock TwilioService to return true so we can reach the user lookup
+        $this->mock(\App\Services\TwilioService::class, function ($mock) {
+            $mock->shouldReceive('verifyCode')
+                 ->with('nonexistent-phone', 'some-token')
+                 ->andReturn(true);
+        });
+
         $response = $this->postJson('/api/reset-password', [
             'phone_number' => 'nonexistent-phone',
             'token' => 'some-token',

@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Services accessible by both users and admins (with translation support)
     Route::middleware(['auth:sanctum', 'detect.language'])->group(function () {
         Route::get('/services', [ServiceController::class, 'index']); // List all services
+        Route::get('/services/quote', [ServiceController::class, 'quote']); // Get pricing quote for services in specific area
         Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
         
         // FAQ APIs accessible by both users and admins (with translation support)
@@ -73,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::get('/requests', [RequestController::class, 'index']); // List all requests
+    Route::get('/requests/default-area', [RequestController::class, 'getDefaultArea']); // Get user's default area for request creation
     Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
     
     // Users and admins can view categories

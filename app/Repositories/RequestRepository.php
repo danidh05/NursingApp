@@ -16,6 +16,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management - let Laravel handle it
         $request = Request::create([
             'user_id' => $user->id,
+            'area_id' => $dto->area_id ?? $user->area_id,
             'full_name' => $dto->full_name,
             'phone_number' => $dto->phone_number,
             'name' => $dto->name,
@@ -33,7 +34,7 @@ class RequestRepository implements IRequestRepository
             $request->services()->attach($dto->service_ids);
         }
 
-        return $request->load('services', 'user');
+        return $request->load('services', 'user', 'area');
     }
 
     public function update(int $id, UpdateRequestDTO $dto, User $user): Request
@@ -60,12 +61,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user');
+        return $request->load('services', 'user', 'area');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role']);
+        $query = Request::with(['services', 'user.role', 'area']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -80,7 +81,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role']);
+        $query = Request::with(['services', 'user.role', 'area']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

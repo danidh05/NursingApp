@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Mockery;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\AreaSeeder;
 
 class RequestServiceTest extends TestCase
 {
@@ -29,8 +31,22 @@ class RequestServiceTest extends TestCase
     {
         parent::setUp();
         
-        $this->user = User::factory()->create(['role_id' => 2]);
+        // Seed necessary data
+        $this->seed(RoleSeeder::class);
+        $this->seed(AreaSeeder::class);
+        
+        $testArea = \App\Models\Area::first();
+        $this->user = User::factory()->create(['role_id' => 2, 'area_id' => $testArea->id]);
         $this->services = Service::factory(2)->create()->pluck('id')->toArray();
+        
+        // Create service area pricing for the services
+        foreach ($this->services as $serviceId) {
+            \App\Models\ServiceAreaPrice::create([
+                'service_id' => $serviceId,
+                'area_id' => $testArea->id,
+                'price' => 100.00,
+            ]);
+        }
         
         $this->service = new RequestService(
             new RequestRepository()

@@ -35,6 +35,7 @@ class Request extends Model
     protected $fillable = [
         'user_id',
         'nurse_id',
+        'area_id',
         'status',
         'scheduled_time',
         'ending_time',
@@ -133,6 +134,14 @@ class Request extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the area for this request.
+     */
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
 
     /**

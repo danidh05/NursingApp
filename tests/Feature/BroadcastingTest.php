@@ -26,6 +26,7 @@ class BroadcastingTest extends TestCase
 
         // Seed roles for testing
         $this->seed(RoleSeeder::class);
+        $this->seed(\Database\Seeders\AreaSeeder::class);
     }
 
     public function test_user_requested_service_event_is_broadcasted()
@@ -34,8 +35,11 @@ class BroadcastingTest extends TestCase
         Event::fake();
     
         $userRole = Role::where('name', 'user')->first();
+        $testArea = \App\Models\Area::first();
+        
         $user = User::factory()->create([
             'role_id' => $userRole->id, 
+            'area_id' => $testArea->id,
             'latitude' => 40.7128, 
             'longitude' => -74.0060,
             'name' => 'John Doe', // Add full_name if required
@@ -45,6 +49,15 @@ class BroadcastingTest extends TestCase
     
         $nurse = Nurse::factory()->create(); // Create a nurse for the request
         $services = Service::factory()->count(2)->create(); // Create multiple services
+        
+        // Create service area pricing for the services
+        foreach ($services as $service) {
+            \App\Models\ServiceAreaPrice::create([
+                'service_id' => $service->id,
+                'area_id' => $testArea->id,
+                'price' => 100.00,
+            ]);
+        }
     
         // Prepare the request data, ensuring all required fields are included
         $response = $this->postJson('/api/requests', [
@@ -91,14 +104,25 @@ class BroadcastingTest extends TestCase
         Event::fake();
 
         // Arrange: Create a request
-        $user = User::factory()->create(['role_id' => 2]);
+        $testArea = \App\Models\Area::first();
+        $user = User::factory()->create(['role_id' => 2, 'area_id' => $testArea->id]);
         $admin = User::factory()->create(['role_id' => 1]);
         $nurse = Nurse::factory()->create();
         $services = Service::factory(2)->create();
+        
+        // Create service area pricing for the services
+        foreach ($services as $service) {
+            \App\Models\ServiceAreaPrice::create([
+                'service_id' => $service->id,
+                'area_id' => $testArea->id,
+                'price' => 100.00,
+            ]);
+        }
 
         $request = UserRequest::factory()->create([
             'user_id' => $user->id,
             'nurse_id' => $nurse->id,
+            'area_id' => $testArea->id,
             'status' => 'submitted',  // Use new status constant
         ]);
         $request->services()->attach($services->pluck('id')->toArray()); // Attach services to the request

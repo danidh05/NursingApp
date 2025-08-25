@@ -9,6 +9,7 @@ class CreateRequestDTO
         public string $phone_number,
         public string $problem_description,
         public array $service_ids,
+        public ?int $area_id = null,
         public ?string $name = null,             // Optional request name/title
         public ?string $nurse_gender = null,
         public ?string $time_type = null,
@@ -24,6 +25,7 @@ class CreateRequestDTO
             phone_number: $data['phone_number'],
             problem_description: $data['problem_description'],
             service_ids: $data['service_ids'],
+            area_id: $data['area_id'] ?? null,
             name: $data['name'] ?? null,
             nurse_gender: $data['nurse_gender'] ?? null,
             time_type: $data['time_type'] ?? null,

@@ -49,15 +49,21 @@ class RequestService implements IRequestService
     }
 
     /**
-     * Calculate the total price for a request based on its services and user's area.
+     * Calculate the total price for a request based on its services and request's area.
      */
     private function calculateRequestTotalPrice(Request $request): float
     {
-        $user = $request->user;
         $serviceIds = $request->services->pluck('id')->toArray();
         
+        // Use request's area_id if available, otherwise fall back to user's registered area
+        $areaId = $request->area_id ?? $request->user->area_id;
+        
+        if (!$areaId) {
+            throw new \Exception('No area specified for pricing calculation');
+        }
+        
         $serviceAreaPrices = ServiceAreaPrice::whereIn('service_id', $serviceIds)
-                                           ->where('area_id', $user->area_id)
+                                           ->where('area_id', $areaId)
                                            ->get();
 
         $totalPrice = 0;

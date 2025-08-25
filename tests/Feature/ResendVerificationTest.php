@@ -18,6 +18,12 @@ class ResendVerificationTest extends TestCase
     {
         parent::setUp();
         
+        // Mock TwilioService to prevent 500 errors
+        $this->mock(\App\Services\TwilioService::class, function ($mock) {
+            $mock->shouldReceive('sendVerificationCode')
+                 ->andReturn(true);
+        });
+
         // Seed roles for testing
         $this->seed(\Database\Seeders\RoleSeeder::class);
         

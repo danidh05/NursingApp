@@ -324,6 +324,110 @@ class ServiceController extends Controller
     }
     
     /**
+     * @OA\Get(
+     *     path="/api/services/quote",
+     *     summary="Get pricing quote for services in a specific area",
+     *     description="Get pricing information for multiple services in a specific area. This allows users to preview pricing before creating a request.",
+     *     tags={"Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="service_ids",
+     *         in="query",
+     *         required=true,
+     *         description="Array of service IDs",
+     *         @OA\Schema(type="array", @OA\Items(type="integer"), example={1,2})
+     *     ),
+     *     @OA\Parameter(
+     *         name="area_id",
+     *         in="query",
+     *         required=true,
+     *         description="Area ID for pricing",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Quote retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="area", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *             ),
+     *             @OA\Property(property="services", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="price", type="number", format="float", example=100.00),
+     *                 @OA\Property(property="area_price", type="number", format="float", example=100.00)
+     *             )),
+     *             @OA\Property(property="total_price", type="number", format="float", example=200.00),
+     *             @OA\Property(property="currency", type="string", example="USD")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function quote(Request $request)
+    {
+        $validated = $request->validate([
+            'service_ids' => 'required|array|min:1',
+            'service_ids.*' => 'exists:services,id',
+            'area_id' => 'required|exists:areas,id',
+        ]);
+
+        $serviceIds = $validated['service_ids'];
+        $areaId = $validated['area_id'];
+
+        // Get the area
+        $area = \App\Models\Area::findOrFail($areaId);
+
+        // Get services with area pricing
+        $services = Service::whereIn('id', $serviceIds)->get();
+        $areaPrices = \App\Models\ServiceAreaPrice::whereIn('service_id', $serviceIds)
+            ->where('area_id', $areaId)
+            ->get()
+            ->keyBy('service_id');
+
+        $totalPrice = 0;
+        $servicesWithPricing = [];
+
+        foreach ($services as $service) {
+            $areaPrice = $areaPrices->get($service->id);
+            
+            if (!$areaPrice) {
+                return response()->json([
+                    'errors' => [
+                        'area_id' => ['The selected area does not have pricing configured for all requested services.']
+                    ]
+                ], 422);
+            }
+
+            $servicesWithPricing[] = [
+                'id' => $service->id,
+                'name' => $service->name,
+                'price' => $areaPrice->price,
+                'area_price' => $areaPrice->price,
+            ];
+
+            $totalPrice += $areaPrice->price;
+        }
+
+        return response()->json([
+            'area' => [
+                'id' => $area->id,
+                'name' => $area->name,
+            ],
+            'services' => $servicesWithPricing,
+            'total_price' => $totalPrice,
+            'currency' => 'USD', // You can make this configurable
+        ]);
+    }
+
+    /**
      * @OA\Delete(
      *     path="/api/admin/services/{id}",
      *     summary="Delete a service (Admin only)",

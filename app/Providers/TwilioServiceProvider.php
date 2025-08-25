@@ -15,12 +15,16 @@ class TwilioServiceProvider extends ServiceProvider
                 return new TwilioService(null);
             }
             
-            $client = new Client(
-                config('services.twilio.sid'),
-                config('services.twilio.auth_token')
-            );
+            $accountSid = config('services.twilio.account_sid');
+            $authToken = config('services.twilio.auth_token');
             
-            return new TwilioService($client);
+            if ($accountSid && $authToken) {
+                $client = new Client($accountSid, $authToken);
+                return new TwilioService($client);
+            }
+            
+            // Fallback to null client if credentials are missing
+            return new TwilioService(null);
         });
     }
 } 

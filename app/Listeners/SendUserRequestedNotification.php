@@ -11,6 +11,14 @@ class SendUserRequestedNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    public $afterCommit = true;     // ensures DB changes are committed
+    public $tries = 3;
+    
+    public function backoff() 
+    { 
+        return [10, 60]; 
+    }
+
     public function __construct(
         private NotificationService $notificationService
     ) {}

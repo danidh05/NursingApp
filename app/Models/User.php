@@ -26,7 +26,7 @@ class User extends Authenticatable
         'latitude',
         'longitude',
         'location',
-        'is_first_login', 
+        'is_first_login',
         'email_verified_at',
         'area_id',
     ];

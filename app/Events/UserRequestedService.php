@@ -4,7 +4,7 @@ namespace App\Events;
 
 use App\Models\Request;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -36,9 +36,12 @@ class UserRequestedService implements ShouldBroadcast
      *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-    public function broadcastOn()
+    public function broadcastOn(): array
     {
-        return new Channel('admin-channel');
+        return [
+            new PrivateChannel('user.' . $this->user->id), // User-specific channel
+            new PrivateChannel('admin.notifications') // Admin channel for admin dashboard
+        ];
     }
 
     /**
@@ -46,9 +49,9 @@ class UserRequestedService implements ShouldBroadcast
      *
      * @return string
      */
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
-        return 'user.requested';
+        return 'user.requested.service';
     }
 
     /**
@@ -56,7 +59,7 @@ class UserRequestedService implements ShouldBroadcast
      *
      * @return array
      */
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
             'request_id' => $this->request->id,
