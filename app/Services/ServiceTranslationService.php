@@ -98,4 +98,60 @@ class ServiceTranslationService
         
         return $service;
     }
+
+    /**
+     * Get all services with area-based pricing and translations for a specific area.
+     *
+     * @param int $areaId
+     * @param string $locale
+     * @return Collection
+     */
+    public function getServicesByArea(int $areaId, string $locale): Collection
+    {
+        // Get all services with their area prices and translations
+        $services = Service::with([
+            'areaPrices' => function ($query) use ($areaId) {
+                $query->where('area_id', $areaId);
+            },
+            'translations',
+            'category'
+        ])->get();
+
+        // Transform services with area-specific pricing and translations
+        return $services->transform(function ($service) use ($areaId, $locale) {
+            // Handle area-based pricing
+            $this->applyAreaBasedPricingForArea($service, $areaId);
+            
+            // Handle translations
+            $this->applyTranslations($service, $locale);
+            
+            // Clean up relationships
+            unset($service->areaPrices, $service->translations);
+            
+            return $service;
+        });
+    }
+
+    /**
+     * Apply area-based pricing to a service for a specific area.
+     *
+     * @param Service $service
+     * @param int $areaId
+     * @return void
+     */
+    private function applyAreaBasedPricingForArea(Service $service, int $areaId): void
+    {
+        $areaPrice = $service->areaPrices->first();
+        
+        if ($areaPrice) {
+            // Area pricing exists - show area-specific price
+            $service->price = $areaPrice->price;
+            $service->area_name = $areaPrice->area->name;
+            $service->has_area_pricing = true;
+        } else {
+            // No area pricing exists - show original price
+            $service->price = $service->getOriginal('price');
+            $service->has_area_pricing = false;
+        }
+    }
 } 

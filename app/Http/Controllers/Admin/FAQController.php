@@ -41,6 +41,8 @@ class FAQController extends Controller
      *                 @OA\Property(property="answer", type="string", example="We offer a wide range of nursing services including home care, elderly care, and specialized medical assistance."),
      *                 @OA\Property(property="order", type="integer", example=1),
      *                 @OA\Property(property="is_active", type="boolean", example=true),
+     *                 @OA\Property(property="available_translations", type="array", @OA\Items(type="string"), example={"ar", "en"}, description="Available translation locales"),
+     *                 @OA\Property(property="translation_count", type="integer", example=2, description="Number of translations available"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
@@ -69,6 +71,8 @@ class FAQController extends Controller
                 'answer' => $faq->answer,
                 'order' => $faq->order,
                 'is_active' => $faq->is_active,
+                'available_translations' => $faq->getAvailableLocales(), // Show available translation locales
+                'translation_count' => $faq->translations()->count(), // Count of translations
                 'created_at' => $faq->created_at->toISOString(),
                 'updated_at' => $faq->updated_at->toISOString(),
             ])
@@ -451,6 +455,364 @@ class FAQController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'FAQs reordered successfully'
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/admin/faqs/{id}/translations",
+     *     summary="Get FAQ translations (Admin)",
+     *     description="Get all translations for a specific FAQ",
+     *     tags={"Admin - FAQs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="FAQ ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="FAQ translations retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Translations retrieved successfully"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="locale", type="string", example="ar"),
+     *                 @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                 @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="FAQ not found"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin access required"
+     *     )
+     * )
+     */
+    public function getTranslations(int $id): JsonResponse
+    {
+        $faq = $this->faqService->getFAQById($id);
+        
+        if (!$faq) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FAQ not found'
+            ], 404);
+        }
+
+        $translations = $faq->translations()->get()->map(function($translation) {
+            return [
+                'id' => $translation->id,
+                'locale' => $translation->locale,
+                'question' => $translation->question,
+                'answer' => $translation->answer,
+                'created_at' => $translation->created_at->toISOString(),
+                'updated_at' => $translation->updated_at->toISOString()
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Translations retrieved successfully',
+            'data' => $translations
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/admin/faqs/{id}/translations",
+     *     summary="Add translation to FAQ (Admin)",
+     *     description="Add a translation for a specific FAQ",
+     *     tags={"Admin - FAQs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="FAQ ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"locale", "question", "answer"},
+     *             @OA\Property(property="locale", type="string", example="ar", description="Language code (ar, en)"),
+     *             @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟", description="Translated question"),
+     *             @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض", description="Translated answer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Translation added successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Translation added successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="locale", type="string", example="ar"),
+     *                 @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                 @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="FAQ not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin access required"
+     *     )
+     * )
+     */
+    public function addTranslation(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'locale' => 'required|string|in:ar,en',
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string'
+        ]);
+
+        $faq = $this->faqService->getFAQById($id);
+        
+        if (!$faq) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FAQ not found'
+            ], 404);
+        }
+
+        // Check if translation already exists
+        if ($faq->hasTranslation($request->locale)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Translation for this locale already exists. Use update instead.'
+            ], 422);
+        }
+
+        $faq->setTranslation($request->locale, [
+            'question' => $request->question,
+            'answer' => $request->answer
+        ]);
+
+        $translation = $faq->translations()->where('locale', $request->locale)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Translation added successfully',
+            'data' => [
+                'id' => $translation->id,
+                'locale' => $translation->locale,
+                'question' => $translation->question,
+                'answer' => $translation->answer,
+                'created_at' => $translation->created_at->toISOString(),
+                'updated_at' => $translation->updated_at->toISOString()
+            ]
+        ], 201);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/admin/faqs/{id}/translations/{locale}",
+     *     summary="Update FAQ translation (Admin)",
+     *     description="Update a specific translation for an FAQ",
+     *     tags={"Admin - FAQs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="FAQ ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="locale",
+     *         in="path",
+     *         required=true,
+     *         description="Language code",
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"question", "answer"},
+     *             @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟", description="Translated question"),
+     *             @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض", description="Translated answer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Translation updated successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Translation updated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="locale", type="string", example="ar"),
+     *                 @OA\Property(property="question", type="string", example="ما هي الخدمات التي تقدمونها؟"),
+     *                 @OA\Property(property="answer", type="string", example="نقدم مجموعة واسعة من خدمات التمريض"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="FAQ or translation not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin access required"
+     *     )
+     * )
+     */
+    public function updateTranslation(Request $request, int $id, string $locale): JsonResponse
+    {
+        $request->validate([
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string'
+        ]);
+
+        $faq = $this->faqService->getFAQById($id);
+        
+        if (!$faq) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FAQ not found'
+            ], 404);
+        }
+
+        if (!$faq->hasTranslation($locale)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Translation not found'
+            ], 404);
+        }
+
+        $faq->setTranslation($locale, [
+            'question' => $request->question,
+            'answer' => $request->answer
+        ]);
+
+        $translation = $faq->translations()->where('locale', $locale)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Translation updated successfully',
+            'data' => [
+                'id' => $translation->id,
+                'locale' => $translation->locale,
+                'question' => $translation->question,
+                'answer' => $translation->answer,
+                'created_at' => $translation->created_at->toISOString(),
+                'updated_at' => $translation->updated_at->toISOString()
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/admin/faqs/{id}/translations/{locale}",
+     *     summary="Delete FAQ translation (Admin)",
+     *     description="Delete a specific translation for an FAQ",
+     *     tags={"Admin - FAQs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="FAQ ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="locale",
+     *         in="path",
+     *         required=true,
+     *         description="Language code",
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Translation deleted successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Translation deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="FAQ or translation not found"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin access required"
+     *     )
+     * )
+     */
+    public function deleteTranslation(int $id, string $locale): JsonResponse
+    {
+        $faq = $this->faqService->getFAQById($id);
+        
+        if (!$faq) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FAQ not found'
+            ], 404);
+        }
+
+        $translation = $faq->translations()->where('locale', $locale)->first();
+        
+        if (!$translation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Translation not found'
+            ], 404);
+        }
+
+        $translation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Translation deleted successfully'
         ]);
     }
 }

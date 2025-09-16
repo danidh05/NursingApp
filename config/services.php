@@ -50,5 +50,12 @@ return [
     'rest_api_url' => env('ONESIGNAL_API_URL', 'https://onesignal.com/api/v1/'),
 ],
 
+    'stream' => [
+        'api_key' => env('STREAM_API_KEY'),
+        'api_secret' => env('STREAM_API_SECRET'),
+        'app_id' => env('STREAM_APP_ID'),
+        'api_base' => env('STREAM_API_BASE', 'https://chat.stream-io-api.com'),
+    ],
+
 
 ];

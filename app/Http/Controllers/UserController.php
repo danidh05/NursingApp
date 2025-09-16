@@ -100,6 +100,11 @@ class UserController extends Controller
         } else {
             // Fetch the authenticated user's details
             $user = $request->user();
+            
+            // If no authenticated user, return 401
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
         }
     
         return response()->json($user, 200);

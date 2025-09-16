@@ -83,4 +83,22 @@ class SliderService
             }
         }
     }
+
+    /**
+     * Reorder sliders.
+     */
+    public function reorderSliders(array $sliderIds): bool
+    {
+        // Remove duplicates while preserving order
+        $uniqueSliderIds = array_values(array_unique($sliderIds));
+        
+        foreach ($uniqueSliderIds as $index => $sliderId) {
+            $slider = $this->sliderRepository->findById($sliderId);
+            if ($slider) {
+                $this->sliderRepository->update($sliderId, ['position' => $index + 1]);
+            }
+        }
+
+        return true;
+    }
 } 

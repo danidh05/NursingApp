@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateSliderRequest;
 use App\Services\SliderService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SliderController extends Controller
 {
@@ -349,5 +351,65 @@ class SliderController extends Controller
                 'message' => 'Failed to delete slider: ' . $e->getMessage()
             ], 422);
         }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/admin/sliders/reorder",
+     *     summary="Reorder sliders (Admin)",
+     *     description="Reorder sliders by providing an array of slider IDs in the desired order",
+     *     tags={"Admin - Sliders"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"slider_ids"},
+     *             @OA\Property(property="slider_ids", type="array", @OA\Items(type="integer"), example={1,3,2,4}, description="Array of slider IDs in the desired order")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sliders reordered successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Sliders reordered successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin access required"
+     *     )
+     * )
+     */
+    public function reorder(Request $request): JsonResponse
+    {
+        $request->validate([
+            'slider_ids' => 'array',
+            'slider_ids.*' => 'integer|exists:sliders,id'
+        ]);
+
+        // Allow empty arrays
+        if (empty($request->slider_ids)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Sliders reordered successfully'
+            ]);
+        }
+
+        $this->sliderService->reorderSliders($request->slider_ids);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sliders reordered successfully'
+        ]);
     }
 }

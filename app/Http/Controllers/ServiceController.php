@@ -428,6 +428,91 @@ class ServiceController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/services/area/{area_id}",
+     *     summary="Get all services for a specific area with pricing and translations",
+     *     description="Retrieve all services available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+     *     tags={"Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="area_id",
+     *         in="path",
+     *         description="Area ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar) - affects service names",
+     *         required=false,
+     *         @OA\Schema(type="string", example="ar")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Services for area retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="area", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *             ),
+     *             @OA\Property(property="services", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية"),
+     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
+     *                 @OA\Property(property="price", type="number", format="float", example=120.00, description="Area-specific price if available, otherwise base price"),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="category", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Home Care")
+     *                 ),
+     *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
+     *                 @OA\Property(property="has_area_pricing", type="boolean", example=true, description="Whether this service has area-specific pricing"),
+     *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
+     *                     @OA\Property(property="locale", type="string", example="ar"),
+     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Area not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Area not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function getServicesByArea(int $areaId)
+    {
+        // Verify area exists
+        $area = \App\Models\Area::find($areaId);
+        if (!$area) {
+            return response()->json(['message' => 'Area not found'], 404);
+        }
+
+        $locale = app()->getLocale();
+        $services = $this->serviceTranslationService->getServicesByArea($areaId, $locale);
+
+        return response()->json([
+            'area' => [
+                'id' => $area->id,
+                'name' => $area->name,
+            ],
+            'services' => $services
+        ]);
+    }
+
+    /**
      * @OA\Delete(
      *     path="/api/admin/services/{id}",
      *     summary="Delete a service (Admin only)",

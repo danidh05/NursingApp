@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 /**
  * User-specific private channel for personal notifications
  * Channel: user.{id}
@@ -52,10 +54,10 @@ Broadcast::channel('notifications', function ($user) {
  * CHANNEL NAMING:
  * - Format: private-chat.{threadId}
  * - Example: private-chat.123 for thread ID 123
- * - Frontend subscribes to: Echo.private('chat.123')
+ * - Frontend subscribes to: Echo.private('private-chat.123')
  * 
  * AUTHENTICATION:
- * - Requires valid JWT token
+ * - Requires valid Sanctum Bearer token
  * - User must be participant in the thread
  * - Policy check: $user->can('view', $thread)
  */
@@ -71,7 +73,7 @@ Broadcast::channel('notifications', function ($user) {
  * Frontend Usage:
  * ```javascript
  * // Subscribe to chat thread 123
- * Echo.private('chat.123')
+ * Echo.private('private-chat.123')
  *     .listen('MessageCreated', (e) => {
  *         // Handle new message
  *         console.log('New message:', e);

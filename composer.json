@@ -11,6 +11,7 @@
         "php": "^8.2",
         "berkayk/onesignal-laravel": "^2.4",
         "darkaonline/l5-swagger": "^9.0",
+        "firebase/php-jwt": "^6.11",
         "guzzlehttp/guzzle": "^7.0",
         "kreait/firebase-php": "^7.20",
         "kreait/laravel-firebase": "*",

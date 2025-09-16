@@ -79,6 +79,10 @@ use Illuminate\Routing\Controller as BaseController;
  *     description="About page management endpoints"
  * )
  * @OA\Tag(
+ *     name="Stream.io Chat",
+ *     description="Stream.io chat integration endpoints for real-time messaging"
+ * )
+ * @OA\Tag(
  *     name="Admin",
  *     description="Admin-only management endpoints"
  * )

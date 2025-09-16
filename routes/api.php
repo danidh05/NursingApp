@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Api\SliderController as ApiSliderController;
 use App\Http\Controllers\Api\PopupController as ApiPopupController;
+use App\Http\Controllers\Api\StreamController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\Admin\PopupController as AdminPopupController;
 use App\Http\Controllers\Admin\ServiceAreaPriceController;
@@ -65,6 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Services accessible by both users and admins (with translation support)
     Route::middleware(['auth:sanctum', 'detect.language'])->group(function () {
         Route::get('/services', [ServiceController::class, 'index']); // List all services
+        Route::get('/services/area/{area_id}', [ServiceController::class, 'getServicesByArea']); // Get all services for a specific area with pricing
         Route::get('/services/quote', [ServiceController::class, 'quote']); // Get pricing quote for services in specific area
         Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
         
@@ -86,6 +88,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Content APIs accessible by both users and admins
     Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
     Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
+    
+    // Stream.io Chat APIs
+    Route::get('/stream/token', [StreamController::class, 'getToken']); // Get Stream.io token for authenticated user
+    Route::post('/stream/users', [StreamController::class, 'createUser']); // Create user in Stream.io
+    Route::put('/stream/users', [StreamController::class, 'updateUser']); // Update user in Stream.io
+    Route::post('/stream/channels', [StreamController::class, 'createChannel']); // Create channel in Stream.io
+    Route::post('/stream/channels/members', [StreamController::class, 'addChannelMembers']); // Add members to channel
+    Route::post('/stream/messages', [StreamController::class, 'sendMessage']); // Send message to channel
     
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
@@ -141,6 +151,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/sliders/{id}', [AdminSliderController::class, 'show']); // Get a specific slider
         Route::put('/sliders/{id}', [AdminSliderController::class, 'update']); // Update a slider
         Route::delete('/sliders/{id}', [AdminSliderController::class, 'destroy']); // Delete a slider
+        Route::post('/sliders/reorder', [AdminSliderController::class, 'reorder']); // Reorder sliders
 
         // Popup management routes
         Route::get('/popups', [AdminPopupController::class, 'index']); // List all popups
@@ -172,6 +183,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/faqs/{id}', [\App\Http\Controllers\Admin\FAQController::class, 'destroy']); // Delete an FAQ
         Route::patch('/faqs/{id}/toggle', [\App\Http\Controllers\Admin\FAQController::class, 'toggleStatus']); // Toggle FAQ active status
         Route::post('/faqs/reorder', [\App\Http\Controllers\Admin\FAQController::class, 'reorder']); // Reorder FAQs
+        
+        // FAQ translation management routes
+        Route::get('/faqs/{id}/translations', [\App\Http\Controllers\Admin\FAQController::class, 'getTranslations']); // Get all translations for an FAQ
+        Route::post('/faqs/{id}/translations', [\App\Http\Controllers\Admin\FAQController::class, 'addTranslation']); // Add translation to FAQ
+        Route::put('/faqs/{id}/translations/{locale}', [\App\Http\Controllers\Admin\FAQController::class, 'updateTranslation']); // Update FAQ translation
+        Route::delete('/faqs/{id}/translations/{locale}', [\App\Http\Controllers\Admin\FAQController::class, 'deleteTranslation']); // Delete FAQ translation
 
         // Area management routes
         Route::get('/areas', [\App\Http\Controllers\Admin\AreaController::class, 'index']); // List all areas with user counts

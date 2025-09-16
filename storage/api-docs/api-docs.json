@@ -1270,6 +1270,22 @@
                                                         "type": "boolean",
                                                         "example": true
                                                     },
+                                                    "available_translations": {
+                                                        "description": "Available translation locales",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "ar",
+                                                            "en"
+                                                        ]
+                                                    },
+                                                    "translation_count": {
+                                                        "description": "Number of translations available",
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "date-time"
@@ -1836,6 +1852,408 @@
                     },
                     "422": {
                         "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/faqs/{id}/translations": {
+            "get": {
+                "tags": [
+                    "Admin - FAQs"
+                ],
+                "summary": "Get FAQ translations (Admin)",
+                "description": "Get all translations for a specific FAQ",
+                "operationId": "31bb52b9ef1439e2a36722e57d80e9fe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "FAQ ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FAQ translations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Translations retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "locale": {
+                                                        "type": "string",
+                                                        "example": "ar"
+                                                    },
+                                                    "question": {
+                                                        "type": "string",
+                                                        "example": "ما هي الخدمات التي تقدمونها؟"
+                                                    },
+                                                    "answer": {
+                                                        "type": "string",
+                                                        "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "FAQ not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - FAQs"
+                ],
+                "summary": "Add translation to FAQ (Admin)",
+                "description": "Add a translation for a specific FAQ",
+                "operationId": "d4356f61f9fd95633ef95b3b31fb3d57",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "FAQ ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "locale",
+                                    "question",
+                                    "answer"
+                                ],
+                                "properties": {
+                                    "locale": {
+                                        "description": "Language code (ar, en)",
+                                        "type": "string",
+                                        "example": "ar"
+                                    },
+                                    "question": {
+                                        "description": "Translated question",
+                                        "type": "string",
+                                        "example": "ما هي الخدمات التي تقدمونها؟"
+                                    },
+                                    "answer": {
+                                        "description": "Translated answer",
+                                        "type": "string",
+                                        "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Translation added successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Translation added successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "locale": {
+                                                    "type": "string",
+                                                    "example": "ar"
+                                                },
+                                                "question": {
+                                                    "type": "string",
+                                                    "example": "ما هي الخدمات التي تقدمونها؟"
+                                                },
+                                                "answer": {
+                                                    "type": "string",
+                                                    "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "FAQ not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/faqs/{id}/translations/{locale}": {
+            "put": {
+                "tags": [
+                    "Admin - FAQs"
+                ],
+                "summary": "Update FAQ translation (Admin)",
+                "description": "Update a specific translation for an FAQ",
+                "operationId": "5fc10c3292fbfe2773d2cde79184c540",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "FAQ ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "path",
+                        "description": "Language code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "question",
+                                    "answer"
+                                ],
+                                "properties": {
+                                    "question": {
+                                        "description": "Translated question",
+                                        "type": "string",
+                                        "example": "ما هي الخدمات التي تقدمونها؟"
+                                    },
+                                    "answer": {
+                                        "description": "Translated answer",
+                                        "type": "string",
+                                        "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Translation updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Translation updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "locale": {
+                                                    "type": "string",
+                                                    "example": "ar"
+                                                },
+                                                "question": {
+                                                    "type": "string",
+                                                    "example": "ما هي الخدمات التي تقدمونها؟"
+                                                },
+                                                "answer": {
+                                                    "type": "string",
+                                                    "example": "نقدم مجموعة واسعة من خدمات التمريض"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "FAQ or translation not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - FAQs"
+                ],
+                "summary": "Delete FAQ translation (Admin)",
+                "description": "Delete a specific translation for an FAQ",
+                "operationId": "55b5c169d1a494b71ceee9d72bfcd400",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "FAQ ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "path",
+                        "description": "Language code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Translation deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Translation deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "FAQ or translation not found"
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -3435,6 +3853,80 @@
                 ]
             }
         },
+        "/api/admin/sliders/reorder": {
+            "post": {
+                "tags": [
+                    "Admin - Sliders"
+                ],
+                "summary": "Reorder sliders (Admin)",
+                "description": "Reorder sliders by providing an array of slider IDs in the desired order",
+                "operationId": "bd0d56ede322aceb95636949359d341a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "slider_ids"
+                                ],
+                                "properties": {
+                                    "slider_ids": {
+                                        "description": "Array of slider IDs in the desired order",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            3,
+                                            2,
+                                            4
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sliders reordered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sliders reordered successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/users/{userId}/requests": {
             "get": {
                 "tags": [
@@ -3757,6 +4249,678 @@
                     },
                     "403": {
                         "description": "Forbidden - Access denied"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stream/token": {
+            "get": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Get Stream.io authentication token",
+                "description": "Generate a JWT token for Stream.io chat authentication. This token is required by the Flutter frontend to connect to Stream.io chat services. The token contains the user ID and is signed with the Stream.io API secret.",
+                "operationId": "8f5a3104c70fe56270bbfb04a3f41903",
+                "responses": {
+                    "200": {
+                        "description": "Token generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "description": "JWT token for Stream.io authentication",
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMTIzIiwiaWF0IjoxNjQwOTk1MjAwLCJleHAiOjE2NDA5OTg4MDB9.signature"
+                                        },
+                                        "api_key": {
+                                            "description": "Stream.io API key for frontend connection",
+                                            "type": "string",
+                                            "example": "your_stream_api_key"
+                                        },
+                                        "user_id": {
+                                            "description": "Laravel user ID",
+                                            "type": "integer",
+                                            "example": 123
+                                        },
+                                        "app_id": {
+                                            "description": "Stream.io app ID",
+                                            "type": "string",
+                                            "example": "your_stream_app_id"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Token generation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to generate token"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "JWT generation failed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stream/users": {
+            "put": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Update user in Stream.io",
+                "description": "Update an existing user's profile information in Stream.io chat system. This is typically called when a user updates their profile information.",
+                "operationId": "536f057a93e591eb384ff9e8d83b3ac7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "User's display name",
+                                        "type": "string",
+                                        "example": "John Doe Updated"
+                                    },
+                                    "email": {
+                                        "description": "User's email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.updated@example.com"
+                                    },
+                                    "image": {
+                                        "description": "URL to user's profile image",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://example.com/new-avatar.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User updated successfully in Stream.io"
+                                        },
+                                        "data": {
+                                            "description": "Updated Stream.io user data",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Failed to update user in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to update user in Stream.io"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Create user in Stream.io",
+                "description": "Create a new user profile in Stream.io chat system. This is typically called after user registration to ensure the user exists in both Laravel and Stream.io systems.",
+                "operationId": "e055959dc78e96676d7fca39406cd9fe",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "User's display name",
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "description": "User's email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "image": {
+                                        "description": "URL to user's profile image",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://example.com/avatar.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User created successfully in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User created successfully in Stream.io"
+                                        },
+                                        "data": {
+                                            "description": "Stream.io user data",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Failed to create user in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to create user in Stream.io"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stream/channels": {
+            "post": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Create channel in Stream.io",
+                "description": "Create a new chat channel in Stream.io. This is typically used for creating group chats, support channels, or any other type of messaging channel.",
+                "operationId": "624fcd9519f83c6ba90768bfa5c96a22",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "channel_type": {
+                                        "description": "Type of channel (e.g., messaging, livestream, team, etc.)",
+                                        "type": "string",
+                                        "example": "messaging"
+                                    },
+                                    "channel_id": {
+                                        "description": "Unique identifier for the channel",
+                                        "type": "string",
+                                        "example": "support-channel-123"
+                                    },
+                                    "members": {
+                                        "description": "Array of user IDs to add as members",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "user1",
+                                            "user2",
+                                            "user3"
+                                        ]
+                                    },
+                                    "name": {
+                                        "description": "Display name for the channel",
+                                        "type": "string",
+                                        "example": "Support Channel"
+                                    },
+                                    "description": {
+                                        "description": "Channel description",
+                                        "type": "string",
+                                        "example": "Customer support channel"
+                                    },
+                                    "image": {
+                                        "description": "URL to channel image",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://example.com/channel-image.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Channel created successfully in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Channel created successfully in Stream.io"
+                                        },
+                                        "data": {
+                                            "description": "Stream.io channel data",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid input data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "description": "Validation errors",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Failed to create channel in Stream.io",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to create channel in Stream.io"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stream/channels/members": {
+            "post": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Add members to channel",
+                "description": "Add one or more users to an existing Stream.io channel. This is useful for inviting users to group chats or adding new members to support channels.",
+                "operationId": "c96d9be61c731ce014b45837514f0023",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "channel_type": {
+                                        "description": "Type of channel",
+                                        "type": "string",
+                                        "example": "messaging"
+                                    },
+                                    "channel_id": {
+                                        "description": "Channel identifier",
+                                        "type": "string",
+                                        "example": "support-channel-123"
+                                    },
+                                    "members": {
+                                        "description": "Array of user IDs to add as members",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "user4",
+                                            "user5"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Members added successfully to channel",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Members added successfully to channel in Stream.io"
+                                        },
+                                        "data": {
+                                            "description": "Updated channel data with new members",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid input data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "description": "Validation errors",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Failed to add members to channel",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to add members to channel in Stream.io"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stream/messages": {
+            "post": {
+                "tags": [
+                    "Stream.io Chat"
+                ],
+                "summary": "Send message to channel",
+                "description": "Send a text message to a specific Stream.io channel. This is typically used for system-generated messages or automated notifications.",
+                "operationId": "2cd5489c0be7914e0b86ac113f65bace",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "channel_type": {
+                                        "description": "Type of channel",
+                                        "type": "string",
+                                        "example": "messaging"
+                                    },
+                                    "channel_id": {
+                                        "description": "Channel identifier",
+                                        "type": "string",
+                                        "example": "support-channel-123"
+                                    },
+                                    "message": {
+                                        "description": "Message text content",
+                                        "type": "string",
+                                        "example": "Hello! This is a system message."
+                                    },
+                                    "metadata": {
+                                        "description": "Additional message metadata",
+                                        "type": "object"
+                                    },
+                                    "attachments": {
+                                        "description": "Message attachments",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "parent_id": {
+                                        "description": "ID of parent message for replies",
+                                        "type": "string",
+                                        "example": "msg-123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message sent successfully in Stream.io"
+                                        },
+                                        "data": {
+                                            "description": "Stream.io message data",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - User must be logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid input data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "description": "Validation errors",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - Failed to send message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to send message in Stream.io"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -6594,6 +7758,12 @@
                                                 "example": 30,
                                                 "nullable": true
                                             },
+                                            "total_price": {
+                                                "description": "Price calculated based on request area",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 150
+                                            },
                                             "created_at": {
                                                 "type": "string",
                                                 "format": "date-time"
@@ -6601,6 +7771,20 @@
                                             "updated_at": {
                                                 "type": "string",
                                                 "format": "date-time"
+                                            },
+                                            "area": {
+                                                "description": "Area information for the request",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Beirut"
+                                                    }
+                                                },
+                                                "type": "object"
                                             },
                                             "services": {
                                                 "type": "array",
@@ -6691,6 +7875,11 @@
                                             2
                                         ]
                                     },
+                                    "area_id": {
+                                        "description": "Optional: Area ID for region-specific pricing. If not provided, uses user's registered area",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "nurse_gender": {
                                         "description": "Preferred nurse gender",
                                         "type": "string",
@@ -6748,6 +7937,11 @@
                                             "type": "integer",
                                             "example": 1
                                         },
+                                        "area_id": {
+                                            "description": "Area ID for region-specific pricing",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
                                         "full_name": {
                                             "type": "string",
                                             "example": "John Doe"
@@ -6802,6 +7996,12 @@
                                             "format": "float",
                                             "example": -74.006
                                         },
+                                        "total_price": {
+                                            "description": "Price calculated based on selected area",
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 150
+                                        },
                                         "created_at": {
                                             "type": "string",
                                             "format": "date-time"
@@ -6809,6 +8009,20 @@
                                         "updated_at": {
                                             "type": "string",
                                             "format": "date-time"
+                                        },
+                                        "area": {
+                                            "description": "Area information for the request",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
                                         },
                                         "services": {
                                             "type": "array",
@@ -6857,6 +8071,51 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/requests/default-area": {
+            "get": {
+                "tags": [
+                    "Requests"
+                ],
+                "summary": "Get user's default area for request creation",
+                "description": "Get the user's registered area to use as default in the request creation form. This allows the frontend to pre-select the user's area while still allowing them to change it.",
+                "operationId": "595a570834335e2be6f51e00aaaa2620",
+                "responses": {
+                    "200": {
+                        "description": "Default area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "default_area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -6977,6 +8236,12 @@
                                             "example": 30,
                                             "nullable": true
                                         },
+                                        "total_price": {
+                                            "description": "Price calculated based on request area",
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 150
+                                        },
                                         "created_at": {
                                             "type": "string",
                                             "format": "date-time"
@@ -6984,6 +8249,20 @@
                                         "updated_at": {
                                             "type": "string",
                                             "format": "date-time"
+                                        },
+                                        "area": {
+                                            "description": "Area information for the request",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
                                         },
                                         "services": {
                                             "type": "array",
@@ -7870,6 +9149,293 @@
                     },
                     "404": {
                         "description": "Service not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/services/quote": {
+            "get": {
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get pricing quote for services in a specific area",
+                "description": "Get pricing information for multiple services in a specific area. This allows users to preview pricing before creating a request.",
+                "operationId": "b7d254f29840550f5ad02049f1e776d7",
+                "parameters": [
+                    {
+                        "name": "service_ids",
+                        "in": "query",
+                        "description": "Array of service IDs",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            },
+                            "example": [
+                                1,
+                                2
+                            ]
+                        }
+                    },
+                    {
+                        "name": "area_id",
+                        "in": "query",
+                        "description": "Area ID for pricing",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quote retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "services": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Home Nursing"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "area_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 200
+                                        },
+                                        "currency": {
+                                            "type": "string",
+                                            "example": "USD"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/services/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get all services for a specific area with pricing and translations",
+                "description": "Retrieve all services available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+                "operationId": "4d0207b1e0d60d2f001a8a25241e5098",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "description": "Area ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects service names",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Services for area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "services": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "رعاية التمريض المنزلية"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Professional nursing care at home"
+                                                    },
+                                                    "price": {
+                                                        "description": "Area-specific price if available, otherwise base price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 120
+                                                    },
+                                                    "discount_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 45
+                                                    },
+                                                    "service_pic": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/service.jpg"
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "category": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Home Care"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "area_name": {
+                                                        "description": "Area name (only included when showing area-specific pricing)",
+                                                        "type": "string",
+                                                        "example": "Beirut"
+                                                    },
+                                                    "has_area_pricing": {
+                                                        "description": "Whether this service has area-specific pricing",
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "translation": {
+                                                        "description": "Translation info (only included when translation exists)",
+                                                        "properties": {
+                                                            "locale": {
+                                                                "type": "string",
+                                                                "example": "ar"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "رعاية التمريض المنزلية"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Area not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -9113,6 +10679,10 @@
         {
             "name": "Admin - FAQs",
             "description": "API Endpoints for FAQ management (Admin only)"
+        },
+        {
+            "name": "Stream.io Chat",
+            "description": "Stream.io chat integration endpoints for real-time messaging"
         },
         {
             "name": "Contact Us",
