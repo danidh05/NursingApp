@@ -145,6 +145,14 @@ class Request extends Model
     }
 
     /**
+     * Get the chat thread for this request.
+     */
+    public function chatThread()
+    {
+        return $this->hasOne(ChatThread::class);
+    }
+
+    /**
      * Auto-update status when nurse arrives
      */
     public function checkAndUpdateStatusOnArrival(): void

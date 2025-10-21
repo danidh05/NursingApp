@@ -28,6 +28,7 @@ class RequestResponseDTO
         public ?float $total_price,
         public ?float $discount_percentage,
         public ?float $discounted_price,
+        public ?int $thread_id,       // Chat thread ID for admin-user communication
         public ?Carbon $deleted_at,
         public Carbon $created_at,
         public Carbon $updated_at,
@@ -69,6 +70,7 @@ class RequestResponseDTO
             total_price: $request->total_price,
             discount_percentage: $request->discount_percentage,
             discounted_price: $request->discounted_price,
+            thread_id: $request->chatThread?->id ?? null,  // Get chat thread ID if exists
             deleted_at: $request->deleted_at,
             created_at: $request->created_at,
             updated_at: $request->updated_at,

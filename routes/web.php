@@ -9,3 +9,6 @@ Route::get('/', function () {
 Route::get('/privacy-policy', function () {
     return view('privacy-policy'); // Make sure you have a view file named privacy-policy.blade.php
 });
+
+// Load broadcasting routes
+require __DIR__.'/channels.php';

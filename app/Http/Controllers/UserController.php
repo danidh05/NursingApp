@@ -257,13 +257,41 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        $activeRequests = $user->requests()->where('status', 'pending')->count();
-
-        $recentServices = $user->requests()
-            ->with('service')
+        // Get all user requests with relationships in a single query
+        $requests = $user->requests()
+            ->with(['services', 'area'])
             ->latest('created_at')
-            ->take(5)
             ->get();
+
+        // Count active requests from the same dataset
+        $activeRequests = $requests
+            ->whereIn('status', ['submitted', 'assigned', 'in_progress'])
+            ->count();
+
+        // Get recent 5 requests and format them
+        $recentServices = $requests
+            ->take(5)
+            ->map(function ($request) {
+                return [
+                    'id' => $request->id,
+                    'full_name' => $request->full_name,
+                    'phone_number' => $request->phone_number,
+                    'problem_description' => $request->problem_description,
+                    'status' => $request->status,
+                    'created_at' => $request->created_at,
+                    'services' => $request->services->map(function ($service) {
+                        return [
+                            'id' => $service->id,
+                            'name' => $service->name,
+                            'price' => $service->pivot->price ?? null, // If price is stored in pivot table
+                        ];
+                    }),
+                    'area' => $request->area ? [
+                        'id' => $request->area->id,
+                        'name' => $request->area->name,
+                    ] : null,
+                ];
+            });
 
         return response()->json([
             'active_requests' => $activeRequests,

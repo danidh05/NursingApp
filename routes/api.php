@@ -31,6 +31,9 @@ Route::post('/login', [AuthController::class, 'login']);
 // Public area routes
 Route::get('/areas', [AreaController::class, 'index']);
 
+// Public settings route (accessible without authentication)
+Route::get('/settings/public', [\App\Http\Controllers\SettingsController::class, 'getPublic']); // Get public settings for frontend
+
 // Authenticated routes
 Route::middleware(['auth:sanctum'])->group(function () {
     // Contact form submission (requires authentication)
@@ -201,6 +204,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/contacts', [\App\Http\Controllers\Admin\ContactController::class, 'index']); // List all contact submissions
         Route::get('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'show']); // Get specific contact submission
         Route::delete('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy']); // Delete contact submission
+
+        // Settings management routes (admin only)
+        Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index']); // List all settings
+        Route::get('/settings/{id}', [\App\Http\Controllers\SettingsController::class, 'show']); // Get specific setting
+        Route::post('/settings', [\App\Http\Controllers\SettingsController::class, 'store']); // Create new setting
+        Route::put('/settings/{id}', [\App\Http\Controllers\SettingsController::class, 'update']); // Update setting
+        Route::delete('/settings/{id}', [\App\Http\Controllers\SettingsController::class, 'destroy']); // Delete setting
+        Route::post('/settings/{id}/toggle', [\App\Http\Controllers\SettingsController::class, 'toggleActive']); // Toggle setting active status
 
             });
 

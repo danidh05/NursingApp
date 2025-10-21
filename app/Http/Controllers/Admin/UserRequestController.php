@@ -44,6 +44,7 @@ class UserRequestController extends Controller
      *                 @OA\Property(property="discount_percentage", type="number", format="float", nullable=true, example=10.00),
      *                 @OA\Property(property="discounted_price", type="number", format="float", example=135.00),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="thread_id", type="integer", example=123, nullable=true, description="Chat thread ID for admin-user communication"),
      *                 @OA\Property(property="services", type="array", @OA\Items(
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Home Nursing")
@@ -65,7 +66,7 @@ class UserRequestController extends Controller
         }
 
         $requests = Request::where('user_id', $userId)
-                          ->with(['services', 'nurse'])
+                          ->with(['services', 'nurse', 'chatThread'])
                           ->orderBy('created_at', 'desc')
                           ->get()
                           ->map(function ($request) {
@@ -80,6 +81,7 @@ class UserRequestController extends Controller
                                   'has_discount' => $request->hasDiscount(),
                                   'created_at' => $request->created_at,
                                   'scheduled_time' => $request->scheduled_time,
+                                  'thread_id' => $request->chatThread?->id ?? null,
                                   'services' => $request->services->map(fn($s) => [
                                       'id' => $s->id,
                                       'name' => $s->name

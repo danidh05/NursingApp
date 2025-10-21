@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'detect.language' => \App\Http\Middleware\DetectLanguage::class,
         ]);
+        
+        // Add CORS middleware to API routes
+        $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
     })
     ->withSchedule(function (Schedule $schedule) {
         // Run birthday processing daily at 9:00 AM

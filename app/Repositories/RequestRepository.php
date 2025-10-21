@@ -34,7 +34,7 @@ class RequestRepository implements IRequestRepository
             $request->services()->attach($dto->service_ids);
         }
 
-        return $request->load('services', 'user', 'area');
+        return $request->load('services', 'user', 'area', 'chatThread');
     }
 
     public function update(int $id, UpdateRequestDTO $dto, User $user): Request
@@ -61,12 +61,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area');
+        return $request->load('services', 'user', 'area', 'chatThread');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role', 'area']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -81,7 +81,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role', 'area']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Direct Pusher Test for Reverb</title>
+    <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.2.0/dist/web/pusher.min.js"></script>
+</head>
+
+<body>
+    <h1>🔌 Direct Pusher Test for Laravel Reverb</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        // Your Reverb configuration
+        const config = {
+            appKey: 'zrjhzajbzsf5exsgvlgw', // REVERB_APP_KEY
+            cluster: 'mt1', // This doesn't matter for Reverb
+            host: '127.0.0.1',
+            port: 8080,
+            encrypted: false,
+            authEndpoint: 'http://127.0.0.1:8000/broadcasting/auth',
+            auth: {
+                headers: {
+                    'Authorization': 'Bearer 1|a9NxxRxBhykTkOEcRRTQfOkN4tOjSERdKwl5H8z3d98b2661'
+                }
+            }
+        };
+
+        addMessage('Config: ' + JSON.stringify(config, null, 2));
+
+        try {
+            // Initialize Pusher directly
+            const pusher = new Pusher(config.appKey, {
+                cluster: config.cluster,
+                wsHost: config.host,
+                wsPort: config.port,
+                wssPort: config.port,
+                forceTLS: config.encrypted,
+                enabledTransports: ['ws', 'wss'],
+                authEndpoint: config.authEndpoint,
+                auth: config.auth
+            });
+
+            statusDiv.innerHTML = '🔄 Connecting to Reverb...';
+
+            // Test connection events
+            pusher.connection.bind('connected', () => {
+                statusDiv.innerHTML = '✅ Connected to Reverb server!';
+                statusDiv.style.color = 'green';
+                addMessage('✅ Connected to Laravel Reverb server');
+
+                // Test subscribing to a private channel
+                testPrivateChannel(pusher);
+            });
+
+            pusher.connection.bind('disconnected', () => {
+                statusDiv.innerHTML = '❌ Disconnected from Reverb server';
+                statusDiv.style.color = 'red';
+                addMessage('❌ Disconnected from Reverb server');
+            });
+
+            pusher.connection.bind('error', (error) => {
+                statusDiv.innerHTML = '❌ Connection error: ' + error.message;
+                statusDiv.style.color = 'red';
+                addMessage('❌ Connection error: ' + error.message);
+            });
+
+            // Test connection state
+            setTimeout(() => {
+                const state = pusher.connection.state;
+                addMessage('Connection state: ' + state);
+
+                if (state !== 'connected') {
+                    addMessage('⚠️ Connection failed. This might be because:');
+                    addMessage('1. Reverb server is not running');
+                    addMessage('2. Wrong configuration');
+                    addMessage('3. Authentication failed');
+                    addMessage('4. CORS issues');
+                }
+            }, 5000);
+
+        } catch (error) {
+            statusDiv.innerHTML = '❌ Error: ' + error.message;
+            statusDiv.style.color = 'red';
+            addMessage('❌ Error: ' + error.message);
+        }
+
+        function testPrivateChannel(pusher) {
+            addMessage('🧪 Testing private channel subscription...');
+
+            try {
+                // Subscribe to a private channel
+                const channel = pusher.subscribe('private-chat.1');
+
+                channel.bind('message.created', (data) => {
+                    addMessage('📨 Message received: ' + JSON.stringify(data));
+                });
+
+                channel.bind('thread.closed', (data) => {
+                    addMessage('🔒 Thread closed: ' + JSON.stringify(data));
+                });
+
+                addMessage('✅ Successfully subscribed to private-chat.1');
+                addMessage('🎉 Laravel Reverb is working!');
+                addMessage('📱 Your Flutter developer can use pusher_client package');
+
+            } catch (error) {
+                addMessage('❌ Channel subscription failed: ' + error.message);
+            }
+        }
+
+        function addMessage(message) {
+            const p = document.createElement('p');
+            p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            messagesDiv.appendChild(p);
+        }
+    </script>
+</body>
+
+</html>

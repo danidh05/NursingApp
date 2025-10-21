@@ -15,7 +15,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://127.0.0.1:8000",
             "description": "API Server"
         }
     ],
@@ -4025,6 +4025,12 @@
                                                         "type": "string",
                                                         "format": "date-time"
                                                     },
+                                                    "thread_id": {
+                                                        "description": "Chat thread ID for admin-user communication",
+                                                        "type": "integer",
+                                                        "example": 123,
+                                                        "nullable": true
+                                                    },
                                                     "services": {
                                                         "type": "array",
                                                         "items": {
@@ -7758,6 +7764,12 @@
                                                 "example": 30,
                                                 "nullable": true
                                             },
+                                            "thread_id": {
+                                                "description": "Chat thread ID for admin-user communication",
+                                                "type": "integer",
+                                                "example": 123,
+                                                "nullable": true
+                                            },
                                             "total_price": {
                                                 "description": "Price calculated based on request area",
                                                 "type": "number",
@@ -8234,6 +8246,12 @@
                                             "description": "Live countdown in minutes, auto-triggers status change to in_progress when reaches 0",
                                             "type": "integer",
                                             "example": 30,
+                                            "nullable": true
+                                        },
+                                        "thread_id": {
+                                            "description": "Chat thread ID for admin-user communication",
+                                            "type": "integer",
+                                            "example": 123,
                                             "nullable": true
                                         },
                                         "total_price": {
@@ -9441,6 +9459,531 @@
                 "security": [
                     {
                         "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/settings": {
+            "get": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Get all settings",
+                "operationId": "4d0065c1ce276add4119aa348280c428",
+                "responses": {
+                    "200": {
+                        "description": "Settings retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "key": {
+                                                        "type": "string",
+                                                        "example": "job_application_url"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/jobs"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "url"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "URL for job application redirect"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Create a new setting",
+                "operationId": "ac81ea47e218197af695ece98dbe306a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "key",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "key": {
+                                        "type": "string",
+                                        "example": "job_application_url"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "example": "https://example.com/jobs"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "url"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "URL for job application redirect"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Setting created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "job_application_url"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/jobs"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "url"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "URL for job application redirect"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/settings/public": {
+            "get": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Get public settings (for frontend)",
+                "operationId": "7e90595b1a8f3e20f1ef1416fdee6cc8",
+                "responses": {
+                    "200": {
+                        "description": "Public settings retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "job_application_url": {
+                                            "type": "string",
+                                            "example": "https://example.com/jobs"
+                                        },
+                                        "whatsapp_support_number": {
+                                            "type": "string",
+                                            "example": "+1234567890"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/settings/{id}": {
+            "get": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Get a specific setting",
+                "operationId": "84fcbd0ff4fbd11225c6f8ccabd2e9c8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setting retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "job_application_url"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/jobs"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "url"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "URL for job application redirect"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Setting not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Update a setting",
+                "operationId": "862148277dcd1fc894da922852ef1033",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "value": {
+                                        "type": "string",
+                                        "example": "https://new-example.com/jobs"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "url"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated URL for job application redirect"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Setting updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "job_application_url"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "https://new-example.com/jobs"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "url"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Updated URL for job application redirect"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Setting not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Delete a setting",
+                "operationId": "c8972a5e50b0d8e53473a7961ebd8de6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setting deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Setting deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Setting not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/settings/{id}/toggle": {
+            "post": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Toggle setting active status",
+                "operationId": "378af5ff13a0d4dd635e0be66ac28ebc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setting status toggled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "job_application_url"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/jobs"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "url"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "URL for job application redirect"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Setting not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
                     }
                 ]
             }
@@ -10731,6 +11274,10 @@
         {
             "name": "FAQs",
             "description": "API Endpoints for FAQ management"
+        },
+        {
+            "name": "Settings",
+            "description": "Application settings management"
         },
         {
             "name": "Admin - Custom Notifications",
