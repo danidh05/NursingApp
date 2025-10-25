@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
@@ -20,6 +19,8 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Broadcast;
+
+
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 

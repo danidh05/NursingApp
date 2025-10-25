@@ -198,7 +198,7 @@ class EnhancedMultilingualTest extends TestCase
     }
 
     /** @test */
-    public function faqs_fallback_to_english_when_arabic_not_available()
+    public function faqs_return_original_content_when_arabic_not_available()
     {
         Sanctum::actingAs($this->user);
 
@@ -219,9 +219,9 @@ class EnhancedMultilingualTest extends TestCase
         $response->assertStatus(200);
         $data = $response->json('data');
         $this->assertCount(1, $data);
-        $this->assertEquals('English Question?', $data[0]['question']); // Falls back to English
-        $this->assertEquals('English Answer', $data[0]['answer']); // Falls back to English
-        $this->assertEquals('en', $data[0]['translation']['locale']);
+        $this->assertEquals('Default Question', $data[0]['question']); // Returns original content
+        $this->assertEquals('Default Answer', $data[0]['answer']); // Returns original content
+        $this->assertNull($data[0]['translation']); // No translation object since no Arabic translation exists
     }
 
     /** @test */

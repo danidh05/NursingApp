@@ -52,9 +52,11 @@ class FAQTranslationService
      */
     private function applyTranslations(FAQ $faq, string $locale): void
     {
-        $translation = $faq->translate($locale);
+        // Get the specific translation for the requested locale
+        $translation = $faq->translations()->where('locale', $locale)->first();
         
         if ($translation) {
+            // Translation exists for the requested locale
             $faq->question = $translation->question;
             $faq->answer = $translation->answer;
             $faq->translation = [
@@ -63,7 +65,7 @@ class FAQTranslationService
                 'answer' => $translation->answer,
             ];
         } else {
-            // No translation found, use default values
+            // No translation found for the requested locale, use original content
             $faq->question = $faq->getOriginal('question');
             $faq->answer = $faq->getOriginal('answer');
             $faq->translation = null;
