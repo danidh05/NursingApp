@@ -19,6 +19,9 @@ use App\Http\Controllers\Admin\ServiceAreaPriceController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
