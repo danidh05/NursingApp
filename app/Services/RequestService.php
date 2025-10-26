@@ -43,7 +43,7 @@ class RequestService implements IRequestService
         Cache::forget("user_requests_{$user->id}");
         
         // Reload request with services
-        $request = $request->fresh(['services', 'user']);
+        $request = $request->fresh(['services', 'user', 'nurse']);
         
         return RequestResponseDTO::fromModel($request);
     }

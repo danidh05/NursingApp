@@ -34,6 +34,7 @@ class RequestResponseDTO
         public Carbon $updated_at,
         public User $user,
         public ?array $area = null,
+        public ?array $nurse = null,  // Nurse information including name
         public array $services = [],
     ) {}
 
@@ -78,6 +79,13 @@ class RequestResponseDTO
             area: $request->area ? [
                 'id' => $request->area->id,
                 'name' => $request->area->name,
+            ] : null,
+            nurse: $request->nurse ? [
+                'id' => $request->nurse->id,
+                'name' => $request->nurse->name,
+                'phone_number' => $request->nurse->phone_number,
+                'gender' => $request->nurse->gender,
+                'profile_picture' => $request->nurse->profile_picture,
             ] : null,
             services: $request->services->toArray(),
         );

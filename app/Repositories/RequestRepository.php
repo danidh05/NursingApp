@@ -34,7 +34,7 @@ class RequestRepository implements IRequestRepository
             $request->services()->attach($dto->service_ids);
         }
 
-        return $request->load('services', 'user', 'area', 'chatThread');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse');
     }
 
     public function update(int $id, UpdateRequestDTO $dto, User $user): Request
@@ -42,7 +42,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management
         // For updates, admins should be able to update any request
         if ($user->role->name === 'admin') {
-            $request = Request::with(['services', 'user.role'])->whereNull('deleted_at')->findOrFail($id);
+            $request = Request::with(['services', 'user.role', 'nurse'])->whereNull('deleted_at')->findOrFail($id);
         } else {
             $request = $this->findById($id, $user);
         }
@@ -61,12 +61,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area', 'chatThread');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -81,7 +81,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

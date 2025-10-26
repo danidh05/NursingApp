@@ -217,4 +217,49 @@ class RequestServiceTest extends TestCase
         $this->assertIsArray($response);
         $this->assertCount(1, $response);
     }
+
+    public function test_request_includes_nurse_information_when_assigned(): void
+    {
+        // Create a nurse
+        $nurse = \App\Models\Nurse::factory()->create([
+            'name' => 'Jane Smith',
+            'phone_number' => '9876543210',
+            'gender' => 'female'
+        ]);
+
+        // Create a request and assign a nurse
+        $request = Request::factory()
+            ->for($this->user)
+            ->create([
+                'nurse_id' => $nurse->id,
+                'status' => Request::STATUS_ASSIGNED
+            ]);
+
+        // Get the request response
+        $response = $this->service->getRequest($request->id, $this->user);
+
+        // Assert nurse information is included
+        $this->assertNotNull($response->nurse);
+        $this->assertEquals($nurse->id, $response->nurse['id']);
+        $this->assertEquals('Jane Smith', $response->nurse['name']);
+        $this->assertEquals('9876543210', $response->nurse['phone_number']);
+        $this->assertEquals('female', $response->nurse['gender']);
+    }
+
+    public function test_request_returns_null_nurse_when_not_assigned(): void
+    {
+        // Create a request without a nurse
+        $request = Request::factory()
+            ->for($this->user)
+            ->create([
+                'nurse_id' => null,
+                'status' => Request::STATUS_SUBMITTED
+            ]);
+
+        // Get the request response
+        $response = $this->service->getRequest($request->id, $this->user);
+
+        // Assert nurse information is null
+        $this->assertNull($response->nurse);
+    }
 } 
