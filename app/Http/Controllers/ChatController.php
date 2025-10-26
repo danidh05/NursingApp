@@ -35,6 +35,19 @@ use Illuminate\Support\Facades\Gate;
  * - Signed URLs with configurable TTL
  * - Thread isolation and participant-only access
  * 
+ * WEBSOCKET SUBSCRIPTION:
+ * After opening a chat thread, subscribe to WebSocket channel to receive real-time events:
+ * 
+ * Channel: private-chat.{threadId}
+ * Events: MessageCreated (listens as "message.created"), ThreadClosed (listens as "thread.closed")
+ * 
+ * Frontend Implementation (Laravel Echo):
+ * Echo.private('private-chat.' + threadId)
+ *   .listen('MessageCreated', (event) => handleNewMessage(event))
+ *   .listen('ThreadClosed', (event) => handleThreadClosed(event))
+ * 
+ * Events contain same data structure as API responses (see MessageCreatedEvent and ThreadClosedEvent schemas)
+ * 
  * @OA\Tag(
  *     name="Chat",
  *     description="Temporary request-scoped chat endpoints for real-time communication"
