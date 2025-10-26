@@ -29,7 +29,7 @@ class PopupController extends Controller
      *                 @OA\Schema(
      *                     @OA\Property(property="popup", type="object",
      *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="image", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg", description="Firebase Storage URL for popup image"),
+     *                         @OA\Property(property="image", type="string", nullable=true, example="https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg", description="Firebase Storage URL for popup image"),
      *                         @OA\Property(property="title", type="string", example="Welcome to Our App"),
      *                         @OA\Property(property="content", type="string", example="We are excited to announce our new features..."),
      *                         @OA\Property(property="type", type="string", enum={"info","warning","promo"}, example="info"),

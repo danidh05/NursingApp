@@ -280,6 +280,101 @@ class ChatController extends Controller
 
     /**
      * @OA\Post(
+     *     path="/api/chat/threads/{threadId}/upload-url",
+     *     summary="Get signed URL for image upload",
+     *     description="Retrieves a signed URL for uploading an image directly to storage. The client uses this URL to upload the image, then sends the mediaPath when posting the message.",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="threadId",
+     *         in="path",
+     *         required=true,
+     *         description="Chat thread ID",
+     *         @OA\Schema(type="integer", example=123)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"filename", "contentType"},
+     *             @OA\Property(property="filename", type="string", example="image.jpg", description="Original filename (used for generating unique storage path)"),
+     *             @OA\Property(property="contentType", type="string", example="image/jpeg", enum={"image/jpeg","image/png","image/webp"}, description="MIME type of the image")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Upload URL generated successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Upload URL generated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="url", type="string", example="https://storage.googleapis.com/bucket/...", description="Signed URL for uploading"),
+     *                 @OA\Property(property="mediaPath", type="string", example="chats/123/unique_filename.jpg", description="Storage path to use when posting the message"),
+     *                 @OA\Property(property="headers", type="object", description="HTTP headers to use during upload")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         ref="#/components/responses/Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         ref="#/components/responses/Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Chat thread not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - Invalid content type or missing parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object", description="Validation error details")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=501,
+     *         ref="#/components/responses/ChatFeatureDisabled"
+     *     )
+     *     )
+     */
+    public function getUploadUrl(Request $request, int $threadId)
+    {
+        $this->ensureChatEnabled();
+
+        $thread = ChatThread::query()->findOrFail($threadId);
+        Gate::authorize('post', $thread);
+
+        $payload = $request->validate([
+            'filename' => 'required|string',
+            'contentType' => 'required|string|in:image/jpeg,image/png,image/webp',
+        ]);
+
+        // Generate unique filename
+        $extension = pathinfo($payload['filename'], PATHINFO_EXTENSION) ?: 'jpg';
+        $objectName = "chats/{$threadId}/" . uniqid() . '_' . time() . '.' . $extension;
+
+        $ttl = (int)config('chat.signed_url_ttl');
+        $signed = $this->storage->signPutUrl($objectName, $payload['contentType'], $ttl);
+
+        if (!$signed['url']) {
+            abort(422, 'Failed to generate upload URL');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Upload URL generated successfully',
+            'data' => [
+                'url' => $signed['url'],
+                'mediaPath' => $objectName,
+                'headers' => $signed['headers'],
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Post(
      *     path="/api/chat/threads/{threadId}/messages",
      *     summary="Post new message to chat thread",
      *     description="Posts a new message to a chat thread. Supports three message types: text, image, and location. For image messages, mediaPath must be a valid storage path. For location messages, lat and lng coordinates are required. Messages trigger real-time broadcasting to thread participants.",

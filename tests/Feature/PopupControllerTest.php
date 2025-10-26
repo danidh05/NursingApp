@@ -280,6 +280,49 @@ class PopupControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_popup_without_image()
+    {
+        // Arrange - Create popup without image
+        $data = [
+            'title' => 'No Image Popup',
+            'content' => 'This popup has no image',
+            'type' => 'info'
+        ];
+
+        // Act
+        $response = $this->actingAs($this->admin)
+            ->postJson('/api/admin/popups', $data);
+
+        // Assert
+        $response->assertStatus(201)
+            ->assertJson([
+                'message' => 'Popup created successfully.'
+            ])
+            ->assertJsonStructure([
+                'popup' => [
+                    'id',
+                    'title',
+                    'content',
+                    'type'
+                ]
+            ]);
+
+        // Verify the popup was created with null image
+        $this->assertDatabaseHas('popups', [
+            'title' => 'No Image Popup',
+            'content' => 'This popup has no image',
+            'type' => 'info',
+            'is_active' => true,
+            'image' => null
+        ]);
+        
+        // Verify the response JSON - image should be null or absent
+        $responseData = $response->json();
+        if (array_key_exists('image', $responseData['popup'])) {
+            $this->assertNull($responseData['popup']['image']);
+        }
+    }
+
     public function test_create_popup_validation_requires_required_fields()
     {
         // Act - Missing required fields

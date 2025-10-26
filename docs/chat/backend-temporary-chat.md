@@ -134,11 +134,44 @@ User/Admin → Controller → Service → Model → Database
 -   Returns signed URLs for media files
 -   Reverses order for chronological frontend display
 
-### 3. Post Message
+### 3a. Get Image Upload URL (NEW)
+
+**Endpoint:** `POST /api/chat/threads/{threadId}/upload-url`
+
+**Description:** Retrieves a signed URL for uploading images directly to storage. See [Image Upload Guide](./image-upload-guide.md) for complete implementation.
+
+**Request Body:**
+
+```json
+{
+    "filename": "image.jpg",
+    "contentType": "image/jpeg"
+}
+```
+
+**Response:**
+
+```json
+{
+    "success": true,
+    "message": "Upload URL generated successfully",
+    "data": {
+        "url": "https://storage.googleapis.com/bucket/chats/123/unique_filename.jpg?...",
+        "mediaPath": "chats/123/unique_filename.jpg",
+        "headers": {
+            "Content-Type": "image/jpeg"
+        }
+    }
+}
+```
+
+**Authorization:** Thread participants with `post` permission
+
+### 3b. Post Message
 
 **Endpoint:** `POST /api/chat/threads/{threadId}/messages`
 
-**Description:** Posts a new message to a chat thread.
+**Description:** Posts a new message to a chat thread. For images, first use the upload-url endpoint above.
 
 **Request Body:**
 
@@ -162,10 +195,26 @@ User/Admin → Controller → Service → Model → Database
 
 #### Image Message
 
+**Note:** Images require a 3-step upload process. See [Image Upload Guide](./image-upload-guide.md) for complete Flutter implementation.
+
+**Step 1:** Get upload URL
+
+```
+POST /api/chat/threads/{threadId}/upload-url
+{
+  "filename": "image.jpg",
+  "contentType": "image/jpeg"
+}
+```
+
+**Step 2:** Upload image to signed URL (PUT request with raw bytes)
+
+**Step 3:** Post message with mediaPath
+
 ```json
 {
     "type": "image",
-    "mediaPath": "chats/123/image.jpg"
+    "mediaPath": "chats/123/unique_filename.jpg"
 }
 ```
 

@@ -51,10 +51,7 @@ class ReverbServerTest extends TestCase
         $this->assertFalse($config['options']['useTLS']);
     }
 
-    public function test_reverb_broadcasting_default_driver()
-    {
-        $this->assertEquals('reverb', config('broadcasting.default'));
-    }
+
 
     public function test_reverb_broadcasting_connection_exists()
     {

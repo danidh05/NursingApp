@@ -30,7 +30,7 @@ class PopupController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="popups", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="image", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"),
+     *                 @OA\Property(property="image", type="string", nullable=true, example="https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"),
      *                 @OA\Property(property="title", type="string", example="Welcome to Our App"),
      *                 @OA\Property(property="content", type="string", example="We are excited to announce our new features..."),
      *                 @OA\Property(property="type", type="string", enum={"info","warning","promo"}, example="info"),
@@ -91,7 +91,7 @@ class PopupController extends Controller
      *             @OA\Property(property="message", type="string", example="Popup created successfully."),
      *             @OA\Property(property="popup", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="image", type="string"),
+     *                 @OA\Property(property="image", type="string", nullable=true),
      *                 @OA\Property(property="title", type="string"),
      *                 @OA\Property(property="content", type="string"),
      *                 @OA\Property(property="type", type="string"),
@@ -159,7 +159,7 @@ class PopupController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="popup", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="image", type="string"),
+     *                 @OA\Property(property="image", type="string", nullable=true),
      *                 @OA\Property(property="title", type="string"),
      *                 @OA\Property(property="content", type="string"),
      *                 @OA\Property(property="type", type="string"),
@@ -240,7 +240,7 @@ class PopupController extends Controller
      *             @OA\Property(property="message", type="string", example="Popup updated successfully."),
      *             @OA\Property(property="popup", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="image", type="string"),
+     *                 @OA\Property(property="image", type="string", nullable=true),
      *                 @OA\Property(property="title", type="string"),
      *                 @OA\Property(property="content", type="string"),
      *                 @OA\Property(property="type", type="string"),

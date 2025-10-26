@@ -222,6 +222,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Temporary request-scoped chat (feature gated) - accessible to both users and admins
     Route::post('/requests/{id}/chat/open', [\App\Http\Controllers\ChatController::class, 'open']);
     Route::get('/chat/threads/{threadId}/messages', [\App\Http\Controllers\ChatController::class, 'listMessages']);
+    Route::post('/chat/threads/{threadId}/upload-url', [\App\Http\Controllers\ChatController::class, 'getUploadUrl']);
     Route::post('/chat/threads/{threadId}/messages', [\App\Http\Controllers\ChatController::class, 'postMessage']);
     Route::patch('/chat/threads/{threadId}/close', [\App\Http\Controllers\ChatController::class, 'close']);
 });

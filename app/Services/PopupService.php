@@ -36,6 +36,9 @@ class PopupService
         // Handle image upload if present
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             $data['image'] = $this->firebaseStorage->uploadFile($data['image'], 'popup-images');
+        } else {
+            // Ensure image is set to null if not provided
+            unset($data['image']);
         }
 
         return $this->popupRepository->create($data);
@@ -63,6 +66,9 @@ class PopupService
                 \Log::error('Failed to upload new popup image', ['error' => $e->getMessage()]);
                 throw new \Exception('Failed to upload image: ' . $e->getMessage());
             }
+        } else {
+            // Don't modify the image field if no new image is provided
+            unset($data['image']);
         }
 
         return $this->popupRepository->update($id, $data);
