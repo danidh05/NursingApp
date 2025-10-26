@@ -19,7 +19,7 @@ class MessageCreated implements ShouldBroadcast
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('private-chat.'.$this->threadId)];
+        return [new PrivateChannel('chat.'.$this->threadId)];
     }
 
     public function broadcastAs(): string
