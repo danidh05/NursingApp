@@ -12,6 +12,14 @@ class SettingsSeeder extends Seeder
      */
     public function run(): void
     {
+        // WhatsApp support number setting
+        Settings::create([
+            'key' => 'whatsapp_support_number',
+            'value' => '+1234567890',
+            'type' => 'phone',
+            'description' => 'WhatsApp number for customer support',
+            'is_active' => true,
+        ]);
         // Job application URL setting
         Settings::create([
             'key' => 'job_application_url',
@@ -21,14 +29,7 @@ class SettingsSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // WhatsApp support number setting
-        Settings::create([
-            'key' => 'whatsapp_support_number',
-            'value' => '+1234567890',
-            'type' => 'phone',
-            'description' => 'WhatsApp number for customer support',
-            'is_active' => true,
-        ]);
+        
 
         // App name setting
         Settings::create([

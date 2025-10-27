@@ -191,17 +191,174 @@ class RequestControllerTest extends TestCase
             ->assertJsonValidationErrors(['full_name', 'service_ids']);
     }
 
-    public function test_admin_can_soft_delete_request(): void
+    public function test_admin_can_assign_nurse_to_request(): void
+    {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotification')
+            ->andReturn(true);
+
+        // Create a test nurse
+        $nurse = \App\Models\Nurse::factory()->create([
+            'name' => 'Test Nurse',
+            'phone_number' => '1234567890',
+            'gender' => 'female'
+        ]);
+
+        $request = Request::factory()->create(['status' => Request::STATUS_SUBMITTED]);
+
+        $response = $this->actingAs($this->admin)
+            ->putJson("/api/admin/requests/{$request->id}", [
+                'status' => Request::STATUS_ASSIGNED,
+                'nurse_id' => $nurse->id
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonFragment([
+                'status' => Request::STATUS_ASSIGNED
+            ]);
+
+        // Check that the response contains the correct nurse ID
+        $responseData = $response->json();
+        $this->assertEquals($nurse->id, $responseData['nurse']['id']);
+        $this->assertEquals($nurse->name, $responseData['nurse']['name']);
+        $this->assertEquals($nurse->phone_number, $responseData['nurse']['phone_number']);
+        $this->assertEquals($nurse->gender, $responseData['nurse']['gender']);
+
+        // Verify the nurse was assigned in the database
+        $this->assertDatabaseHas('requests', [
+            'id' => $request->id,
+            'nurse_id' => $nurse->id,
+            'status' => Request::STATUS_ASSIGNED
+        ]);
+    }
+
+    public function test_admin_can_unassign_nurse_from_request(): void
+    {
+        // Create a test nurse
+        $nurse = \App\Models\Nurse::factory()->create();
+        
+        $request = Request::factory()->create([
+            'status' => Request::STATUS_ASSIGNED,
+            'nurse_id' => $nurse->id
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->putJson("/api/admin/requests/{$request->id}", [
+                'nurse_id' => null
+            ]);
+
+        $response->assertStatus(200);
+
+        // Check that the response contains null nurse
+        $responseData = $response->json();
+        $this->assertNull($responseData['nurse']);
+
+        // Verify the nurse was unassigned in the database
+        $this->assertDatabaseHas('requests', [
+            'id' => $request->id,
+            'nurse_id' => null
+        ]);
+    }
+
+    public function test_complete_nurse_assignment_flow(): void
+    {
+        // Mock OneSignal facade
+        $oneSignalMock = Mockery::mock('alias:OneSignal');
+        $oneSignalMock->shouldReceive('sendNotification')
+            ->andReturn(true);
+
+        // Step 1: User creates a request (nurse_id will be null by default)
+        $response = $this->actingAs($this->user)->postJson('/api/requests', [
+            'full_name' => 'John Doe',
+            'phone_number' => '1234567890',
+            'name' => 'Test Request',
+            'location' => 'Test Location',
+            'time_type' => Request::TIME_TYPE_FULL,
+            'nurse_gender' => 'female',
+            'service_ids' => $this->services,
+            'problem_description' => 'Test problem',
+            'area_id' => $this->user->area_id,
+            'scheduled_time' => now()->addDay()->toDateTimeString(),
+            'ending_time' => now()->addDays(2)->toDateTimeString(),
+        ]);
+
+        $response->assertStatus(201);
+        $requestData = $response->json();
+        $requestId = $requestData['id'];
+
+        // Verify nurse is null initially
+        $this->assertNull($requestData['nurse']);
+
+        // Step 2: Admin assigns a nurse to the request
+        $nurse = \App\Models\Nurse::factory()->create([
+            'name' => 'Assigned Nurse',
+            'phone_number' => '9876543210',
+            'gender' => 'female'
+        ]);
+
+        $updateResponse = $this->actingAs($this->admin)
+            ->putJson("/api/admin/requests/{$requestId}", [
+                'status' => Request::STATUS_ASSIGNED,
+                'nurse_id' => $nurse->id
+            ]);
+
+        $updateResponse->assertStatus(200);
+        $updatedData = $updateResponse->json();
+
+        // Verify nurse is now assigned
+        $this->assertNotNull($updatedData['nurse']);
+        $this->assertEquals($nurse->id, $updatedData['nurse']['id']);
+        $this->assertEquals($nurse->name, $updatedData['nurse']['name']);
+        $this->assertEquals($nurse->phone_number, $updatedData['nurse']['phone_number']);
+        $this->assertEquals($nurse->gender, $updatedData['nurse']['gender']);
+
+        // Step 3: Verify the assignment persists when getting the request
+        $getResponse = $this->actingAs($this->user)
+            ->getJson("/api/requests/{$requestId}");
+
+        $getResponse->assertStatus(200);
+        $getData = $getResponse->json();
+
+        // Verify nurse information is still present
+        $this->assertNotNull($getData['nurse']);
+        $this->assertEquals($nurse->id, $getData['nurse']['id']);
+        $this->assertEquals($nurse->name, $getData['nurse']['name']);
+
+        // Step 4: Admin can unassign the nurse
+        $unassignResponse = $this->actingAs($this->admin)
+            ->putJson("/api/admin/requests/{$requestId}", [
+                'nurse_id' => null
+            ]);
+
+        $unassignResponse->assertStatus(200);
+        $unassignData = $unassignResponse->json();
+
+        // Verify nurse is now null again
+        $this->assertNull($unassignData['nurse']);
+
+        // Step 5: Verify unassignment persists
+        $finalGetResponse = $this->actingAs($this->user)
+            ->getJson("/api/requests/{$requestId}");
+
+        $finalGetResponse->assertStatus(200);
+        $finalData = $finalGetResponse->json();
+
+        // Verify nurse is null
+        $this->assertNull($finalData['nurse']);
+    }
+
+    public function test_nurse_assignment_validation_fails_for_invalid_nurse_id(): void
     {
         $request = Request::factory()->create();
 
         $response = $this->actingAs($this->admin)
-            ->deleteJson("/api/admin/requests/{$request->id}");
+            ->putJson("/api/admin/requests/{$request->id}", [
+                'nurse_id' => 99999 // Non-existent nurse ID
+            ]);
 
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'Request removed from admin view, but still available to users.']);
-
-        $this->assertSoftDeleted('requests', ['id' => $request->id]);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['nurse_id']);
     }
 
     public function test_user_can_view_soft_deleted_own_request(): void

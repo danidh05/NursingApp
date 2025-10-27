@@ -316,7 +316,8 @@ class RequestController extends Controller
      *             @OA\Property(property="time_needed_to_arrive", type="integer", example=30, description="Time in minutes needed to arrive"),
      *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Preferred nurse gender"),
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
-     *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Scheduled time for service")
+     *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Scheduled time for service"),
+     *             @OA\Property(property="nurse_id", type="integer", example=1, nullable=true, description="ID of the assigned nurse (optional)")
      *         )
      *     ),
      *     @OA\Response(
@@ -385,6 +386,7 @@ class RequestController extends Controller
             'time_type' => 'sometimes|string|in:full-time,part-time',
             'scheduled_time' => 'sometimes|date|after:now',
             'discount_percentage' => 'sometimes|nullable|numeric|min:0|max:100',
+            'nurse_id' => 'sometimes|nullable|integer|exists:nurses,id',
         ]);
 
         // Debug: Log the validated data

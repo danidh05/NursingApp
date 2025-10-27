@@ -14,6 +14,7 @@ class UpdateRequestDTO
         public ?string $nurse_gender = null,
         public ?string $time_type = null,
         public ?string $scheduled_time = null,
+        public ?int $nurse_id = null,               // Nurse assignment
     ) {}
 
     public static function fromArray(array $data): self
@@ -28,6 +29,23 @@ class UpdateRequestDTO
             nurse_gender: $data['nurse_gender'] ?? null,
             time_type: $data['time_type'] ?? null,
             scheduled_time: $data['scheduled_time'] ?? null,
+            nurse_id: $data['nurse_id'] ?? null,
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'full_name' => $this->full_name,
+            'phone_number' => $this->phone_number,
+            'name' => $this->name,
+            'problem_description' => $this->problem_description,
+            'status' => $this->status,
+            'time_needed_to_arrive' => $this->time_needed_to_arrive,
+            'nurse_gender' => $this->nurse_gender,
+            'time_type' => $this->time_type,
+            'scheduled_time' => $this->scheduled_time,
+            'nurse_id' => $this->nurse_id,
+        ];
     }
 } 

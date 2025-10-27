@@ -141,6 +141,8 @@ class ChatController extends Controller
      *             @OA\Property(property="message", type="string", example="Chat thread opened successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="threadId", type="integer", example=123, description="Unique chat thread identifier")
+     *                 @OA\Property(property="adminId", type="integer", example=1, description="Admin user ID")
+     *                 @OA\Property(property="clientId", type="integer", example=2, description="Client user ID")
      *             )
      *         )
      *     ),
@@ -180,7 +182,9 @@ class ChatController extends Controller
             'success' => true,
             'message' => 'Chat thread opened successfully',
             'data' => [
-                'threadId' => $thread->id
+                'threadId' => $thread->id,
+                'adminId' => $thread->admin_id,
+                'clientId'=>$thread->client_id,
             ]
         ]);
     }

@@ -59,6 +59,11 @@ class RequestRepository implements IRequestRepository
             'scheduled_time' => $dto->scheduled_time,
         ], fn($value) => $value !== null);
 
+        // Handle nurse_id separately to allow null values
+        if (array_key_exists('nurse_id', $dto->toArray())) {
+            $updateData['nurse_id'] = $dto->nurse_id;
+        }
+
         $request->update($updateData);
 
         return $request->load('services', 'user', 'area', 'chatThread', 'nurse');
