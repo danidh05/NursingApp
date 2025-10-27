@@ -8,28 +8,26 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Queue\SerializesModels;
 
-class MessageCreated implements ShouldBroadcast
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+
+class MessageCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    public bool $afterCommit = true;           // broadcast after DB commit
-    public string $broadcastQueue = 'broadcasts'; // optional: pin to a queue
 
     public function __construct(public int $threadId, public array $payload) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('chat.'.$this->threadId)];
+        return [new PrivateChannel('chat.' . $this->threadId)];
     }
 
     public function broadcastAs(): string
     {
-        return 'message.created'; // or 'chat.message.created.v1'
+        return 'message.created';
     }
 
     public function broadcastWith(): array
     {
-        // payload should already be minimal & signed by the service
         return $this->payload;
     }
 
