@@ -140,8 +140,8 @@ class ChatController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Chat thread opened successfully"),
      *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="threadId", type="integer", example=123, description="Unique chat thread identifier")
-     *                 @OA\Property(property="adminId", type="integer", example=1, description="Admin user ID")
+     *                 @OA\Property(property="threadId", type="integer", example=123, description="Unique chat thread identifier"),
+     *                 @OA\Property(property="adminId", type="integer", example=1, description="Admin user ID"),
      *                 @OA\Property(property="clientId", type="integer", example=2, description="Client user ID")
      *             )
      *         )

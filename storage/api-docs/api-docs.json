@@ -2294,7 +2294,8 @@
                                                     },
                                                     "image": {
                                                         "type": "string",
-                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"
+                                                        "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg",
+                                                        "nullable": true
                                                     },
                                                     "title": {
                                                         "type": "string",
@@ -2444,7 +2445,8 @@
                                                     "example": 1
                                                 },
                                                 "image": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "nullable": true
                                                 },
                                                 "title": {
                                                     "type": "string"
@@ -2550,7 +2552,8 @@
                                                     "example": 1
                                                 },
                                                 "image": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "nullable": true
                                                 },
                                                 "title": {
                                                     "type": "string"
@@ -2717,7 +2720,8 @@
                                                     "example": 1
                                                 },
                                                 "image": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "nullable": true
                                                 },
                                                 "title": {
                                                     "type": "string"
@@ -4100,7 +4104,8 @@
                                                         "image": {
                                                             "description": "Firebase Storage URL for popup image",
                                                             "type": "string",
-                                                            "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg"
+                                                            "example": "https://firebasestorage.googleapis.com/v0/b/.../popup-images/image.jpg",
+                                                            "nullable": true
                                                         },
                                                         "title": {
                                                             "type": "string",
@@ -6160,6 +6165,16 @@
                                                     "description": "Unique chat thread identifier",
                                                     "type": "integer",
                                                     "example": 123
+                                                },
+                                                "adminId": {
+                                                    "description": "Admin user ID",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clientId": {
+                                                    "description": "Client user ID",
+                                                    "type": "integer",
+                                                    "example": 2
                                                 }
                                             },
                                             "type": "object"
@@ -6361,6 +6376,133 @@
                     },
                     "422": {
                         "description": "Validation error - Invalid message data or media path",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "description": "Validation error details",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "501": {
+                        "$ref": "#/components/responses/ChatFeatureDisabled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chat/threads/{threadId}/upload-url": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get signed URL for image upload",
+                "description": "Retrieves a signed URL for uploading an image directly to storage. The client uses this URL to upload the image, then sends the mediaPath when posting the message.",
+                "operationId": "84288b91547a4e1442cfc2b0c03e3494",
+                "parameters": [
+                    {
+                        "name": "threadId",
+                        "in": "path",
+                        "description": "Chat thread ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "filename",
+                                    "contentType"
+                                ],
+                                "properties": {
+                                    "filename": {
+                                        "description": "Original filename (used for generating unique storage path)",
+                                        "type": "string",
+                                        "example": "image.jpg"
+                                    },
+                                    "contentType": {
+                                        "description": "MIME type of the image",
+                                        "type": "string",
+                                        "enum": [
+                                            "image/jpeg",
+                                            "image/png",
+                                            "image/webp"
+                                        ],
+                                        "example": "image/jpeg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upload URL generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Upload URL generated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "url": {
+                                                    "description": "Signed URL for uploading",
+                                                    "type": "string",
+                                                    "example": "https://storage.googleapis.com/bucket/..."
+                                                },
+                                                "mediaPath": {
+                                                    "description": "Storage path to use when posting the message",
+                                                    "type": "string",
+                                                    "example": "chats/123/unique_filename.jpg"
+                                                },
+                                                "headers": {
+                                                    "description": "HTTP headers to use during upload",
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "404": {
+                        "description": "Chat thread not found"
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid content type or missing parameters",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -8442,6 +8584,12 @@
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2024-01-15T10:00:00Z"
+                                    },
+                                    "nurse_id": {
+                                        "description": "ID of the assigned nurse (optional)",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
