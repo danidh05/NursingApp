@@ -40,6 +40,7 @@ class AuthController extends Controller
      *             @OA\Property(property="password", type="string", minLength=8, example="password123", description="User's password"),
      *             @OA\Property(property="password_confirmation", type="string", example="password123", description="Password confirmation"),
      *             @OA\Property(property="birth_date", type="string", format="date", example="1990-05-15", description="User's birth date (YYYY-MM-DD) - optional, used for birthday notifications"),
+     *             @OA\Property(property="gender", type="string", enum={"male", "female", "none"}, example="male", description="User's gender - optional, one of: male, female, or none"),
      *             @OA\Property(property="area_id", type="integer", example=1, description="User's area/region ID (required for region-based pricing)")
      *         )
      *     ),
@@ -75,6 +76,7 @@ class AuthController extends Controller
             'phone_number' => 'required|string|max:15|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'birth_date' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:male,female,none',
             'area_id' => 'required|exists:areas,id',
         ]);
     
@@ -94,6 +96,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'role_id' => $role_id,
             'birth_date' => $request->birth_date,
+            'gender' => $request->gender,
             'area_id' => $request->area_id,
         ]);
     
