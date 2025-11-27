@@ -203,13 +203,13 @@ public function verifySms(Request $request)
      * @OA\Post(
      *     path="/api/login",
      *     summary="User login",
-     *     description="Authenticate user with email and password",
+     *     description="Authenticate user with email or phone number and password",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com", description="User's email address"),
+     *             @OA\Property(property="email", type="string", example="john@example.com", description="User's email address or phone number"),
      *             @OA\Property(property="password", type="string", example="password123", description="User's password")
      *         )
      *     ),
@@ -253,7 +253,7 @@ public function verifySms(Request $request)
     {
         // Validate login credentials
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email' => 'required|string', // Accept email or phone number
             'password' => 'required|string',
         ]);
 
@@ -261,29 +261,41 @@ public function verifySms(Request $request)
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $credentials = $request->only('email', 'password');
+        $identifier = $request->input('email'); // Can be email or phone number
+        $password = $request->input('password');
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        // Determine if identifier is email or phone number
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
 
-            if (!$user->email_verified_at) {
-                return response()->json(['message' => 'Your phone number is not verified.'], 403);
-            }
-
-            $token = $user->createToken('authToken')->plainTextToken;
-
-            return response()->json([
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role_id' => $user->role_id,
-                ],
-            ], 200);
+        // Find user by email or phone number
+        if ($isEmail) {
+            $user = User::where('email', $identifier)->first();
+        } else {
+            $user = User::where('phone_number', $identifier)->first();
         }
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        // Check if user exists and password is correct
+        if (!$user || !Hash::check($password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Check if phone is verified
+        if (!$user->email_verified_at) {
+            return response()->json(['message' => 'Your phone number is not verified.'], 403);
+        }
+
+        // Create token and login
+        $token = $user->createToken('authToken')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_id' => $user->role_id,
+            ],
+        ], 200);
     }
 
     /**
