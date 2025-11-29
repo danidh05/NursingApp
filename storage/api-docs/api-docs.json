@@ -5044,6 +5044,16 @@
                                         "format": "date",
                                         "example": "1990-05-15"
                                     },
+                                    "gender": {
+                                        "description": "User's gender - optional, one of: male, female, or none",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "none"
+                                        ],
+                                        "example": "male"
+                                    },
                                     "area_id": {
                                         "description": "User's area/region ID (required for region-based pricing)",
                                         "type": "integer",
@@ -5228,7 +5238,7 @@
                     "Authentication"
                 ],
                 "summary": "User login",
-                "description": "Authenticate user with email and password",
+                "description": "Authenticate user with email or phone number and password",
                 "operationId": "c373bc4cffa4a56fc64e3979b8ee7b96",
                 "requestBody": {
                     "required": true,
@@ -5241,9 +5251,8 @@
                                 ],
                                 "properties": {
                                     "email": {
-                                        "description": "User's email address",
+                                        "description": "User's email address or phone number",
                                         "type": "string",
-                                        "format": "email",
                                         "example": "john@example.com"
                                     },
                                     "password": {
