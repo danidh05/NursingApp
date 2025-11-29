@@ -17,6 +17,7 @@ use App\Repositories\ContactRepository;
 use App\Services\Interfaces\IRequestService;
 use App\Services\RequestService;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Fix for MySQL/MariaDB key length issue with utf8mb4
+        // Older MySQL versions have a 1000 byte limit for index keys
+        // With utf8mb4 (4 bytes per char), 255 chars = 1020 bytes (exceeds limit)
+        Schema::defaultStringLength(191);
     }
 }
