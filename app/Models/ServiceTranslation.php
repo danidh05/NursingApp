@@ -13,6 +13,10 @@ class ServiceTranslation extends Model
         'service_id',
         'locale',
         'name',
+        'description',
+        'details',
+        'instructions',
+        'service_includes',
     ];
 
     protected $casts = [

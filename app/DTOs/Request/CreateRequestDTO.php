@@ -15,7 +15,13 @@ class CreateRequestDTO
         public ?string $time_type = null,
         public ?string $scheduled_time = null,
         public ?string $ending_time = null,
-        public string $location,
+        public ?string $location = null,         // Can be coordinates or address string
+        // Address fields
+        public ?bool $use_saved_address = false,
+        public ?string $address_city = null,
+        public ?string $address_street = null,
+        public ?string $address_building = null,
+        public ?string $address_additional_information = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -31,7 +37,12 @@ class CreateRequestDTO
             time_type: $data['time_type'] ?? null,
             scheduled_time: $data['scheduled_time'] ?? null,
             ending_time: $data['ending_time'] ?? null,
-            location: $data['location'],
+            location: $data['location'] ?? null,
+            use_saved_address: $data['use_saved_address'] ?? false,
+            address_city: $data['address_city'] ?? null,
+            address_street: $data['address_street'] ?? null,
+            address_building: $data['address_building'] ?? null,
+            address_additional_information: $data['address_additional_information'] ?? null,
         );
     }
 } 

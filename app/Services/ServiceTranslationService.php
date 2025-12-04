@@ -69,6 +69,10 @@ class ServiceTranslationService
             $service->translation = [
                 'locale' => $translation->locale,
                 'name' => $translation->name,
+                'description' => $translation->description ?? null,
+                'details' => $translation->details ?? null,
+                'instructions' => $translation->instructions ?? null,
+                'service_includes' => $translation->service_includes ?? null,
             ];
         } else {
             // No translation found, use default name

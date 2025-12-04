@@ -17,11 +17,11 @@ class Service extends Model
      */
     protected $fillable = [
         'name',
-        'description',
+        'description', // Non-translatable (legacy), but translations also have description
         'price',
         'discount_price',
-        'category_id', // You mentioned wanting to keep this for future use.
-        'service_pic'
+        'category_id',
+        'image', // Laravel Storage path
     ];
 
     /**
@@ -66,5 +66,18 @@ class Service extends Model
         return $this->belongsToMany(Area::class, 'service_area_price')
                     ->withPivot('price')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the image URL (full URL for frontend).
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // Return full URL using Laravel Storage
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->image);
     }
 }

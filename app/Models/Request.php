@@ -49,6 +49,12 @@ class Request extends Model
         'discount_percentage',
         'total_price',
         'discounted_price',
+        // Address fields
+        'use_saved_address',
+        'address_city',
+        'address_street',
+        'address_building',
+        'address_additional_information',
     ];
 
     /**

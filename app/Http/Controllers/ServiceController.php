@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use App\Services\ServiceTranslationService;
+use App\Services\ImageStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -38,7 +39,8 @@ class ServiceController extends Controller
     use AuthorizesRequests;
 
     public function __construct(
-        private ServiceTranslationService $serviceTranslationService
+        private ServiceTranslationService $serviceTranslationService,
+        private ImageStorageService $imageStorageService
     ) {}
 
     /**
@@ -164,16 +166,55 @@ class ServiceController extends Controller
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'service_pic'=>'nullable|string|url',
-            'category_id' => 'required|exists:categories,id' // Assuming there's a category table
+            'image' => 'nullable|image|max:2048', // 2MB max
+            'category_id' => 'required|exists:categories,id',
+            // Translation fields
+            'description' => 'nullable|string',
+            'details' => 'nullable|string',
+            'instructions' => 'nullable|string',
+            'service_includes' => 'nullable|string',
+            'locale' => 'required|string|in:en,ar',
         ]);
 
-        $service = Service::create($validatedData);
+        // Upload image if provided
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $this->imageStorageService->uploadImage($request->file('image'), 'services');
+        }
 
-        return response()->json(['message' => 'Service created successfully.', 'service' => $service], 201);
+        // Create service
+        $service = Service::create([
+            'name' => $validatedData['name'],
+            'price' => $validatedData['price'],
+            'discount_price' => $validatedData['discount_price'] ?? null,
+            'category_id' => $validatedData['category_id'],
+            'image' => $imagePath,
+        ]);
+
+        // Create translation
+        if ($request->has('locale')) {
+            $service->translations()->create([
+                'locale' => $request->locale,
+                'name' => $validatedData['name'],
+                'description' => $request->description ?? null,
+                'details' => $request->details ?? null,
+                'instructions' => $request->instructions ?? null,
+                'service_includes' => $request->service_includes ?? null,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service created successfully.',
+            'data' => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'image' => $service->image_url,
+                'price' => $service->price,
+            ],
+        ], 201);
     }
 
     /**
@@ -310,17 +351,64 @@ class ServiceController extends Controller
     
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'price' => 'sometimes|numeric',
-            'description' => 'sometimes|nullable|string',
-             'service_pic'=>'sometimes|nullable|string|url',
+            'price' => 'sometimes|numeric|min:0',
             'discount_price' => 'sometimes|nullable|numeric|min:0|lt:price',
-
-           'category_id' => 'sometimes|exists:categories,id', // Include category_id validation if needed
+            'image' => 'nullable|image|max:2048',
+            'category_id' => 'sometimes|exists:categories,id',
+            // Translation fields
+            'description' => 'nullable|string',
+            'details' => 'nullable|string',
+            'instructions' => 'nullable|string',
+            'service_includes' => 'nullable|string',
+            'locale' => 'required|string|in:en,ar',
         ]);
+
+        // Update image if provided
+        if ($request->hasFile('image')) {
+            $imagePath = $this->imageStorageService->updateImage(
+                $request->file('image'),
+                $service->image,
+                'services'
+            );
+            $service->image = $imagePath;
+        }
+
+        // Update service fields
+        $updateData = array_filter([
+            'name' => $validatedData['name'] ?? null,
+            'price' => $validatedData['price'] ?? null,
+            'discount_price' => $validatedData['discount_price'] ?? null,
+            'category_id' => $validatedData['category_id'] ?? null,
+        ], fn($value) => $value !== null);
+
+        if (!empty($updateData)) {
+            $service->update($updateData);
+        }
+
+        // Update or create translation
+        if ($request->has('locale')) {
+            $service->translations()->updateOrCreate(
+                ['locale' => $request->locale],
+                [
+                    'name' => $validatedData['name'] ?? $service->name,
+                    'description' => $request->description ?? null,
+                    'details' => $request->details ?? null,
+                    'instructions' => $request->instructions ?? null,
+                    'service_includes' => $request->service_includes ?? null,
+                ]
+            );
+        }
     
-        $service->update($validatedData);
-    
-        return response()->json(['message' => 'Service updated successfully.'], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Service updated successfully.',
+            'data' => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'image' => $service->image_url,
+                'price' => $service->price,
+            ],
+        ], 200);
     }
     
     /**
@@ -551,9 +639,17 @@ class ServiceController extends Controller
     {
         $this->authorize('delete', $service);
     
+        // Delete image if exists
+        if ($service->image) {
+            $this->imageStorageService->deleteImage($service->image);
+        }
+    
         // Perform a hard delete
         $service->delete();
     
-        return response()->json(['message' => 'Service deleted successfully.'], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Service deleted successfully.',
+        ], 200);
     }
 }

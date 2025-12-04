@@ -27,6 +27,12 @@ class RequestRepository implements IRequestRepository
             'ending_time' => $dto->ending_time,
             'location' => $dto->location,
             'status' => Request::STATUS_SUBMITTED, // Use new status constant
+            // Address fields
+            'use_saved_address' => $dto->use_saved_address ?? false,
+            'address_city' => $dto->address_city,
+            'address_street' => $dto->address_street,
+            'address_building' => $dto->address_building,
+            'address_additional_information' => $dto->address_additional_information,
         ]);
 
         // Attach services

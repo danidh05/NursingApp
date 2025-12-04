@@ -26,7 +26,13 @@ class CreateRequestRequest extends FormRequest
             'time_type' => ['nullable', 'string', 'in:full-time,part-time'],
             'scheduled_time' => ['nullable', 'date', 'after_or_equal:' . now()->subSeconds(30)->toDateTimeString()],
             'ending_time' => ['nullable', 'date', 'after:scheduled_time'],
-            'location' => ['required', 'string'],
+            'location' => ['nullable', 'string'], // Can be coordinates or address string
+            // Address fields
+            'use_saved_address' => ['nullable', 'boolean'],
+            'address_city' => ['nullable', 'required_without:use_saved_address', 'string', 'max:255'],
+            'address_street' => ['nullable', 'required_without:use_saved_address', 'string', 'max:255'],
+            'address_building' => ['nullable', 'string', 'max:255'],
+            'address_additional_information' => ['nullable', 'string'],
         ];
     }
 
@@ -34,6 +40,16 @@ class CreateRequestRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $data = $validator->getData();
+            
+            // Address validation: if use_saved_address is false, new address fields are required
+            if (isset($data['use_saved_address']) && !$data['use_saved_address']) {
+                if (empty($data['address_city'])) {
+                    $validator->errors()->add('address_city', 'City is required when not using saved address.');
+                }
+                if (empty($data['address_street'])) {
+                    $validator->errors()->add('address_street', 'Street is required when not using saved address.');
+                }
+            }
             
             // If scheduled_time is provided and it's not immediate (more than 1 minute from now), ending_time is required
             if (!empty($data['scheduled_time'])) {
