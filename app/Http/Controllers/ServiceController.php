@@ -67,12 +67,16 @@ class ServiceController extends Controller
      *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
      *                 @OA\Property(property="price", type="number", format="float", example=120.00, description="Area-specific price if user has area and pricing exists, otherwise original price"),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
-     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/uuid_timestamp.jpg", description="Full URL to service image"),
      *                 @OA\Property(property="category_id", type="integer", example=1),
      *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
      *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
      *                     @OA\Property(property="locale", type="string", example="ar"),
-     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية")
+     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية"),
+     *                     @OA\Property(property="description", type="string", example="رعاية تمريضية مهنية في المنزل"),
+     *                     @OA\Property(property="details", type="string", example="خدمات تمريضية منزلية شاملة"),
+     *                     @OA\Property(property="instructions", type="string", example="اتبع هذه التعليمات..."),
+     *                     @OA\Property(property="service_includes", type="string", example="يشمل: الأدوية، المراقبة")
      *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
@@ -110,36 +114,39 @@ class ServiceController extends Controller
      * @OA\Post(
      *     path="/api/admin/services",
      *     summary="Create a new service (Admin only)",
-     *     description="Create a new service. Only accessible by admins.",
+     *     description="Create a new service with image upload and translations. Use form-data (multipart/form-data) for file uploads. Only accessible by admins.",
      *     tags={"Admin"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","price","category_id"},
-     *             @OA\Property(property="name", type="string", example="Home Nursing", description="Service name"),
-     *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
-     *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
-     *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
-     *             @OA\Property(property="service_pic", type="string", format="url", example="https://example.com/service.jpg", description="URL to service picture (stored as URL string, not file upload)"),
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (REQUIRED - must be valid category)")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name","price","category_id","locale"},
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care", description="Service name"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
+     *                 @OA\Property(property="category_id", type="integer", example=1, description="Category ID (REQUIRED)"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Service image file (jpg, png, webp, max 2MB)"),
+     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Translatable description"),
+     *                 @OA\Property(property="details", type="string", example="Comprehensive home nursing services", description="Translatable details"),
+     *                 @OA\Property(property="instructions", type="string", example="Follow these instructions...", description="Translatable instructions"),
+     *                 @OA\Property(property="service_includes", type="string", example="Includes: medication, monitoring", description="Translatable service includes"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (REQUIRED)")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Service created successfully",
      *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Service created successfully."),
-     *             @OA\Property(property="service", type="object",
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
-     *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
-     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
-     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
-     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
-     *                 @OA\Property(property="category_id", type="integer", example=1),
-     *                 @OA\Property(property="created_at", type="string", format="date-time"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/uuid_timestamp.jpg"),
+     *                 @OA\Property(property="price", type="string", example="50.00")
      *             )
      *         )
      *     ),
@@ -248,12 +255,16 @@ class ServiceController extends Controller
      *                 @OA\Property(property="description", type="string", example="Professional nursing care at home"),
      *                 @OA\Property(property="price", type="number", format="float", example=120.00),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
-     *                 @OA\Property(property="service_pic", type="string", example="https://example.com/service.jpg"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/uuid_timestamp.jpg", description="Full URL to service image"),
      *                 @OA\Property(property="category_id", type="integer", example=1),
      *                 @OA\Property(property="area_name", type="string", example="Beirut", description="Area name (only included when showing area-specific pricing)"),
      *                 @OA\Property(property="translation", type="object", description="Translation info (only included when translation exists)",
      *                     @OA\Property(property="locale", type="string", example="ar"),
-     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية")
+     *                     @OA\Property(property="name", type="string", example="رعاية التمريض المنزلية"),
+     *                     @OA\Property(property="description", type="string", example="رعاية تمريضية مهنية في المنزل"),
+     *                     @OA\Property(property="details", type="string", example="خدمات تمريضية منزلية شاملة"),
+     *                     @OA\Property(property="instructions", type="string", example="اتبع هذه التعليمات..."),
+     *                     @OA\Property(property="service_includes", type="string", example="يشمل: الأدوية، المراقبة")
      *                 ),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
@@ -295,7 +306,7 @@ class ServiceController extends Controller
      * @OA\Put(
      *     path="/api/admin/services/{id}",
      *     summary="Update service details (Admin only)",
-     *     description="Update a service's information. Only accessible by admins.",
+     *     description="Update a service's information with image upload and translations. Use form-data (multipart/form-data) for file uploads. Only accessible by admins.",
      *     tags={"Admin"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -307,20 +318,35 @@ class ServiceController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Home Nursing", description="Service name"),
-     *             @OA\Property(property="description", type="string", example="Professional nursing care at home", description="Service description"),
-     *             @OA\Property(property="price", type="number", format="float", example=50.00, description="Service price"),
-     *             @OA\Property(property="discount_price", type="number", format="float", example=45.00, description="Discounted price (must be less than regular price)"),
-     *             @OA\Property(property="service_pic", type="string", format="url", example="https://example.com/service.jpg", description="URL to service picture (stored as URL string, not file upload)"),
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (must be valid category if provided)")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"locale"},
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care - Updated", description="Service name"),
+     *                 @OA\Property(property="price", type="number", format="float", example=55.00, description="Service price"),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=50.00, description="Discounted price (must be less than regular price)"),
+     *                 @OA\Property(property="category_id", type="integer", example=1, description="Category ID"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Service image file (jpg, png, webp, max 2MB) - optional, updates image if provided"),
+     *                 @OA\Property(property="description", type="string", example="Updated professional nursing care", description="Translatable description"),
+     *                 @OA\Property(property="details", type="string", example="Updated comprehensive services", description="Translatable details"),
+     *                 @OA\Property(property="instructions", type="string", example="Updated instructions", description="Translatable instructions"),
+     *                 @OA\Property(property="service_includes", type="string", example="Updated includes", description="Translatable service includes"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (REQUIRED)")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Service updated successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Service updated successfully.")
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Service updated successfully."),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care - Updated"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/new_uuid_timestamp.jpg"),
+     *                 @OA\Property(property="price", type="string", example="55.00")
+     *             )
      *         )
      *     ),
      *     @OA\Response(

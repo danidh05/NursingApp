@@ -143,7 +143,7 @@ class RequestController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"full_name","phone_number","problem_description","service_ids","location"},
+     *             required={"full_name","phone_number","problem_description","service_ids"},
      *             @OA\Property(property="full_name", type="string", example="John Doe", description="Full name of the person needing care"),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="Contact phone number"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
@@ -154,7 +154,12 @@ class RequestController extends Controller
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
      *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),
      *             @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Required only for scheduled appointments (not immediate requests)"),
-     *             @OA\Property(property="location", type="string", example="123 Main St, New York", description="Service location address")
+     *             @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates (latitude,longitude) or address string"),
+     *             @OA\Property(property="use_saved_address", type="boolean", example=false, description="Flag to use saved user address. If true, address fields are optional. If false, address fields are required."),
+     *             @OA\Property(property="address_city", type="string", example="Beirut", description="City (required if use_saved_address is false)"),
+     *             @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address (required if use_saved_address is false)"),
+     *             @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information (optional)"),
+     *             @OA\Property(property="address_additional_information", type="string", example="Apartment 5, ring the bell", description="Additional address information (optional)")
      *         )
      *     ),
      *     @OA\Response(
@@ -172,9 +177,14 @@ class RequestController extends Controller
      *             @OA\Property(property="nurse_gender", type="string", example="female"),
      *             @OA\Property(property="time_type", type="string", example="full-time"),
      *             @OA\Property(property="scheduled_time", type="string", format="date-time"),
-     *             @OA\Property(property="location", type="string", example="123 Main St, New York"),
-     *             @OA\Property(property="latitude", type="number", format="float", example=40.7128),
-     *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060),
+     *             @OA\Property(property="location", type="string", example="33.8938,35.5018"),
+     *             @OA\Property(property="use_saved_address", type="boolean", example=false),
+     *             @OA\Property(property="address_city", type="string", example="Beirut", nullable=true),
+     *             @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", nullable=true),
+     *             @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", nullable=true),
+     *             @OA\Property(property="address_additional_information", type="string", example="Apartment 5", nullable=true),
+     *             @OA\Property(property="latitude", type="number", format="float", example=40.7128, nullable=true, description="From user location info"),
+     *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060, nullable=true, description="From user location info"),
      *             @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on selected area"),
      *             @OA\Property(property="created_at", type="string", format="date-time"),
      *             @OA\Property(property="updated_at", type="string", format="date-time"),
