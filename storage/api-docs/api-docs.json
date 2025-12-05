@@ -8003,8 +8003,7 @@
                                     "full_name",
                                     "phone_number",
                                     "problem_description",
-                                    "service_ids",
-                                    "location"
+                                    "service_ids"
                                 ],
                                 "properties": {
                                     "full_name": {
@@ -8075,9 +8074,34 @@
                                         "example": "2024-01-15T12:00:00Z"
                                     },
                                     "location": {
-                                        "description": "Service location address",
+                                        "description": "Location coordinates (latitude,longitude) or address string",
                                         "type": "string",
-                                        "example": "123 Main St, New York"
+                                        "example": "33.8938,35.5018"
+                                    },
+                                    "use_saved_address": {
+                                        "description": "Flag to use saved user address. If true, address fields are optional. If false, address fields are required.",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "address_city": {
+                                        "description": "City (required if use_saved_address is false)",
+                                        "type": "string",
+                                        "example": "Beirut"
+                                    },
+                                    "address_street": {
+                                        "description": "Street address (required if use_saved_address is false)",
+                                        "type": "string",
+                                        "example": "Fouad Chehab Street"
+                                    },
+                                    "address_building": {
+                                        "description": "Building information (optional)",
+                                        "type": "string",
+                                        "example": "Hamood Center, 3rd floor"
+                                    },
+                                    "address_additional_information": {
+                                        "description": "Additional address information (optional)",
+                                        "type": "string",
+                                        "example": "Apartment 5, ring the bell"
                                     }
                                 },
                                 "type": "object"
@@ -8147,17 +8171,45 @@
                                         },
                                         "location": {
                                             "type": "string",
-                                            "example": "123 Main St, New York"
+                                            "example": "33.8938,35.5018"
+                                        },
+                                        "use_saved_address": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "address_city": {
+                                            "type": "string",
+                                            "example": "Beirut",
+                                            "nullable": true
+                                        },
+                                        "address_street": {
+                                            "type": "string",
+                                            "example": "Fouad Chehab Street",
+                                            "nullable": true
+                                        },
+                                        "address_building": {
+                                            "type": "string",
+                                            "example": "Hamood Center, 3rd floor",
+                                            "nullable": true
+                                        },
+                                        "address_additional_information": {
+                                            "type": "string",
+                                            "example": "Apartment 5",
+                                            "nullable": true
                                         },
                                         "latitude": {
+                                            "description": "From user location info",
                                             "type": "number",
                                             "format": "float",
-                                            "example": 40.7128
+                                            "example": 40.7128,
+                                            "nullable": true
                                         },
                                         "longitude": {
+                                            "description": "From user location info",
                                             "type": "number",
                                             "format": "float",
-                                            "example": -74.006
+                                            "example": -74.006,
+                                            "nullable": true
                                         },
                                         "total_price": {
                                             "description": "Price calculated based on selected area",
@@ -8845,9 +8897,10 @@
                                                         "format": "float",
                                                         "example": 45
                                                     },
-                                                    "service_pic": {
+                                                    "image": {
+                                                        "description": "Full URL to service image",
                                                         "type": "string",
-                                                        "example": "https://example.com/service.jpg"
+                                                        "example": "http://localhost:8000/storage/services/uuid_timestamp.jpg"
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -8868,6 +8921,22 @@
                                                             "name": {
                                                                 "type": "string",
                                                                 "example": "رعاية التمريض المنزلية"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "رعاية تمريضية مهنية في المنزل"
+                                                            },
+                                                            "details": {
+                                                                "type": "string",
+                                                                "example": "خدمات تمريضية منزلية شاملة"
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string",
+                                                                "example": "اتبع هذه التعليمات..."
+                                                            },
+                                                            "service_includes": {
+                                                                "type": "string",
+                                                                "example": "يشمل: الأدوية، المراقبة"
                                                             }
                                                         },
                                                         "type": "object"
@@ -8907,28 +8976,24 @@
                     "Admin"
                 ],
                 "summary": "Create a new service (Admin only)",
-                "description": "Create a new service. Only accessible by admins.",
+                "description": "Create a new service with image upload and translations. Use form-data (multipart/form-data) for file uploads. Only accessible by admins.",
                 "operationId": "21e74e71d346d35fe461d7261b704024",
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
                                     "price",
-                                    "category_id"
+                                    "category_id",
+                                    "locale"
                                 ],
                                 "properties": {
                                     "name": {
                                         "description": "Service name",
                                         "type": "string",
-                                        "example": "Home Nursing"
-                                    },
-                                    "description": {
-                                        "description": "Service description",
-                                        "type": "string",
-                                        "example": "Professional nursing care at home"
+                                        "example": "Home Nursing Care"
                                     },
                                     "price": {
                                         "description": "Service price",
@@ -8942,16 +9007,44 @@
                                         "format": "float",
                                         "example": 45
                                     },
-                                    "service_pic": {
-                                        "description": "URL to service picture (stored as URL string, not file upload)",
-                                        "type": "string",
-                                        "format": "url",
-                                        "example": "https://example.com/service.jpg"
-                                    },
                                     "category_id": {
-                                        "description": "Category ID (REQUIRED - must be valid category)",
+                                        "description": "Category ID (REQUIRED)",
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "image": {
+                                        "description": "Service image file (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "description": {
+                                        "description": "Translatable description",
+                                        "type": "string",
+                                        "example": "Professional nursing care at home"
+                                    },
+                                    "details": {
+                                        "description": "Translatable details",
+                                        "type": "string",
+                                        "example": "Comprehensive home nursing services"
+                                    },
+                                    "instructions": {
+                                        "description": "Translatable instructions",
+                                        "type": "string",
+                                        "example": "Follow these instructions..."
+                                    },
+                                    "service_includes": {
+                                        "description": "Translatable service includes",
+                                        "type": "string",
+                                        "example": "Includes: medication, monitoring"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (REQUIRED)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
                                     }
                                 },
                                 "type": "object"
@@ -8966,11 +9059,15 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Service created successfully."
                                         },
-                                        "service": {
+                                        "data": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
@@ -8978,37 +9075,15 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Home Nursing"
+                                                    "example": "Home Nursing Care"
                                                 },
-                                                "description": {
+                                                "image": {
                                                     "type": "string",
-                                                    "example": "Professional nursing care at home"
+                                                    "example": "http://localhost:8000/storage/services/uuid_timestamp.jpg"
                                                 },
                                                 "price": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 50
-                                                },
-                                                "discount_price": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 45
-                                                },
-                                                "service_pic": {
                                                     "type": "string",
-                                                    "example": "https://example.com/service.jpg"
-                                                },
-                                                "category_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
+                                                    "example": "50.00"
                                                 }
                                             },
                                             "type": "object"
@@ -9109,9 +9184,10 @@
                                                     "format": "float",
                                                     "example": 45
                                                 },
-                                                "service_pic": {
+                                                "image": {
+                                                    "description": "Full URL to service image",
                                                     "type": "string",
-                                                    "example": "https://example.com/service.jpg"
+                                                    "example": "http://localhost:8000/storage/services/uuid_timestamp.jpg"
                                                 },
                                                 "category_id": {
                                                     "type": "integer",
@@ -9132,6 +9208,22 @@
                                                         "name": {
                                                             "type": "string",
                                                             "example": "رعاية التمريض المنزلية"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "رعاية تمريضية مهنية في المنزل"
+                                                        },
+                                                        "details": {
+                                                            "type": "string",
+                                                            "example": "خدمات تمريضية منزلية شاملة"
+                                                        },
+                                                        "instructions": {
+                                                            "type": "string",
+                                                            "example": "اتبع هذه التعليمات..."
+                                                        },
+                                                        "service_includes": {
+                                                            "type": "string",
+                                                            "example": "يشمل: الأدوية، المراقبة"
                                                         }
                                                     },
                                                     "type": "object"
@@ -9173,7 +9265,7 @@
                     "Admin"
                 ],
                 "summary": "Update service details (Admin only)",
-                "description": "Update a service's information. Only accessible by admins.",
+                "description": "Update a service's information with image upload and translations. Use form-data (multipart/form-data) for file uploads. Only accessible by admins.",
                 "operationId": "68dbe8d1f512cb4d709ae5e4c2abbd5e",
                 "parameters": [
                     {
@@ -9190,41 +9282,67 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
+                                "required": [
+                                    "locale"
+                                ],
                                 "properties": {
                                     "name": {
                                         "description": "Service name",
                                         "type": "string",
-                                        "example": "Home Nursing"
-                                    },
-                                    "description": {
-                                        "description": "Service description",
-                                        "type": "string",
-                                        "example": "Professional nursing care at home"
+                                        "example": "Home Nursing Care - Updated"
                                     },
                                     "price": {
                                         "description": "Service price",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 50
+                                        "example": 55
                                     },
                                     "discount_price": {
                                         "description": "Discounted price (must be less than regular price)",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 45
-                                    },
-                                    "service_pic": {
-                                        "description": "URL to service picture (stored as URL string, not file upload)",
-                                        "type": "string",
-                                        "format": "url",
-                                        "example": "https://example.com/service.jpg"
+                                        "example": 50
                                     },
                                     "category_id": {
-                                        "description": "Category ID (must be valid category if provided)",
+                                        "description": "Category ID",
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "image": {
+                                        "description": "Service image file (jpg, png, webp, max 2MB) - optional, updates image if provided",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "description": {
+                                        "description": "Translatable description",
+                                        "type": "string",
+                                        "example": "Updated professional nursing care"
+                                    },
+                                    "details": {
+                                        "description": "Translatable details",
+                                        "type": "string",
+                                        "example": "Updated comprehensive services"
+                                    },
+                                    "instructions": {
+                                        "description": "Translatable instructions",
+                                        "type": "string",
+                                        "example": "Updated instructions"
+                                    },
+                                    "service_includes": {
+                                        "description": "Translatable service includes",
+                                        "type": "string",
+                                        "example": "Updated includes"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (REQUIRED)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
                                     }
                                 },
                                 "type": "object"
@@ -9239,9 +9357,34 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Service updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Home Nursing Care - Updated"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/services/new_uuid_timestamp.jpg"
+                                                },
+                                                "price": {
+                                                    "type": "string",
+                                                    "example": "55.00"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
