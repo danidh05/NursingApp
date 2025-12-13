@@ -44,6 +44,8 @@ class Request extends Model
         'time_type',
         'problem_description',
         'nurse_gender',
+        'first_name',
+        'last_name',
         'full_name',
         'phone_number',
         'name', // Optional request name/title

@@ -122,29 +122,26 @@ class TestDataSeeder extends Seeder
     {
         $this->command->info('📁 Seeding categories...');
         
-        // Category 1: Service Request (fixed category for the new system)
-        Category::firstOrCreate(
-            ['id' => 1],
-            ['name' => 'Service Request']
-        );
-        
-        // Other categories (for future use)
+        // All 8 fixed categories (hardcoded order)
         $categories = [
-            ['name' => 'Home Care'],
-            ['name' => 'Emergency Care'],
-            ['name' => 'Elderly Care'],
-            ['name' => 'Post-Surgery Care'],
-            ['name' => 'Chronic Disease Management'],
+            ['id' => 1, 'name' => 'Service Request'],
+            ['id' => 2, 'name' => 'Tests'],
+            ['id' => 3, 'name' => 'Rays'],
+            ['id' => 4, 'name' => 'Machines'],
+            ['id' => 5, 'name' => 'Physiotherapist'],
+            ['id' => 6, 'name' => 'Offers'],
+            ['id' => 7, 'name' => 'Duties'],
+            ['id' => 8, 'name' => 'Doctors'],
         ];
 
         foreach ($categories as $category) {
             Category::firstOrCreate(
-                ['name' => $category['name']],
-                $category
+                ['id' => $category['id']],
+                ['name' => $category['name']]
             );
         }
 
-        $this->command->info('   ✅ Categories seeded (Category 1: Service Request created)');
+        $this->command->info('   ✅ All 8 categories seeded');
     }
 
     private function seedServices(): void

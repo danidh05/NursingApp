@@ -14,11 +14,20 @@ class RequestRepository implements IRequestRepository
     public function create(CreateRequestDTO $dto, User $user): Request
     {
         // Remove any manual transaction management - let Laravel handle it
+        // Build full_name from first_name and last_name if provided
+        $fullName = $dto->full_name;
+        if (!$fullName && ($dto->first_name || $dto->last_name)) {
+            $parts = array_filter([$dto->first_name, $dto->last_name]);
+            $fullName = !empty($parts) ? implode(' ', $parts) : null;
+        }
+        
         $request = Request::create([
             'user_id' => $user->id,
             'category_id' => $dto->category_id ?? 1, // Default to Category 1: Service Request
             'area_id' => $dto->area_id ?? $user->area_id,
-            'full_name' => $dto->full_name,
+            'first_name' => $dto->first_name,
+            'last_name' => $dto->last_name,
+            'full_name' => $fullName,
             'phone_number' => $dto->phone_number,
             'name' => $dto->name,
             'problem_description' => $dto->problem_description,

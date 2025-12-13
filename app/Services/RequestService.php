@@ -11,6 +11,7 @@ use App\Models\Request;
 use App\Models\User;
 use App\Repositories\Interfaces\IRequestRepository;
 use App\Services\Interfaces\IRequestService;
+use App\Services\CategoryHandlers\CategoryRequestHandlerFactory;
 use App\Models\ServiceAreaPrice;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
@@ -23,18 +24,29 @@ class RequestService implements IRequestService
 
     public function createRequest(array $data, User $user): RequestResponseDTO
     {
-        // Remove any manual transaction management - let Laravel handle it
-        $dto = CreateRequestDTO::fromArray($data);
+        // Get category_id (defaults to 1: Service Request)
+        $categoryId = $data['category_id'] ?? 1;
+        
+        // Get category-specific handler
+        $handler = CategoryRequestHandlerFactory::getHandler($categoryId);
+        
+        // Map data to DTO using category-specific handler
+        $dto = $handler->mapToDTO($data);
         
         // Create the request
         $request = $this->requestRepository->create($dto, $user);
         
-        // Calculate and set total price
-        $totalPrice = $this->calculateRequestTotalPrice($request);
-        $request->update([
-            'total_price' => $totalPrice,
-            'discounted_price' => $totalPrice // Initially same as total price
-        ]);
+        // Calculate and set total price (only for categories that use services)
+        if ($categoryId === 1 && !empty($dto->service_ids)) {
+            $totalPrice = $this->calculateRequestTotalPrice($request);
+            $request->update([
+                'total_price' => $totalPrice,
+                'discounted_price' => $totalPrice // Initially same as total price
+            ]);
+        }
+        
+        // Category-specific post-processing
+        $handler->afterCreate($request, $user);
         
         // Dispatch event
         Event::dispatch(new UserRequestedService($request, $user));

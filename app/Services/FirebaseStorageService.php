@@ -10,9 +10,16 @@ class FirebaseStorageService
 {
     protected $storage;
 
-    public function __construct()
+    /**
+     * Lazy-load Firebase storage to avoid initialization errors during setup
+     * when credentials file doesn't exist yet.
+     */
+    protected function getStorage()
     {
-        $this->storage = Firebase::storage(); // exposes Google\Cloud\Storage\Bucket underneath
+        if ($this->storage === null) {
+            $this->storage = Firebase::storage(); // exposes Google\Cloud\Storage\Bucket underneath
+        }
+        return $this->storage;
     }
 
     // ------------------------
@@ -20,7 +27,7 @@ class FirebaseStorageService
     // ------------------------
     public function uploadFile(UploadedFile $uploadedFile, string $folder = 'category-images'): string
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
 
         $filename = $folder.'/'.uniqid().'_'.time().'.'.$uploadedFile->getClientOriginalExtension();
 
@@ -37,7 +44,7 @@ class FirebaseStorageService
 
     public function deleteFile(string $fileUrl): bool
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
         $objectName = $this->objectNameFromUrl($fileUrl, $bucket->name());
 
         if ($objectName && $bucket->object($objectName)->exists()) {
@@ -56,7 +63,7 @@ class FirebaseStorageService
      */
     public function signV4GetUrl(string $objectName, int $ttlSeconds): string
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
         $object = $bucket->object($objectName);
         return $object->signedUrl(now()->addSeconds($ttlSeconds), [
             'version' => 'v4',
@@ -70,7 +77,7 @@ class FirebaseStorageService
      */
     public function signV4PutUrl(string $objectName, string $contentType, int $ttlSeconds): array
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
         $object = $bucket->object($objectName);
         $url = $object->signedUrl(now()->addSeconds($ttlSeconds), [
             'version'     => 'v4',
@@ -85,7 +92,7 @@ class FirebaseStorageService
      */
     public function deleteByPrefix(string $prefix): int
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
         $deleted = 0;
         foreach ($bucket->objects(['prefix' => $prefix]) as $object) {
             $object->delete();
@@ -117,7 +124,7 @@ class FirebaseStorageService
      */
     public function publicUrlFromObjectName(string $objectName): string
     {
-        $bucket = $this->storage->getBucket();
+        $bucket = $this->getStorage()->getBucket();
         return 'https://storage.googleapis.com/'.$bucket->name().'/'.$objectName;
     }
 }

@@ -7,6 +7,7 @@ use App\Services\RequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\CreateRequestRequest;
 
 /**
@@ -143,15 +144,17 @@ class RequestController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"full_name","phone_number","problem_description","service_ids"},
-     *             @OA\Property(property="full_name", type="string", example="John Doe", description="Full name of the person needing care"),
-     *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="Contact phone number"),
+     *             required={"service_ids"},
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Optional: Category ID. Defaults to 1 (Service Request) if not provided. Each category has different required fields."),
+     *             @OA\Property(property="first_name", type="string", example="John", description="Optional: First name (can be used instead of full_name)"),
+     *             @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name (can be used instead of full_name)"),
+     *             @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name (can be built from first_name + last_name)"),
+     *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
+     *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
+     *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
-     *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Description of the care needed"),
-             *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Array of service IDs"),
-             *             @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing. If not provided, uses user's registered area"),
-             *             @OA\Property(property="category_id", type="integer", example=1, description="Optional: Category ID. Defaults to 1 (Service Request) if not provided"),
-             *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Preferred nurse gender"),
+     *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Required for Category 1: Array of service IDs"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing. If not provided, uses user's registered area"),
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
      *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),
      *             @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Required only for scheduled appointments (not immediate requests)"),
@@ -167,11 +170,13 @@ class RequestController extends Controller
      *         response=201,
      *         description="Request created successfully",
      *         @OA\JsonContent(
-             *             @OA\Property(property="id", type="integer", example=1),
-             *             @OA\Property(property="user_id", type="integer", example=1),
-             *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (defaults to 1: Service Request)"),
-             *             @OA\Property(property="area_id", type="integer", example=1, description="Area ID for region-specific pricing"),
-             *             @OA\Property(property="full_name", type="string", example="John Doe"),
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (defaults to 1: Service Request)"),
+     *             @OA\Property(property="area_id", type="integer", example=1, description="Area ID for region-specific pricing"),
+     *             @OA\Property(property="first_name", type="string", example="John", nullable=true),
+     *             @OA\Property(property="last_name", type="string", example="Doe", nullable=true),
+     *             @OA\Property(property="full_name", type="string", example="John Doe", nullable=true),
      *             @OA\Property(property="phone_number", type="string", example="+1234567890"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", nullable=true),
      *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent"),
@@ -385,7 +390,7 @@ class RequestController extends Controller
         $user = Auth::user();
         
         // Debug: Log the update attempt
-        \Log::info("RequestController::update called for request ID: {$id} by user: {$user->id} with role: {$user->role->name}");
+        Log::info("RequestController::update called for request ID: {$id} by user: {$user->id} with role: {$user->role->name}");
         
         $validated = $httpRequest->validate([
             'full_name' => 'sometimes|string|max:255',
@@ -402,7 +407,7 @@ class RequestController extends Controller
         ]);
 
         // Debug: Log the validated data
-        \Log::info("Validated data: " . json_encode($validated));
+        Log::info("Validated data: " . json_encode($validated));
 
         // Handle discount update if provided
         if (array_key_exists('discount_percentage', $validated)) {

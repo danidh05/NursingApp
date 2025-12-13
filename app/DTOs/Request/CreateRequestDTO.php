@@ -5,10 +5,12 @@ namespace App\DTOs\Request;
 class CreateRequestDTO
 {
     public function __construct(
-        public string $full_name,
-        public string $phone_number,
-        public string $problem_description,
-        public array $service_ids,
+        public ?string $first_name = null,
+        public ?string $last_name = null,
+        public ?string $full_name = null,
+        public ?string $phone_number = null,
+        public ?string $problem_description = null,
+        public array $service_ids = [],
         public ?int $area_id = null,
         public ?int $category_id = 1,            // Default to Category 1: Service Request
         public ?string $name = null,             // Optional request name/title
