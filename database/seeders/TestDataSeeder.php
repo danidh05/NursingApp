@@ -10,6 +10,8 @@ use App\Models\Service;
 use App\Models\Nurse;
 use App\Models\Request;
 use App\Models\About;
+use App\Models\Area;
+use App\Models\ServiceAreaPrice;
 use Illuminate\Support\Facades\Hash;
 
 class TestDataSeeder extends Seeder
@@ -27,19 +29,22 @@ class TestDataSeeder extends Seeder
         // 2. Create Test Users
         $this->seedTestUsers();
         
-        // 3. Create Categories
+        // 3. Create Categories (including Category 1: Service Request)
         $this->seedCategories();
         
         // 4. Create Services
         $this->seedServices();
         
-        // 5. Create Nurses
+        // 5. Seed Service Area Prices
+        $this->seedServiceAreaPrices();
+        
+        // 6. Create Nurses
         $this->seedNurses();
         
-        // 6. Create Sample Requests with different statuses
+        // 7. Create Sample Requests with different statuses
         $this->seedSampleRequests();
         
-        // 7. Create About information
+        // 8. Create About information
         $this->seedAboutInfo();
 
         $this->command->info('✅ Test data seeding completed successfully!');
@@ -117,6 +122,13 @@ class TestDataSeeder extends Seeder
     {
         $this->command->info('📁 Seeding categories...');
         
+        // Category 1: Service Request (fixed category for the new system)
+        Category::firstOrCreate(
+            ['id' => 1],
+            ['name' => 'Service Request']
+        );
+        
+        // Other categories (for future use)
         $categories = [
             ['name' => 'Home Care'],
             ['name' => 'Emergency Care'],
@@ -132,7 +144,7 @@ class TestDataSeeder extends Seeder
             );
         }
 
-        $this->command->info('   ✅ Categories seeded');
+        $this->command->info('   ✅ Categories seeded (Category 1: Service Request created)');
     }
 
     private function seedServices(): void
@@ -213,6 +225,55 @@ class TestDataSeeder extends Seeder
         $this->command->info('   ✅ Services seeded');
     }
 
+    private function seedServiceAreaPrices(): void
+    {
+        $this->command->info('💰 Seeding service area prices...');
+        
+        $services = Service::all();
+        $areas = Area::all();
+        
+        if ($services->isEmpty() || $areas->isEmpty()) {
+            $this->command->warn('   ⚠️  No services or areas found. Skipping service area price seeding.');
+            return;
+        }
+        
+        $pricesCreated = 0;
+        
+        // Create pricing for each service in each area
+        foreach ($services as $service) {
+            foreach ($areas as $area) {
+                // Use the service's base price and add a small variation based on area
+                $basePrice = $service->price ?? 100.00;
+                $areaMultiplier = [
+                    'Beirut' => 1.2,
+                    'Mount Lebanon' => 1.1,
+                    'North Lebanon' => 1.0,
+                    'South Lebanon' => 0.95,
+                    'Bekaa' => 0.9,
+                    'Nabatieh' => 0.9,
+                    'Akkar' => 0.85,
+                    'Baalbek-Hermel' => 0.85,
+                ];
+                
+                $multiplier = $areaMultiplier[$area->name] ?? 1.0;
+                $price = round($basePrice * $multiplier, 2);
+                
+                ServiceAreaPrice::firstOrCreate(
+                    [
+                        'service_id' => $service->id,
+                        'area_id' => $area->id,
+                    ],
+                    [
+                        'price' => $price,
+                    ]
+                );
+                $pricesCreated++;
+            }
+        }
+        
+        $this->command->info("   ✅ Service area prices seeded ({$pricesCreated} price entries created)");
+    }
+
     private function seedNurses(): void
     {
         $this->command->info('👩‍⚕️ Seeding nurses...');
@@ -277,6 +338,7 @@ class TestDataSeeder extends Seeder
         $sampleRequests = [
             [
                 'user_id' => $users->first()->id,
+                'category_id' => 1, // Category 1: Service Request
                 'nurse_id' => $nurses->first()->id,
                 'full_name' => 'John Doe Sr.',
                 'phone_number' => '+1555100001',
@@ -290,6 +352,7 @@ class TestDataSeeder extends Seeder
             ],
             [
                 'user_id' => $users->skip(1)->first()?->id ?? $users->first()->id,
+                'category_id' => 1, // Category 1: Service Request
                 'nurse_id' => $nurses->skip(1)->first()->id,
                 'full_name' => 'Jane Smith',
                 'phone_number' => '+1555100002',
@@ -303,6 +366,7 @@ class TestDataSeeder extends Seeder
             ],
             [
                 'user_id' => $users->first()->id,
+                'category_id' => 1, // Category 1: Service Request
                 'nurse_id' => $nurses->skip(2)->first()->id,
                 'full_name' => 'Robert Wilson',
                 'phone_number' => '+1555100003',
@@ -316,6 +380,7 @@ class TestDataSeeder extends Seeder
             ],
             [
                 'user_id' => $users->skip(1)->first()?->id ?? $users->first()->id,
+                'category_id' => 1, // Category 1: Service Request
                 'nurse_id' => $nurses->skip(3)->first()->id,
                 'full_name' => 'Mary Johnson',
                 'phone_number' => '+1555100004',

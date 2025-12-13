@@ -16,6 +16,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management - let Laravel handle it
         $request = Request::create([
             'user_id' => $user->id,
+            'category_id' => $dto->category_id ?? 1, // Default to Category 1: Service Request
             'area_id' => $dto->area_id ?? $user->area_id,
             'full_name' => $dto->full_name,
             'phone_number' => $dto->phone_number,

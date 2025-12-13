@@ -34,6 +34,7 @@ class Request extends Model
      */
     protected $fillable = [
         'user_id',
+        'category_id',
         'nurse_id',
         'area_id',
         'status',
@@ -148,6 +149,14 @@ class Request extends Model
     public function area()
     {
         return $this->belongsTo(Area::class);
+    }
+
+    /**
+     * Get the category for this request.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 
     /**

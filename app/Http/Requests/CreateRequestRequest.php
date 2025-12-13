@@ -22,6 +22,7 @@ class CreateRequestRequest extends FormRequest
             'service_ids' => ['required', 'array', 'min:1'],
             'service_ids.*' => ['exists:services,id'],
             'area_id' => ['nullable', 'integer', 'exists:areas,id'],
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'], // Defaults to 1 if not provided
             'nurse_gender' => ['nullable', 'string', 'in:male,female,any'],
             'time_type' => ['nullable', 'string', 'in:full-time,part-time'],
             'scheduled_time' => ['nullable', 'date', 'after_or_equal:' . now()->subSeconds(30)->toDateTimeString()],

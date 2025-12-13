@@ -10,6 +10,7 @@ class CreateRequestDTO
         public string $problem_description,
         public array $service_ids,
         public ?int $area_id = null,
+        public ?int $category_id = 1,            // Default to Category 1: Service Request
         public ?string $name = null,             // Optional request name/title
         public ?string $nurse_gender = null,
         public ?string $time_type = null,
@@ -32,6 +33,7 @@ class CreateRequestDTO
             problem_description: $data['problem_description'],
             service_ids: $data['service_ids'],
             area_id: $data['area_id'] ?? null,
+            category_id: $data['category_id'] ?? 1, // Default to Category 1: Service Request
             name: $data['name'] ?? null,
             nurse_gender: $data['nurse_gender'] ?? null,
             time_type: $data['time_type'] ?? null,
