@@ -15,6 +15,7 @@ use App\Services\CategoryHandlers\CategoryRequestHandlerFactory;
 use App\Models\ServiceAreaPrice;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 
 class RequestService implements IRequestService
 {
@@ -30,6 +31,11 @@ class RequestService implements IRequestService
         // Get category-specific handler
         $handler = CategoryRequestHandlerFactory::getHandler($categoryId);
         
+        // Handle file uploads for Category 2 before mapping to DTO
+        if ($categoryId === 2) {
+            $data = $this->handleCategory2FileUploads($data);
+        }
+        
         // Map data to DTO using category-specific handler
         $dto = $handler->mapToDTO($data);
         
@@ -43,6 +49,25 @@ class RequestService implements IRequestService
                 'total_price' => $totalPrice,
                 'discounted_price' => $totalPrice // Initially same as total price
             ]);
+        } elseif ($categoryId === 2) {
+            // Category 2: Set price from test package or individual test (no area pricing)
+            if ($dto->test_package_id) {
+                $testPackage = \App\Models\TestPackage::find($dto->test_package_id);
+                if ($testPackage) {
+                    $request->update([
+                        'total_price' => $testPackage->price,
+                        'discounted_price' => $testPackage->price,
+                    ]);
+                }
+            } elseif ($dto->test_id) {
+                $test = \App\Models\Test::find($dto->test_id);
+                if ($test) {
+                    $request->update([
+                        'total_price' => $test->price,
+                        'discounted_price' => $test->price,
+                    ]);
+                }
+            }
         }
         
         // Category-specific post-processing
@@ -55,9 +80,40 @@ class RequestService implements IRequestService
         Cache::forget("user_requests_{$user->id}");
         
         // Reload request with services
-        $request = $request->fresh(['services', 'user', 'nurse']);
+        $request = $request->fresh(['services', 'user', 'nurse', 'testPackage', 'test']);
         
         return RequestResponseDTO::fromModel($request);
+    }
+
+    /**
+     * Handle file uploads for Category 2 requests.
+     */
+    private function handleCategory2FileUploads(array $data): array
+    {
+        $imageStorageService = app(\App\Services\ImageStorageService::class);
+        
+        // Handle request_details_files (multiple files)
+        if (isset($data['request_details_files']) && is_array($data['request_details_files'])) {
+            $filePaths = [];
+            foreach ($data['request_details_files'] as $file) {
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    $filePaths[] = $imageStorageService->uploadImage($file, 'request-details');
+                }
+            }
+            $data['request_details_files'] = $filePaths;
+        }
+        
+        // Handle attach_front_face
+        if (isset($data['attach_front_face']) && $data['attach_front_face'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['attach_front_face'] = $imageStorageService->uploadImage($data['attach_front_face'], 'insurance-cards');
+        }
+        
+        // Handle attach_back_face
+        if (isset($data['attach_back_face']) && $data['attach_back_face'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['attach_back_face'] = $imageStorageService->uploadImage($data['attach_back_face'], 'insurance-cards');
+        }
+        
+        return $data;
     }
 
     /**
@@ -103,7 +159,7 @@ class RequestService implements IRequestService
         if (isset($data['time_needed_to_arrive']) && $data['time_needed_to_arrive'] === 0) {
             if ($request->status === Request::STATUS_ASSIGNED) {
                 $request->update(['status' => Request::STATUS_IN_PROGRESS]);
-                \Log::info("Auto-updated request {$id} status to 'in_progress' - nurse arrived");
+                Log::info("Auto-updated request {$id} status to 'in_progress' - nurse arrived");
             }
         }
 

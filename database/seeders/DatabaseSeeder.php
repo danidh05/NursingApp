@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AreaSeeder::class,
             TestDataSeeder::class,
+            TestSeeder::class, // Category 2: Tests and Test Packages
         ]);
     }
 }

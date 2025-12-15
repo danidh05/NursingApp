@@ -3931,6 +3931,1011 @@
                 ]
             }
         },
+        "/api/admin/tests": {
+            "get": {
+                "tags": [
+                    "Admin - Tests"
+                ],
+                "summary": "List all tests (Admin)",
+                "description": "Retrieve all tests with translations for admin management",
+                "operationId": "bc3352f537547db55d560b13c7e3bc27",
+                "responses": {
+                    "200": {
+                        "description": "Tests retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "sample_type": {
+                                                        "type": "string",
+                                                        "example": "Blood"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/tests/..."
+                                                    },
+                                                    "translations": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "locale": {
+                                                                    "type": "string",
+                                                                    "example": "en"
+                                                                },
+                                                                "about_test": {
+                                                                    "type": "string",
+                                                                    "example": "Complete blood count test..."
+                                                                },
+                                                                "instructions": {
+                                                                    "type": "string",
+                                                                    "example": "Fasting required..."
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Tests"
+                ],
+                "summary": "Create a new test (Admin)",
+                "description": "Create a new test with image upload and translations. Use form-data (multipart/form-data) for file uploads.",
+                "operationId": "8123ca9e8c0e5ee3da814c420adeb3d2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "sample_type",
+                                    "price",
+                                    "locale"
+                                ],
+                                "properties": {
+                                    "sample_type": {
+                                        "description": "Type of sample (e.g., Blood, Urine)",
+                                        "type": "string",
+                                        "example": "Blood"
+                                    },
+                                    "price": {
+                                        "description": "Test price (same for all areas)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    },
+                                    "image": {
+                                        "description": "Test image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_test": {
+                                        "description": "About test description (translatable)",
+                                        "type": "string",
+                                        "example": "Complete blood count test description"
+                                    },
+                                    "instructions": {
+                                        "description": "Test instructions (translatable)",
+                                        "type": "string",
+                                        "example": "Fasting required for 8 hours"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Test created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sample_type": {
+                                                    "type": "string",
+                                                    "example": "Blood"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/tests/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/tests/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Tests"
+                ],
+                "summary": "Get a specific test (Admin)",
+                "description": "Retrieve a specific test with translations",
+                "operationId": "e3faecf48ea9831283fb7f118b834b61",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sample_type": {
+                                                    "type": "string",
+                                                    "example": "Blood"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/tests/..."
+                                                },
+                                                "translations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "locale": {
+                                                                "type": "string",
+                                                                "example": "en"
+                                                            },
+                                                            "about_test": {
+                                                                "type": "string"
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Tests"
+                ],
+                "summary": "Update a test (Admin)",
+                "description": "Update an existing test with image upload and translations. Use form-data (multipart/form-data) for file uploads.",
+                "operationId": "70dab048a4926718685df615a9a10902",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "locale"
+                                ],
+                                "properties": {
+                                    "sample_type": {
+                                        "type": "string",
+                                        "example": "Blood"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 55
+                                    },
+                                    "image": {
+                                        "description": "New test image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_test": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "instructions": {
+                                        "type": "string",
+                                        "example": "Updated instructions"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Test updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sample_type": {
+                                                    "type": "string",
+                                                    "example": "Blood"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 55
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/tests/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Tests"
+                ],
+                "summary": "Delete a test (Admin)",
+                "description": "Delete a test and its associated image and translations",
+                "operationId": "6dc152039bd4f880f9cbf164a5dc1d6e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/test-packages": {
+            "get": {
+                "tags": [
+                    "Admin - Test Packages"
+                ],
+                "summary": "List all test packages (Admin)",
+                "description": "Retrieve all test packages with tests and translations for admin management",
+                "operationId": "1a0b709bbc3d88267e930757bd06b664",
+                "responses": {
+                    "200": {
+                        "description": "Test packages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Basic Package"
+                                                    },
+                                                    "results": {
+                                                        "type": "string",
+                                                        "example": "within 48 hours"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 150
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/test-packages/..."
+                                                    },
+                                                    "show_details": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "translations": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    },
+                                                    "tests": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Test Packages"
+                ],
+                "summary": "Create a new test package (Admin)",
+                "description": "Create a new test package with image, translations, and associated tests. Use form-data (multipart/form-data) for file uploads.",
+                "operationId": "713a40d9baf8fc665f6978aac371b128",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "results",
+                                    "price",
+                                    "locale",
+                                    "test_ids"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Package name",
+                                        "type": "string",
+                                        "example": "Basic Package"
+                                    },
+                                    "results": {
+                                        "description": "Results timeframe",
+                                        "type": "string",
+                                        "example": "within 48 hours"
+                                    },
+                                    "price": {
+                                        "description": "Package price (same for all areas)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 150
+                                    },
+                                    "image": {
+                                        "description": "Package image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "show_details": {
+                                        "description": "Show details flag",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_test": {
+                                        "description": "About test (translatable)",
+                                        "type": "string",
+                                        "example": "Basic health screening package"
+                                    },
+                                    "instructions": {
+                                        "description": "Instructions (translatable)",
+                                        "type": "string",
+                                        "example": "Follow all test instructions"
+                                    },
+                                    "test_ids": {
+                                        "description": "Array of test IDs to include in package",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Test package created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test package created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Basic Package"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/test-packages/..."
+                                                },
+                                                "tests": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/test-packages/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Test Packages"
+                ],
+                "summary": "Get a specific test package (Admin)",
+                "description": "Retrieve a specific test package with tests and translations",
+                "operationId": "f9bc6a88498ee6ad56b25f6dc8c78d74",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test Package ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test package retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Basic Package"
+                                                },
+                                                "results": {
+                                                    "type": "string",
+                                                    "example": "within 48 hours"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/test-packages/..."
+                                                },
+                                                "show_details": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "translations": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "tests": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test package not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Test Packages"
+                ],
+                "summary": "Update a test package (Admin)",
+                "description": "Update an existing test package with image, translations, and test relationships. Use form-data (multipart/form-data) for file uploads.",
+                "operationId": "4c8487b714b162a98bb213ece5719395",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test Package ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "locale"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Basic Package Updated"
+                                    },
+                                    "results": {
+                                        "type": "string",
+                                        "example": "within 48 hours"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 160
+                                    },
+                                    "image": {
+                                        "description": "New package image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "show_details": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_test": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "instructions": {
+                                        "type": "string",
+                                        "example": "Updated instructions"
+                                    },
+                                    "test_ids": {
+                                        "description": "Updated array of test IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Test package updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test package updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Basic Package Updated"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 160
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/test-packages/..."
+                                                },
+                                                "tests": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test package not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Test Packages"
+                ],
+                "summary": "Delete a test package (Admin)",
+                "description": "Delete a test package and its associated image and translations",
+                "operationId": "9eea99375baf488da7b5d80c7b068ba3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test Package ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test package deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Test package deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Test package not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/users/{userId}/requests": {
             "get": {
                 "tags": [
@@ -7992,58 +8997,49 @@
                     "Requests"
                 ],
                 "summary": "Create a new request",
-                "description": "Create a new service request. Only accessible by users.",
+                "description": "Create a new service request. Supports multiple categories with different payloads. ALL categories use multipart/form-data format (for consistency and future file upload support). Only accessible by users.",
                 "operationId": "b78212afe2734cba4b079913cc3d3855",
                 "requestBody": {
+                    "description": "All categories use multipart/form-data. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "full_name",
-                                    "phone_number",
-                                    "problem_description",
-                                    "service_ids"
-                                ],
+                                "title": "Create Request - All Categories",
+                                "description": "Common fields for all categories. Category-specific required fields are listed below.",
                                 "properties": {
+                                    "category_id": {
+                                        "description": "REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "first_name": {
+                                        "description": "Optional: First name",
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "description": "Optional: Last name",
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
                                     "full_name": {
-                                        "description": "Full name of the person needing care",
+                                        "description": "Optional: Full name (can be built from first_name + last_name)",
                                         "type": "string",
                                         "example": "John Doe"
                                     },
                                     "phone_number": {
-                                        "description": "Contact phone number",
+                                        "description": "Optional: Contact phone number",
                                         "type": "string",
                                         "example": "+1234567890"
                                     },
-                                    "name": {
-                                        "description": "Optional request name/title",
-                                        "type": "string",
-                                        "example": "Emergency Home Care"
-                                    },
                                     "problem_description": {
-                                        "description": "Description of the care needed",
+                                        "description": "Optional: Description of the problem/care needed",
                                         "type": "string",
                                         "example": "Need nursing care for elderly parent"
                                     },
-                                    "service_ids": {
-                                        "description": "Array of service IDs",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2
-                                        ]
-                                    },
-                                    "area_id": {
-                                        "description": "Optional: Area ID for region-specific pricing. If not provided, uses user's registered area",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
                                     "nurse_gender": {
-                                        "description": "Preferred nurse gender",
+                                        "description": "Optional: Preferred nurse gender",
                                         "type": "string",
                                         "enum": [
                                             "male",
@@ -8052,44 +9048,34 @@
                                         ],
                                         "example": "female"
                                     },
-                                    "time_type": {
-                                        "description": "Type of time commitment needed",
+                                    "name": {
+                                        "description": "Optional request name/title",
                                         "type": "string",
-                                        "enum": [
-                                            "full-time",
-                                            "part-time"
-                                        ],
-                                        "example": "full-time"
+                                        "example": "Emergency Home Care"
                                     },
-                                    "scheduled_time": {
-                                        "description": "For immediate requests: use now(). For scheduled: use future time",
+                                    "additional_information": {
+                                        "description": "Optional additional information for all categories",
                                         "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15T10:00:00Z"
-                                    },
-                                    "ending_time": {
-                                        "description": "Required only for scheduled appointments (not immediate requests)",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15T12:00:00Z"
-                                    },
-                                    "location": {
-                                        "description": "Location coordinates (latitude,longitude) or address string",
-                                        "type": "string",
-                                        "example": "33.8938,35.5018"
+                                        "example": "Additional notes"
                                     },
                                     "use_saved_address": {
-                                        "description": "Flag to use saved user address. If true, address fields are optional. If false, address fields are required.",
-                                        "type": "boolean",
-                                        "example": false
+                                        "description": "Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1.",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "false"
                                     },
                                     "address_city": {
-                                        "description": "City (required if use_saved_address is false)",
+                                        "description": "City (required for Category 1 if use_saved_address is false, optional for other categories)",
                                         "type": "string",
                                         "example": "Beirut"
                                     },
                                     "address_street": {
-                                        "description": "Street address (required if use_saved_address is false)",
+                                        "description": "Street address (required for Category 1 if use_saved_address is false, optional for other categories)",
                                         "type": "string",
                                         "example": "Fouad Chehab Street"
                                     },
@@ -8102,6 +9088,81 @@
                                         "description": "Additional address information (optional)",
                                         "type": "string",
                                         "example": "Apartment 5, ring the bell"
+                                    },
+                                    "location": {
+                                        "description": "Location coordinates (latitude,longitude) or address string (optional)",
+                                        "type": "string",
+                                        "example": "33.8938,35.5018"
+                                    },
+                                    "service_id": {
+                                        "description": "REQUIRED for Category 1 only: Single service ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "description": "Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "time_type": {
+                                        "description": "Optional for Category 1: Type of time commitment needed",
+                                        "type": "string",
+                                        "enum": [
+                                            "full-time",
+                                            "part-time"
+                                        ],
+                                        "example": "full-time"
+                                    },
+                                    "scheduled_time": {
+                                        "description": "Optional for Category 1: For immediate requests: use now(). For scheduled: use future time",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T10:00:00Z"
+                                    },
+                                    "ending_time": {
+                                        "description": "Optional for Category 1: Required only for scheduled appointments (not immediate requests)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T12:00:00Z"
+                                    },
+                                    "test_package_id": {
+                                        "description": "REQUIRED for Category 2: Test package ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "request_details_files[]": {
+                                        "description": "Optional for Category 2: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "notes": {
+                                        "description": "Optional for Category 2: Notes",
+                                        "type": "string",
+                                        "example": "Patient has allergies"
+                                    },
+                                    "request_with_insurance": {
+                                        "description": "Optional for Category 2: Request with insurance option. Send as string: 'true' or 'false'",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "true"
+                                    },
+                                    "attach_front_face": {
+                                        "description": "Optional for Category 2: Insurance card front face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "attach_back_face": {
+                                        "description": "Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -8124,14 +9185,30 @@
                                             "type": "integer",
                                             "example": 1
                                         },
+                                        "category_id": {
+                                            "description": "Category ID (defaults to 1: Service Request)",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
                                         "area_id": {
                                             "description": "Area ID for region-specific pricing",
                                             "type": "integer",
                                             "example": 1
                                         },
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "John",
+                                            "nullable": true
+                                        },
+                                        "last_name": {
+                                            "type": "string",
+                                            "example": "Doe",
+                                            "nullable": true
+                                        },
                                         "full_name": {
                                             "type": "string",
-                                            "example": "John Doe"
+                                            "example": "John Doe",
+                                            "nullable": true
                                         },
                                         "phone_number": {
                                             "type": "string",
@@ -10288,6 +11365,434 @@
                 ]
             }
         },
+        "/api/tests": {
+            "get": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "List all tests",
+                "description": "Retrieve all tests with translations based on Accept-Language header",
+                "operationId": "5f539f69bb1d910182eb35136c5baa3a",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tests retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "sample_type": {
+                                                        "type": "string",
+                                                        "example": "Blood"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/tests/..."
+                                                    },
+                                                    "about_test": {
+                                                        "type": "string",
+                                                        "example": "Complete blood count test...",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "type": "string",
+                                                        "example": "Fasting required...",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tests/{id}": {
+            "get": {
+                "tags": [
+                    "Tests"
+                ],
+                "summary": "Get a specific test",
+                "description": "Retrieve a specific test with translations based on Accept-Language header",
+                "operationId": "7e3d8428f4df82c6d4ee7bd1d4d2128c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sample_type": {
+                                                    "type": "string",
+                                                    "example": "Blood"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/tests/..."
+                                                },
+                                                "about_test": {
+                                                    "type": "string",
+                                                    "example": "Complete blood count test...",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "type": "string",
+                                                    "example": "Fasting required...",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Test not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/test-packages": {
+            "get": {
+                "tags": [
+                    "Test Packages"
+                ],
+                "summary": "List all test packages",
+                "description": "Retrieve all test packages with tests and translations based on Accept-Language header",
+                "operationId": "12df9ad6a350189e88f6b9ea5c88c29f",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test packages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Basic Package"
+                                                    },
+                                                    "results": {
+                                                        "type": "string",
+                                                        "example": "within 48 hours"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 150
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/test-packages/..."
+                                                    },
+                                                    "show_details": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "about_test": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "tests": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "sample_type": {
+                                                                    "type": "string",
+                                                                    "example": "Blood"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 50
+                                                                },
+                                                                "image": {
+                                                                    "type": "string"
+                                                                },
+                                                                "about_test": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "instructions": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/test-packages/{id}": {
+            "get": {
+                "tags": [
+                    "Test Packages"
+                ],
+                "summary": "Get a specific test package",
+                "description": "Retrieve a specific test package with tests and translations based on Accept-Language header",
+                "operationId": "cc95e1a712155b9c892312b5126b2541",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Test Package ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Test package retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Basic Package"
+                                                },
+                                                "results": {
+                                                    "type": "string",
+                                                    "example": "within 48 hours"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/test-packages/..."
+                                                },
+                                                "show_details": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "about_test": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "tests": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "sample_type": {
+                                                                "type": "string",
+                                                                "example": "Blood"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 50
+                                                            },
+                                                            "image": {
+                                                                "type": "string"
+                                                            },
+                                                            "about_test": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Test package not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/me": {
             "get": {
                 "tags": [
@@ -11524,6 +13029,14 @@
             "description": "API Endpoints for FAQ management (Admin only)"
         },
         {
+            "name": "Admin - Tests",
+            "description": "API Endpoints for Test management (Admin only)"
+        },
+        {
+            "name": "Admin - Test Packages",
+            "description": "API Endpoints for Test Package management (Admin only)"
+        },
+        {
             "name": "Stream.io Chat",
             "description": "Stream.io chat integration endpoints for real-time messaging"
         },
@@ -11578,6 +13091,14 @@
         {
             "name": "Settings",
             "description": "Application settings management"
+        },
+        {
+            "name": "Tests",
+            "description": "API Endpoints for viewing Tests (User accessible)"
+        },
+        {
+            "name": "Test Packages",
+            "description": "API Endpoints for viewing Test Packages (User accessible)"
         },
         {
             "name": "Admin - Custom Notifications",

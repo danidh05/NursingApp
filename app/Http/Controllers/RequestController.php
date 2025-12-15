@@ -138,31 +138,46 @@ class RequestController extends Controller
      * @OA\Post(
      *     path="/api/requests",
      *     summary="Create a new request",
-     *     description="Create a new service request. Only accessible by users.",
+     *     description="Create a new service request. Supports multiple categories with different payloads. ALL categories use multipart/form-data format (for consistency and future file upload support). Only accessible by users.",
      *     tags={"Requests"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Optional: Category ID. Defaults to 1 (Service Request) if not provided. Each category has different required fields."),
-     *             @OA\Property(property="first_name", type="string", example="John", description="Optional: First name (can be used instead of full_name)"),
-     *             @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name (can be used instead of full_name)"),
-     *             @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name (can be built from first_name + last_name)"),
-     *             @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
-     *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
-     *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
-     *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
-     *             @OA\Property(property="service_id", type="integer", example=1, description="Required for Category 1 only: Single service ID"),
-     *             @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing. If not provided, uses user's registered area"),
-     *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
-     *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),
-     *             @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Required only for scheduled appointments (not immediate requests)"),
-     *             @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates (latitude,longitude) or address string"),
-     *             @OA\Property(property="use_saved_address", type="boolean", example=false, description="Flag to use saved user address. If true, address fields are optional. If false, address fields are required."),
-     *             @OA\Property(property="address_city", type="string", example="Beirut", description="City (required if use_saved_address is false)"),
-     *             @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address (required if use_saved_address is false)"),
-     *             @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information (optional)"),
-     *             @OA\Property(property="address_additional_information", type="string", example="Apartment 5, ring the bell", description="Additional address information (optional)")
+     *         description="All categories use multipart/form-data. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 title="Create Request - All Categories",
+     *                 description="Common fields for all categories. Category-specific required fields are listed below.",
+     *                 @OA\Property(property="category_id", type="integer", example=1, description="REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided."),
+     *                 @OA\Property(property="first_name", type="string", example="John", description="Optional: First name"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name"),
+     *                 @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name (can be built from first_name + last_name)"),
+     *                 @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
+     *                 @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
+     *                 @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
+     *                 @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
+     *                 @OA\Property(property="additional_information", type="string", example="Additional notes", description="Optional additional information for all categories"),
+     *                 @OA\Property(property="use_saved_address", type="string", example="false", enum={"true","false","0","1"}, description="Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1."),
+     *                 @OA\Property(property="address_city", type="string", example="Beirut", description="City (required for Category 1 if use_saved_address is false, optional for other categories)"),
+     *                 @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address (required for Category 1 if use_saved_address is false, optional for other categories)"),
+     *                 @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information (optional)"),
+     *                 @OA\Property(property="address_additional_information", type="string", example="Apartment 5, ring the bell", description="Additional address information (optional)"),
+     *                 @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates (latitude,longitude) or address string (optional)"),
+     *                 
+     *                 @OA\Property(property="service_id", type="integer", example=1, description="REQUIRED for Category 1 only: Single service ID"),
+     *                 @OA\Property(property="area_id", type="integer", example=1, description="Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area"),
+     *                 @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Optional for Category 1: Type of time commitment needed"),
+     *                 @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Optional for Category 1: For immediate requests: use now(). For scheduled: use future time"),
+     *                 @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Optional for Category 1: Required only for scheduled appointments (not immediate requests)"),
+     *                 
+     *                 @OA\Property(property="test_package_id", type="integer", example=1, description="REQUIRED for Category 2: Test package ID"),
+     *                 @OA\Property(property="request_details_files[]", type="array", @OA\Items(type="string", format="binary"), description="Optional for Category 2: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports"),
+     *                 @OA\Property(property="notes", type="string", example="Patient has allergies", description="Optional for Category 2: Notes"),
+     *                 @OA\Property(property="request_with_insurance", type="string", example="true", enum={"true","false","0","1"}, description="Optional for Category 2: Request with insurance option. Send as string: 'true' or 'false'"),
+     *                 @OA\Property(property="attach_front_face", type="string", format="binary", description="Optional for Category 2: Insurance card front face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
+     *                 @OA\Property(property="attach_back_face", type="string", format="binary", description="Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'")
+     *             )
      *         )
      *     ),
      *     @OA\Response(

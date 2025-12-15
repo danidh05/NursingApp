@@ -18,6 +18,10 @@ use App\Http\Controllers\Admin\ServiceAreaPriceController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\TestPackageController;
+use App\Http\Controllers\Admin\TestController as AdminTestController;
+use App\Http\Controllers\Admin\TestPackageController as AdminTestPackageController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -76,6 +80,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/services/area/{area_id}', [ServiceController::class, 'getServicesByArea']); // Get all services for a specific area with pricing
         Route::get('/services/quote', [ServiceController::class, 'quote']); // Get pricing quote for services in specific area
         Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
+        
+        // Tests and Test Packages (Category 2)
+        Route::get('/tests', [TestController::class, 'index']); // List all tests
+        Route::get('/tests/{id}', [TestController::class, 'show']); // View a specific test
+        Route::get('/test-packages', [TestPackageController::class, 'index']); // List all test packages
+        Route::get('/test-packages/{id}', [TestPackageController::class, 'show']); // View a specific test package
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -144,6 +154,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/services', [ServiceController::class, 'store']); // Create a new service
         Route::put('/services/{service}', [ServiceController::class, 'update']); // Update a service
         Route::delete('/services/{service}', [ServiceController::class, 'destroy']); // Delete a service
+        
+        // Test management routes (Category 2)
+        Route::apiResource('tests', AdminTestController::class); // CRUD for tests
+        Route::apiResource('test-packages', AdminTestPackageController::class); // CRUD for test packages
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

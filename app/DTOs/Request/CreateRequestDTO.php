@@ -25,6 +25,16 @@ class CreateRequestDTO
         public ?string $address_street = null,
         public ?string $address_building = null,
         public ?string $address_additional_information = null,
+        // Category 2: Tests specific fields
+        public ?int $test_package_id = null,
+        public ?int $test_id = null, // For individual test requests
+        public ?array $request_details_files = null, // Array of file paths
+        public ?string $notes = null,
+        public ?bool $request_with_insurance = false,
+        public ?string $attach_front_face = null, // File path
+        public ?string $attach_back_face = null, // File path
+        // Common field for all categories
+        public ?string $additional_information = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -49,6 +59,15 @@ class CreateRequestDTO
             address_street: $data['address_street'] ?? null,
             address_building: $data['address_building'] ?? null,
             address_additional_information: $data['address_additional_information'] ?? null,
+            // Category 2 fields
+            test_package_id: $data['test_package_id'] ?? null,
+            test_id: $data['test_id'] ?? null,
+            request_details_files: $data['request_details_files'] ?? null,
+            notes: $data['notes'] ?? null,
+            request_with_insurance: $data['request_with_insurance'] ?? false,
+            attach_front_face: $data['attach_front_face'] ?? null,
+            attach_back_face: $data['attach_back_face'] ?? null,
+            additional_information: $data['additional_information'] ?? null,
         );
     }
 } 

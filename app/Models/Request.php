@@ -58,6 +58,15 @@ class Request extends Model
         'address_street',
         'address_building',
         'address_additional_information',
+        'additional_information', // Optional text for all categories
+        // Category 2: Tests specific fields
+        'test_package_id',
+        'test_id', // For individual test requests
+        'request_details_files',
+        'notes',
+        'request_with_insurance',
+        'attach_front_face',
+        'attach_back_face',
     ];
 
     /**
@@ -71,6 +80,8 @@ class Request extends Model
         'discount_percentage' => 'decimal:2',
         'total_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
+        'request_with_insurance' => 'boolean',
+        'request_details_files' => 'array',
     ];
 
     protected $dates = ['deleted_at'];
@@ -159,6 +170,22 @@ class Request extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the test package for this request (Category 2 only).
+     */
+    public function testPackage()
+    {
+        return $this->belongsTo(TestPackage::class);
+    }
+
+    /**
+     * Get the test for this request (Category 2 only - individual test).
+     */
+    public function test()
+    {
+        return $this->belongsTo(Test::class);
     }
 
     /**

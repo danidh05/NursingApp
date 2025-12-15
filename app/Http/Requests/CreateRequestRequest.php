@@ -40,10 +40,30 @@ class CreateRequestRequest extends FormRequest
             $data = $validator->getData();
             $categoryId = $data['category_id'] ?? 1;
             
+            // Category 2 specific validations
+            if ($categoryId === 2) {
+                // Ensure either test_package_id OR test_id is provided, but not both
+                $hasTestPackage = !empty($data['test_package_id']);
+                $hasTest = !empty($data['test_id']);
+                
+                if (!$hasTestPackage && !$hasTest) {
+                    $validator->errors()->add('test_package_id', 'Either test_package_id or test_id must be provided for Category 2 requests.');
+                    $validator->errors()->add('test_id', 'Either test_package_id or test_id must be provided for Category 2 requests.');
+                }
+                
+                if ($hasTestPackage && $hasTest) {
+                    $validator->errors()->add('test_package_id', 'Cannot provide both test_package_id and test_id. Please provide only one.');
+                    $validator->errors()->add('test_id', 'Cannot provide both test_package_id and test_id. Please provide only one.');
+                }
+            }
+            
             // Category 1 specific validations
             if ($categoryId === 1) {
+                // Normalize boolean from form-data (may be string "true"/"false")
+                $useSavedAddress = filter_var($data['use_saved_address'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                
                 // Address validation: if use_saved_address is false, new address fields are required
-                if (isset($data['use_saved_address']) && !$data['use_saved_address']) {
+                if (!$useSavedAddress) {
                     if (empty($data['address_city'])) {
                         $validator->errors()->add('address_city', 'City is required when not using saved address.');
                     }

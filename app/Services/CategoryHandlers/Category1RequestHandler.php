@@ -52,11 +52,12 @@ class Category1RequestHandler extends BaseCategoryRequestHandler
             scheduled_time: $data['scheduled_time'] ?? null,
             ending_time: $data['ending_time'] ?? null,
             location: $data['location'] ?? null,
-            use_saved_address: $data['use_saved_address'] ?? false,
+            use_saved_address: $this->normalizeBoolean($data['use_saved_address'] ?? false),
             address_city: $data['address_city'] ?? null,
             address_street: $data['address_street'] ?? null,
             address_building: $data['address_building'] ?? null,
             address_additional_information: $data['address_additional_information'] ?? null,
+            additional_information: $data['additional_information'] ?? null,
         );
     }
 }

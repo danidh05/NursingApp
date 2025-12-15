@@ -26,7 +26,39 @@ abstract class BaseCategoryRequestHandler implements ICategoryRequestHandler
             'phone_number' => ['nullable', 'string', 'max:20'],
             'problem_description' => ['nullable', 'string'],
             'nurse_gender' => ['nullable', 'string', 'in:male,female,any'],
+            // Address fields (common for all categories)
+            'use_saved_address' => ['nullable', 'boolean'], // Laravel handles "true"/"false" strings automatically
+            'address_city' => ['nullable', 'string', 'max:255'],
+            'address_street' => ['nullable', 'string', 'max:255'],
+            'address_building' => ['nullable', 'string', 'max:255'],
+            'address_additional_information' => ['nullable', 'string'],
+            'additional_information' => ['nullable', 'string'],
         ];
+    }
+
+    /**
+     * Normalize boolean values from form-data (which sends strings).
+     * Converts "true", "1", "on", "yes" to true, everything else to false.
+     *
+     * @param mixed $value
+     * @return bool|null
+     */
+    protected function normalizeBoolean($value): ?bool
+    {
+        if ($value === null) {
+            return null;
+        }
+        
+        if (is_bool($value)) {
+            return $value;
+        }
+        
+        if (is_string($value)) {
+            $value = strtolower(trim($value));
+            return in_array($value, ['true', '1', 'on', 'yes'], true);
+        }
+        
+        return (bool) $value;
     }
 
     /**

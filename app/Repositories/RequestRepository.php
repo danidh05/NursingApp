@@ -13,7 +13,6 @@ class RequestRepository implements IRequestRepository
 {
     public function create(CreateRequestDTO $dto, User $user): Request
     {
-        // Remove any manual transaction management - let Laravel handle it
         // Build full_name from first_name and last_name if provided
         $fullName = $dto->full_name;
         if (!$fullName && ($dto->first_name || $dto->last_name)) {
@@ -21,10 +20,12 @@ class RequestRepository implements IRequestRepository
             $fullName = !empty($parts) ? implode(' ', $parts) : null;
         }
         
-        $request = Request::create([
+        $categoryId = $dto->category_id ?? 1;
+        
+        // Base fields common to all categories
+        $requestData = [
             'user_id' => $user->id,
-            'category_id' => $dto->category_id ?? 1, // Default to Category 1: Service Request
-            'area_id' => $dto->area_id ?? $user->area_id,
+            'category_id' => $categoryId,
             'first_name' => $dto->first_name,
             'last_name' => $dto->last_name,
             'full_name' => $fullName,
@@ -32,25 +33,75 @@ class RequestRepository implements IRequestRepository
             'name' => $dto->name,
             'problem_description' => $dto->problem_description,
             'nurse_gender' => $dto->nurse_gender,
-            'time_type' => $dto->time_type,
-            'scheduled_time' => $dto->scheduled_time,
-            'ending_time' => $dto->ending_time,
             'location' => $dto->location,
-            'status' => Request::STATUS_SUBMITTED, // Use new status constant
-            // Address fields
+            'status' => Request::STATUS_SUBMITTED,
+            // Address fields (common to all categories)
             'use_saved_address' => $dto->use_saved_address ?? false,
             'address_city' => $dto->address_city,
             'address_street' => $dto->address_street,
             'address_building' => $dto->address_building,
             'address_additional_information' => $dto->address_additional_information,
-        ]);
+            'additional_information' => $dto->additional_information,
+        ];
+        
+        // Category-specific fields - only include fields relevant to the category
+        if ($categoryId === 1) {
+            // Category 1: Service Request
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
+            if ($dto->time_type !== null) {
+                $requestData['time_type'] = $dto->time_type;
+            }
+            if ($dto->scheduled_time !== null) {
+                $requestData['scheduled_time'] = $dto->scheduled_time;
+            }
+            if ($dto->ending_time !== null) {
+                $requestData['ending_time'] = $dto->ending_time;
+            }
+            // Do NOT include Category 2 fields (test_package_id, test_id, etc.)
+        } elseif ($categoryId === 2) {
+            // Category 2: Tests
+            if ($dto->test_package_id !== null) {
+                $requestData['test_package_id'] = $dto->test_package_id;
+            }
+            if ($dto->test_id !== null) {
+                $requestData['test_id'] = $dto->test_id;
+            }
+            if ($dto->request_details_files !== null) {
+                $requestData['request_details_files'] = $dto->request_details_files;
+            }
+            if ($dto->notes !== null) {
+                $requestData['notes'] = $dto->notes;
+            }
+            $requestData['request_with_insurance'] = $dto->request_with_insurance ?? false;
+            if ($dto->attach_front_face !== null) {
+                $requestData['attach_front_face'] = $dto->attach_front_face;
+            }
+            if ($dto->attach_back_face !== null) {
+                $requestData['attach_back_face'] = $dto->attach_back_face;
+            }
+            // Do NOT include Category 1 fields (area_id, time_type, scheduled_time, ending_time)
+        } else {
+            // Future categories (3-8): Only common fields, no category-specific fields yet
+            // Can be extended when implementing other categories
+        }
+        
+        $request = Request::create($requestData);
 
         // Attach service (only for Category 1: Service Request)
-        if ($dto->service_id) {
+        if ($categoryId === 1 && $dto->service_id) {
             $request->services()->attach($dto->service_id);
         }
 
-        return $request->load('services', 'user', 'area', 'chatThread', 'nurse');
+        // Load relationships based on category
+        $relationships = ['user', 'area', 'chatThread', 'nurse'];
+        if ($categoryId === 1) {
+            $relationships[] = 'services';
+        } elseif ($categoryId === 2) {
+            $relationships[] = 'testPackage';
+            $relationships[] = 'test';
+        }
+
+        return $request->load($relationships);
     }
 
     public function update(int $id, UpdateRequestDTO $dto, User $user): Request
