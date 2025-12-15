@@ -8,7 +8,7 @@ use App\DTOs\Request\CreateRequestDTO;
  * Category 1: Service Request Handler
  * 
  * This category requires:
- * - service_ids (array, required)
+ * - service_id (integer, required) - Only one service per request
  * - area_id (optional, uses user's area if not provided)
  * - Address fields (required if use_saved_address is false)
  * - time_type, scheduled_time, ending_time (optional)
@@ -19,8 +19,7 @@ class Category1RequestHandler extends BaseCategoryRequestHandler
     {
         return array_merge($this->getCommonRules(), [
             // Service Request specific fields
-            'service_ids' => ['required', 'array', 'min:1'],
-            'service_ids.*' => ['exists:services,id'],
+            'service_id' => ['required', 'integer', 'exists:services,id'],
             'area_id' => ['nullable', 'integer', 'exists:areas,id'],
             'name' => ['nullable', 'string', 'max:255'],
             'time_type' => ['nullable', 'string', 'in:full-time,part-time'],
@@ -44,7 +43,7 @@ class Category1RequestHandler extends BaseCategoryRequestHandler
             full_name: $this->buildFullName($data) ?? $data['full_name'] ?? null,
             phone_number: $data['phone_number'] ?? null,
             problem_description: $data['problem_description'] ?? null,
-            service_ids: $data['service_ids'] ?? [],
+            service_id: $data['service_id'] ?? null,
             area_id: $data['area_id'] ?? null,
             category_id: $data['category_id'] ?? 1,
             name: $data['name'] ?? null,

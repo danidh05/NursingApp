@@ -45,9 +45,9 @@ class RequestRepository implements IRequestRepository
             'address_additional_information' => $dto->address_additional_information,
         ]);
 
-        // Attach services
-        if (!empty($dto->service_ids)) {
-            $request->services()->attach($dto->service_ids);
+        // Attach service (only for Category 1: Service Request)
+        if ($dto->service_id) {
+            $request->services()->attach($dto->service_id);
         }
 
         return $request->load('services', 'user', 'area', 'chatThread', 'nurse');

@@ -10,7 +10,7 @@ class CreateRequestDTO
         public ?string $full_name = null,
         public ?string $phone_number = null,
         public ?string $problem_description = null,
-        public array $service_ids = [],
+        public ?int $service_id = null,  // Only for Category 1: Service Request
         public ?int $area_id = null,
         public ?int $category_id = 1,            // Default to Category 1: Service Request
         public ?string $name = null,             // Optional request name/title
@@ -30,10 +30,12 @@ class CreateRequestDTO
     public static function fromArray(array $data): self
     {
         return new self(
-            full_name: $data['full_name'],
-            phone_number: $data['phone_number'],
-            problem_description: $data['problem_description'],
-            service_ids: $data['service_ids'],
+            first_name: $data['first_name'] ?? null,
+            last_name: $data['last_name'] ?? null,
+            full_name: $data['full_name'] ?? null,
+            phone_number: $data['phone_number'] ?? null,
+            problem_description: $data['problem_description'] ?? null,
+            service_id: $data['service_id'] ?? null,  // Only for Category 1
             area_id: $data['area_id'] ?? null,
             category_id: $data['category_id'] ?? 1, // Default to Category 1: Service Request
             name: $data['name'] ?? null,

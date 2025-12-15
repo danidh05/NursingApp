@@ -144,7 +144,6 @@ class RequestController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"service_ids"},
      *             @OA\Property(property="category_id", type="integer", example=1, description="Optional: Category ID. Defaults to 1 (Service Request) if not provided. Each category has different required fields."),
      *             @OA\Property(property="first_name", type="string", example="John", description="Optional: First name (can be used instead of full_name)"),
      *             @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name (can be used instead of full_name)"),
@@ -153,7 +152,7 @@ class RequestController extends Controller
      *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
      *             @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
      *             @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
-     *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Required for Category 1: Array of service IDs"),
+     *             @OA\Property(property="service_id", type="integer", example=1, description="Required for Category 1 only: Single service ID"),
      *             @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing. If not provided, uses user's registered area"),
      *             @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Type of time commitment needed"),
      *             @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="For immediate requests: use now(). For scheduled: use future time"),

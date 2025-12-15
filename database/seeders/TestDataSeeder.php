@@ -401,10 +401,10 @@ class TestDataSeeder extends Seeder
                 $requestData
             );
 
-            // Attach random services to each request
-            if ($request->wasRecentlyCreated) {
-                $randomServices = $services->random(rand(1, 3))->pluck('id');
-                $request->services()->attach($randomServices);
+            // Attach one random service to each request (Category 1 only supports single service)
+            if ($request->wasRecentlyCreated && $request->category_id === 1) {
+                $randomService = $services->random(1)->id;
+                $request->services()->attach($randomService);
             }
 
             // Add time_needed_to_arrive to cache for requests with ASSIGNED status

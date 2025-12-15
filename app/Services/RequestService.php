@@ -36,8 +36,8 @@ class RequestService implements IRequestService
         // Create the request
         $request = $this->requestRepository->create($dto, $user);
         
-        // Calculate and set total price (only for categories that use services)
-        if ($categoryId === 1 && !empty($dto->service_ids)) {
+        // Calculate and set total price (only for Category 1: Service Request)
+        if ($categoryId === 1 && $dto->service_id) {
             $totalPrice = $this->calculateRequestTotalPrice($request);
             $request->update([
                 'total_price' => $totalPrice,
@@ -61,11 +61,16 @@ class RequestService implements IRequestService
     }
 
     /**
-     * Calculate the total price for a request based on its services and request's area.
+     * Calculate the total price for a request based on its service and request's area.
+     * Category 1 only supports a single service per request.
      */
     private function calculateRequestTotalPrice(Request $request): float
     {
-        $serviceIds = $request->services->pluck('id')->toArray();
+        $service = $request->services->first();
+        
+        if (!$service) {
+            throw new \Exception('No service attached to request');
+        }
         
         // Use request's area_id if available, otherwise fall back to user's registered area
         $areaId = $request->area_id ?? $request->user->area_id;
@@ -74,19 +79,15 @@ class RequestService implements IRequestService
             throw new \Exception('No area specified for pricing calculation');
         }
         
-        $serviceAreaPrices = ServiceAreaPrice::whereIn('service_id', $serviceIds)
+        $serviceAreaPrice = ServiceAreaPrice::where('service_id', $service->id)
                                            ->where('area_id', $areaId)
-                                           ->get();
+                                           ->first();
 
-        $totalPrice = 0;
-        foreach ($serviceIds as $serviceId) {
-            $price = $serviceAreaPrices->where('service_id', $serviceId)->first();
-            if ($price) {
-                $totalPrice += $price->price;
-            }
+        if (!$serviceAreaPrice) {
+            throw new \Exception("No pricing found for service {$service->id} in area {$areaId}");
         }
 
-        return $totalPrice;
+        return $serviceAreaPrice->price;
     }
 
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO

@@ -64,22 +64,19 @@ class CreateRequestRequest extends FormRequest
                     }
                 }
 
-                // Validate that the selected area has pricing for all requested services
+                // Validate that the selected area has pricing for the requested service (Category 1 only)
                 // If area_id is not provided, use the authenticated user's registered area
                 $areaId = $data['area_id'] ?? auth()->user()?->area_id;
                 
-                if (!empty($areaId) && !empty($data['service_ids'])) {
-                    $serviceIds = $data['service_ids'];
+                if (!empty($areaId) && !empty($data['service_id'])) {
+                    $serviceId = $data['service_id'];
                     
-                    $missingPricing = \App\Models\ServiceAreaPrice::whereIn('service_id', $serviceIds)
+                    $hasPricing = \App\Models\ServiceAreaPrice::where('service_id', $serviceId)
                         ->where('area_id', $areaId)
-                        ->pluck('service_id')
-                        ->toArray();
+                        ->exists();
                     
-                    $missingServices = array_diff($serviceIds, $missingPricing);
-                    
-                    if (!empty($missingServices)) {
-                        $validator->errors()->add('area_id', 'The selected area does not have pricing configured for all requested services.');
+                    if (!$hasPricing) {
+                        $validator->errors()->add('area_id', 'The selected area does not have pricing configured for the requested service.');
                     }
                 }
             }
@@ -92,9 +89,8 @@ class CreateRequestRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'service_ids.required' => 'At least one service must be selected.',
-            'service_ids.min' => 'At least one service must be selected.',
-            'service_ids.*.exists' => 'One or more selected services are invalid.',
+            'service_id.required' => 'A service must be selected for Category 1 requests.',
+            'service_id.exists' => 'The selected service is invalid.',
 
             'ending_time.after' => 'Ending time must be after scheduled time.',
         ];
