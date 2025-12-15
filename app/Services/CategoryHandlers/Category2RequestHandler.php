@@ -21,8 +21,9 @@ class Category2RequestHandler extends BaseCategoryRequestHandler
     {
         return array_merge($this->getCommonRules(), [
             // Tests specific fields - either test_package_id OR test_id (not both)
-            'test_package_id' => ['nullable', 'integer', 'exists:test_packages,id', 'required_without:test_id', 'prohibited_with:test_id'],
-            'test_id' => ['nullable', 'integer', 'exists:tests,id', 'required_without:test_package_id', 'prohibited_with:test_package_id'],
+            // Note: The "not both" logic is handled in CreateRequestRequest::withValidator()
+            'test_package_id' => ['nullable', 'integer', 'exists:test_packages,id', 'required_without:test_id'],
+            'test_id' => ['nullable', 'integer', 'exists:tests,id', 'required_without:test_package_id'],
             'request_details_files' => ['nullable', 'array'],
             'request_details_files.*' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // 5MB max
             'notes' => ['nullable', 'string'],
