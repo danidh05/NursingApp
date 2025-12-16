@@ -3971,29 +3971,17 @@
                                                         "type": "string",
                                                         "example": "http://localhost:8000/storage/tests/..."
                                                     },
-                                                    "translations": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "locale": {
-                                                                    "type": "string",
-                                                                    "example": "en"
-                                                                },
-                                                                "about_test": {
-                                                                    "type": "string",
-                                                                    "example": "Complete blood count test..."
-                                                                },
-                                                                "instructions": {
-                                                                    "type": "string",
-                                                                    "example": "Fasting required..."
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
+                                                    "about_test": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Complete blood count test...",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Fasting required...",
+                                                        "nullable": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -4032,8 +4020,7 @@
                             "schema": {
                                 "required": [
                                     "sample_type",
-                                    "price",
-                                    "locale"
+                                    "price"
                                 ],
                                 "properties": {
                                     "sample_type": {
@@ -4053,7 +4040,7 @@
                                         "format": "binary"
                                     },
                                     "locale": {
-                                        "description": "Translation locale",
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
                                         "type": "string",
                                         "enum": [
                                             "en",
@@ -4187,23 +4174,15 @@
                                                     "type": "string",
                                                     "example": "http://localhost:8000/storage/tests/..."
                                                 },
-                                                "translations": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "locale": {
-                                                                "type": "string",
-                                                                "example": "en"
-                                                            },
-                                                            "about_test": {
-                                                                "type": "string"
-                                                            },
-                                                            "instructions": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
+                                                "about_test": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
                                                 }
                                             },
                                             "type": "object"
@@ -4235,7 +4214,7 @@
                     "Admin - Tests"
                 ],
                 "summary": "Update a test (Admin)",
-                "description": "Update an existing test with image upload and translations. Use form-data (multipart/form-data) for file uploads.",
+                "description": "Update an existing test with image upload and translations. **CRITICAL FOR FILE UPLOADS:** This endpoint accepts both PUT (for non-file updates) and POST with `_method=PUT` (for file uploads). When uploading files, you MUST: 1) Use POST method (not PUT), 2) Include `_method=PUT` in form-data, 3) Use multipart/form-data. This is Laravel's method spoofing - required because PHP only populates \\$_FILES for POST requests.",
                 "operationId": "70dab048a4926718685df615a9a10902",
                 "parameters": [
                     {
@@ -4254,10 +4233,12 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "locale"
-                                ],
                                 "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
                                     "sample_type": {
                                         "type": "string",
                                         "example": "Blood"
@@ -4273,6 +4254,7 @@
                                         "format": "binary"
                                     },
                                     "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
                                         "type": "string",
                                         "enum": [
                                             "en",
@@ -4327,6 +4309,16 @@
                                                 "image": {
                                                     "type": "string",
                                                     "example": "http://localhost:8000/storage/tests/..."
+                                                },
+                                                "about_test": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
                                                 }
                                             },
                                             "type": "object"
@@ -4461,13 +4453,47 @@
                                                         "type": "boolean",
                                                         "example": true
                                                     },
-                                                    "translations": {
-                                                        "type": "array",
-                                                        "items": {}
+                                                    "about_test": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "nullable": true
                                                     },
                                                     "tests": {
                                                         "type": "array",
-                                                        "items": {}
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "sample_type": {
+                                                                    "type": "string",
+                                                                    "example": "Blood"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 50
+                                                                },
+                                                                "image": {
+                                                                    "type": "string"
+                                                                },
+                                                                "about_test": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "instructions": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
                                                     }
                                                 },
                                                 "type": "object"
@@ -4508,7 +4534,6 @@
                                     "name",
                                     "results",
                                     "price",
-                                    "locale",
                                     "test_ids"
                                 ],
                                 "properties": {
@@ -4539,7 +4564,7 @@
                                         "example": true
                                     },
                                     "locale": {
-                                        "description": "Translation locale",
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
                                         "type": "string",
                                         "enum": [
                                             "en",
@@ -4696,13 +4721,47 @@
                                                     "type": "boolean",
                                                     "example": true
                                                 },
-                                                "translations": {
-                                                    "type": "array",
-                                                    "items": {}
+                                                "about_test": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
                                                 },
                                                 "tests": {
                                                     "type": "array",
-                                                    "items": {}
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "sample_type": {
+                                                                "type": "string",
+                                                                "example": "Blood"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 50
+                                                            },
+                                                            "image": {
+                                                                "type": "string"
+                                                            },
+                                                            "about_test": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -4734,7 +4793,7 @@
                     "Admin - Test Packages"
                 ],
                 "summary": "Update a test package (Admin)",
-                "description": "Update an existing test package with image, translations, and test relationships. Use form-data (multipart/form-data) for file uploads.",
+                "description": "Update an existing test package with image, translations, and test relationships. **CRITICAL FOR FILE UPLOADS:** This endpoint accepts both PUT (for non-file updates) and POST with `_method=PUT` (for file uploads). When uploading files, you MUST: 1) Use POST method (not PUT), 2) Include `_method=PUT` in form-data, 3) Use multipart/form-data. This is Laravel's method spoofing - required because PHP only populates \\$_FILES for POST requests.",
                 "operationId": "4c8487b714b162a98bb213ece5719395",
                 "parameters": [
                     {
@@ -4753,10 +4812,12 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "locale"
-                                ],
                                 "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
                                     "name": {
                                         "type": "string",
                                         "example": "Basic Package Updated"
@@ -4780,6 +4841,7 @@
                                         "example": true
                                     },
                                     "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
                                         "type": "string",
                                         "enum": [
                                             "en",
@@ -4838,6 +4900,10 @@
                                                     "type": "string",
                                                     "example": "Basic Package Updated"
                                                 },
+                                                "results": {
+                                                    "type": "string",
+                                                    "example": "within 48 hours"
+                                                },
                                                 "price": {
                                                     "type": "number",
                                                     "format": "float",
@@ -4847,9 +4913,51 @@
                                                     "type": "string",
                                                     "example": "http://localhost:8000/storage/test-packages/..."
                                                 },
+                                                "show_details": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "about_test": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
                                                 "tests": {
                                                     "type": "array",
-                                                    "items": {}
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "sample_type": {
+                                                                "type": "string",
+                                                                "example": "Blood"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 50
+                                                            },
+                                                            "image": {
+                                                                "type": "string"
+                                                            },
+                                                            "about_test": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -10342,7 +10450,7 @@
                     "Admin"
                 ],
                 "summary": "Update service details (Admin only)",
-                "description": "Update a service's information with image upload and translations. Use form-data (multipart/form-data) for file uploads. Only accessible by admins.",
+                "description": "Update a service's information with image upload and translations. **CRITICAL FOR FILE UPLOADS:** This endpoint accepts both PUT (for non-file updates) and POST with `_method=PUT` (for file uploads). When uploading files, you MUST: 1) Use POST method (not PUT), 2) Include `_method=PUT` in form-data, 3) Use multipart/form-data. This is Laravel's method spoofing - required because PHP only populates \\$_FILES for POST requests. Only accessible by admins.",
                 "operationId": "68dbe8d1f512cb4d709ae5e4c2abbd5e",
                 "parameters": [
                     {
@@ -10361,10 +10469,12 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "locale"
-                                ],
                                 "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
                                     "name": {
                                         "description": "Service name",
                                         "type": "string",
@@ -10413,7 +10523,7 @@
                                         "example": "Updated includes"
                                     },
                                     "locale": {
-                                        "description": "Translation locale (REQUIRED)",
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
                                         "type": "string",
                                         "enum": [
                                             "en",
