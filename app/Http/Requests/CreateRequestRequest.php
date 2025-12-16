@@ -16,14 +16,33 @@ class CreateRequestRequest extends FormRequest
     /**
      * Prepare the data for validation.
      * Normalize boolean strings from form-data before validation.
+     * Also normalize request_details_files to always be an array.
      */
     protected function prepareForValidation(): void
     {
+        $categoryId = $this->input('category_id', 1);
+        
         // Normalize boolean strings from form-data
-        $this->merge([
+        $normalized = [
             'use_saved_address' => $this->normalizeBooleanString($this->input('use_saved_address')),
             'request_with_insurance' => $this->normalizeBooleanString($this->input('request_with_insurance')),
-        ]);
+        ];
+        
+        // For Category 2, normalize request_details_files to always be an array
+        if ($categoryId === 2) {
+            // Check if request_details_files exists as a file (single or array)
+            if ($this->hasFile('request_details_files')) {
+                $files = $this->file('request_details_files');
+                // If it's a single file, convert to array
+                $normalized['request_details_files'] = is_array($files) ? $files : [$files];
+            } elseif ($this->hasFile('request_details_files[]')) {
+                // Handle Postman's array syntax
+                $files = $this->file('request_details_files[]');
+                $normalized['request_details_files'] = is_array($files) ? $files : [$files];
+            }
+        }
+        
+        $this->merge($normalized);
     }
 
     /**
@@ -77,6 +96,34 @@ class CreateRequestRequest extends FormRequest
         $validator->after(function ($validator) {
             $data = $validator->getData();
             $categoryId = $data['category_id'] ?? 1;
+            
+            // Category 2: Validate request_details_files if present
+            if ($categoryId === 2 && isset($data['request_details_files'])) {
+                $files = $data['request_details_files'];
+                // Ensure it's an array
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+                
+                // Validate each file
+                foreach ($files as $index => $file) {
+                    if (!$file instanceof \Illuminate\Http\UploadedFile) {
+                        $validator->errors()->add("request_details_files.{$index}", "The request details files must be valid file uploads.");
+                        continue;
+                    }
+                    
+                    // Validate file type
+                    $allowedMimes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                    if (!in_array($file->getMimeType(), $allowedMimes)) {
+                        $validator->errors()->add("request_details_files.{$index}", "The file must be a PDF, JPG, or PNG.");
+                    }
+                    
+                    // Validate file size (5MB = 5120 KB)
+                    if ($file->getSize() > 5120 * 1024) {
+                        $validator->errors()->add("request_details_files.{$index}", "The file must not be larger than 5MB.");
+                    }
+                }
+            }
             
             // Category 2 specific validations
             if ($categoryId === 2) {

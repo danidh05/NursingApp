@@ -67,7 +67,8 @@ class RequestRepository implements IRequestRepository
                 $requestData['test_id'] = $dto->test_id;
             }
             if ($dto->request_details_files !== null) {
-                $requestData['request_details_files'] = $dto->request_details_files;
+                // request_details_files is an array, encode as JSON for database storage
+                $requestData['request_details_files'] = json_encode($dto->request_details_files);
             }
             if ($dto->notes !== null) {
                 $requestData['notes'] = $dto->notes;
@@ -93,7 +94,7 @@ class RequestRepository implements IRequestRepository
         }
 
         // Load relationships based on category
-        $relationships = ['user', 'area', 'chatThread', 'nurse'];
+        $relationships = ['user', 'area', 'chatThread', 'nurse', 'category'];
         if ($categoryId === 1) {
             $relationships[] = 'services';
         } elseif ($categoryId === 2) {
@@ -109,7 +110,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management
         // For updates, admins should be able to update any request
         if ($user->role->name === 'admin') {
-            $request = Request::with(['services', 'user.role', 'nurse'])->whereNull('deleted_at')->findOrFail($id);
+            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test'])->whereNull('deleted_at')->findOrFail($id);
         } else {
             $request = $this->findById($id, $user);
         }
@@ -133,12 +134,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area', 'chatThread', 'nurse');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -153,7 +154,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

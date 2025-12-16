@@ -239,9 +239,122 @@ class RequestController extends Controller
      */
     public function store(CreateRequestRequest $httpRequest): JsonResponse
     {
+        // DEBUG STEP 1: Check what files are in the raw request
+        Log::info('=== REQUEST CONTROLLER: File Upload Debug Start ===');
+        Log::info('Request has files: ' . ($httpRequest->hasFile('request_details_files') ? 'YES' : 'NO'));
+        Log::info('Request has attach_front_face: ' . ($httpRequest->hasFile('attach_front_face') ? 'YES' : 'NO'));
+        Log::info('Request has attach_back_face: ' . ($httpRequest->hasFile('attach_back_face') ? 'YES' : 'NO'));
+        
+        // Get all files from request (handles both 'request_details_files' and 'request_details_files[]')
+        $allFiles = $httpRequest->allFiles();
+        Log::info('All files keys in request: ' . json_encode(array_keys($allFiles)));
+        
+        // Get validated data (excludes files)
         $validated = $httpRequest->validated();
+        Log::info('Validated data keys: ' . json_encode(array_keys($validated)));
+        
+        // For Category 2, merge file uploads back into validated data
+        $categoryId = $httpRequest->input('category_id', 1);
+        Log::info('Category ID: ' . $categoryId);
+        
+        if ($categoryId === 2) {
+            // DEBUG STEP 2: Check each file field
+            // IMPORTANT: Always extract files from allFiles() first, as validated() may have converted them
+            // Handle request_details_files - Postman sends as 'request_details_files[]' but Laravel receives as 'request_details_files'
+            // Also handle case where single file is sent (not array)
+            $requestDetailsFiles = null;
+            
+            // ALWAYS get files from allFiles() first (these are guaranteed to be UploadedFile objects)
+            if (isset($allFiles['request_details_files'])) {
+                $requestDetailsFiles = $allFiles['request_details_files'];
+                Log::info('Found request_details_files in allFiles() (without brackets)');
+            } elseif (isset($allFiles['request_details_files[]'])) {
+                $requestDetailsFiles = $allFiles['request_details_files[]'];
+                Log::info('Found request_details_files[] in allFiles() (with brackets)');
+            }
+            
+            // Only check validated data if not found in allFiles() (but this shouldn't happen)
+            if ($requestDetailsFiles === null && isset($validated['request_details_files'])) {
+                $validatedFile = $validated['request_details_files'];
+                // Only use if it's an UploadedFile object
+                if ($validatedFile instanceof \Illuminate\Http\UploadedFile || 
+                    (is_array($validatedFile) && isset($validatedFile[0]) && $validatedFile[0] instanceof \Illuminate\Http\UploadedFile)) {
+                    $requestDetailsFiles = $validatedFile;
+                    Log::info('Found request_details_files in validated data (UploadedFile object)');
+                } else {
+                    Log::warning('request_details_files in validated data is NOT UploadedFile, type: ' . gettype($validatedFile));
+                }
+            }
+            
+            if ($requestDetailsFiles !== null) {
+                // Ensure it's an array (handle both single file and array)
+                if (!is_array($requestDetailsFiles)) {
+                    $requestDetailsFiles = [$requestDetailsFiles];
+                    Log::info('Normalized single file to array');
+                }
+                
+                // Verify each file is an UploadedFile object
+                $validFiles = [];
+                foreach ($requestDetailsFiles as $index => $file) {
+                    Log::info("request_details_files[$index] type: " . gettype($file));
+                    if ($file instanceof \Illuminate\Http\UploadedFile) {
+                        Log::info("request_details_files[$index] is UploadedFile: " . $file->getClientOriginalName());
+                        $validFiles[] = $file;
+                    } else {
+                        Log::warning("request_details_files[$index] is NOT UploadedFile, it's: " . gettype($file));
+                    }
+                }
+                
+                if (!empty($validFiles)) {
+                    $validated['request_details_files'] = $validFiles;
+                    Log::info('Added ' . count($validFiles) . ' valid files to request_details_files');
+                } else {
+                    Log::warning('No valid UploadedFile objects found in request_details_files');
+                }
+            } else {
+                Log::warning('request_details_files not found in allFiles() or validated data');
+            }
+            
+            // Handle attach_front_face
+            if (isset($allFiles['attach_front_face'])) {
+                $file = $allFiles['attach_front_face'];
+                Log::info('attach_front_face type: ' . gettype($file));
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    Log::info('attach_front_face is UploadedFile: ' . $file->getClientOriginalName());
+                    $validated['attach_front_face'] = $file;
+                } else {
+                    Log::warning('attach_front_face is NOT UploadedFile, it\'s: ' . gettype($file));
+                    if (is_string($file)) {
+                        Log::warning('attach_front_face is a string (temp path): ' . substr($file, 0, 100));
+                    }
+                }
+            } else {
+                Log::warning('attach_front_face not found in allFiles()');
+            }
+            
+            // Handle attach_back_face
+            if (isset($allFiles['attach_back_face'])) {
+                $file = $allFiles['attach_back_face'];
+                Log::info('attach_back_face type: ' . gettype($file));
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    Log::info('attach_back_face is UploadedFile: ' . $file->getClientOriginalName());
+                    $validated['attach_back_face'] = $file;
+                } else {
+                    Log::warning('attach_back_face is NOT UploadedFile, it\'s: ' . gettype($file));
+                    if (is_string($file)) {
+                        Log::warning('attach_back_face is a string (temp path): ' . substr($file, 0, 100));
+                    }
+                }
+            } else {
+                Log::warning('attach_back_face not found in allFiles()');
+            }
+            
+            Log::info('Final validated data keys after file merge: ' . json_encode(array_keys($validated)));
+        }
 
         $request = $this->requestService->createRequest($validated, Auth::user());
+        
+        Log::info('=== REQUEST CONTROLLER: File Upload Debug End ===');
         
         return response()->json($request, 201);
     }

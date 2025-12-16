@@ -26,14 +26,63 @@ class RequestService implements IRequestService
     public function createRequest(array $data, User $user): RequestResponseDTO
     {
         // Get category_id (defaults to 1: Service Request)
-        $categoryId = $data['category_id'] ?? 1;
+        $categoryId = (int)($data['category_id'] ?? 1); // Ensure it's an integer
+        
+        Log::info('=== REQUEST SERVICE: createRequest called ===');
+        Log::info('Category ID: ' . $categoryId . ' (type: ' . gettype($categoryId) . ')');
+        Log::info('Data keys received: ' . json_encode(array_keys($data)));
         
         // Get category-specific handler
         $handler = CategoryRequestHandlerFactory::getHandler($categoryId);
         
         // Handle file uploads for Category 2 before mapping to DTO
-        if ($categoryId === 2) {
+        // IMPORTANT: Files must be UploadedFile instances, not strings
+        if ($categoryId == 2) { // Use == instead of === to handle string "2" vs int 2
+            Log::info('=== REQUEST SERVICE: Starting file upload processing ===');
+            Log::info('Category 2 detected, checking for files...');
+            
+            // Debug: Log what we receive BEFORE upload
+            if (isset($data['request_details_files'])) {
+                Log::info('request_details_files BEFORE upload:', [
+                    'is_array' => is_array($data['request_details_files']),
+                    'count' => is_array($data['request_details_files']) ? count($data['request_details_files']) : 'not array',
+                    'first_type' => is_array($data['request_details_files']) && isset($data['request_details_files'][0]) 
+                        ? gettype($data['request_details_files'][0]) 
+                        : 'N/A',
+                ]);
+            }
+            if (isset($data['attach_front_face'])) {
+                Log::info('attach_front_face BEFORE upload:', [
+                    'type' => gettype($data['attach_front_face']),
+                    'class' => is_object($data['attach_front_face']) ? get_class($data['attach_front_face']) : 'not object',
+                    'is_uploaded_file' => $data['attach_front_face'] instanceof \Illuminate\Http\UploadedFile,
+                ]);
+            }
+            if (isset($data['attach_back_face'])) {
+                Log::info('attach_back_face BEFORE upload:', [
+                    'type' => gettype($data['attach_back_face']),
+                    'class' => is_object($data['attach_back_face']) ? get_class($data['attach_back_face']) : 'not object',
+                    'is_uploaded_file' => $data['attach_back_face'] instanceof \Illuminate\Http\UploadedFile,
+                ]);
+            }
+            
             $data = $this->handleCategory2FileUploads($data);
+            
+            // Debug: Log what we have AFTER upload
+            Log::info('=== REQUEST SERVICE: After file upload processing ===');
+            if (isset($data['request_details_files'])) {
+                Log::info('request_details_files AFTER upload:', [
+                    'is_array' => is_array($data['request_details_files']),
+                    'count' => is_array($data['request_details_files']) ? count($data['request_details_files']) : 'not array',
+                    'values' => is_array($data['request_details_files']) ? $data['request_details_files'] : $data['request_details_files'],
+                ]);
+            }
+            if (isset($data['attach_front_face'])) {
+                Log::info('attach_front_face AFTER upload: ' . $data['attach_front_face']);
+            }
+            if (isset($data['attach_back_face'])) {
+                Log::info('attach_back_face AFTER upload: ' . $data['attach_back_face']);
+            }
         }
         
         // Map data to DTO using category-specific handler
@@ -90,29 +139,117 @@ class RequestService implements IRequestService
      */
     private function handleCategory2FileUploads(array $data): array
     {
+        Log::info('=== HANDLE FILE UPLOADS: Starting ===');
         $imageStorageService = app(\App\Services\ImageStorageService::class);
         
-        // Handle request_details_files (multiple files)
-        if (isset($data['request_details_files']) && is_array($data['request_details_files'])) {
+        // Handle request_details_files (multiple files or single file)
+        if (isset($data['request_details_files'])) {
+            Log::info('Processing request_details_files, is_array: ' . (is_array($data['request_details_files']) ? 'YES' : 'NO'));
+            Log::info('Type: ' . gettype($data['request_details_files']));
+            
             $filePaths = [];
-            foreach ($data['request_details_files'] as $file) {
+            
+            // Handle both array and single file cases
+            $files = is_array($data['request_details_files']) 
+                ? $data['request_details_files'] 
+                : [$data['request_details_files']];
+            
+            foreach ($files as $index => $file) {
+                Log::info("Processing request_details_files[$index]");
+                Log::info("  - Type: " . gettype($file));
+                Log::info("  - Is UploadedFile: " . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+                
                 if ($file instanceof \Illuminate\Http\UploadedFile) {
-                    $filePaths[] = $imageStorageService->uploadImage($file, 'request-details');
+                    try {
+                        Log::info("  - Original name: " . $file->getClientOriginalName());
+                        Log::info("  - Size: " . $file->getSize() . " bytes");
+                        $uploadedPath = $imageStorageService->uploadImage($file, 'request-details');
+                        Log::info("  - Uploaded to: " . $uploadedPath);
+                        $filePaths[] = $uploadedPath;
+                    } catch (\Exception $e) {
+                        Log::error("  - Failed to upload request_details_files[$index]: " . $e->getMessage());
+                        Log::error("  - Exception trace: " . $e->getTraceAsString());
+                        // Continue with other files
+                    }
+                } elseif (is_string($file)) {
+                    // Already a path string (shouldn't happen, but handle it)
+                    Log::info("  - Already a path string: " . substr($file, 0, 100));
+                    $filePaths[] = $file;
+                } else {
+                    Log::warning("  - request_details_files[$index] is unexpected type: " . gettype($file));
                 }
             }
-            $data['request_details_files'] = $filePaths;
+            
+            if (!empty($filePaths)) {
+                $data['request_details_files'] = $filePaths;
+                Log::info('Successfully uploaded ' . count($filePaths) . ' files for request_details_files');
+            } else {
+                Log::warning('No files were successfully uploaded for request_details_files');
+                $data['request_details_files'] = null;
+            }
+        } else {
+            Log::info('request_details_files not set in data');
         }
         
         // Handle attach_front_face
-        if (isset($data['attach_front_face']) && $data['attach_front_face'] instanceof \Illuminate\Http\UploadedFile) {
-            $data['attach_front_face'] = $imageStorageService->uploadImage($data['attach_front_face'], 'insurance-cards');
+        if (isset($data['attach_front_face'])) {
+            Log::info('Processing attach_front_face');
+            Log::info('  - Type: ' . gettype($data['attach_front_face']));
+            Log::info('  - Is UploadedFile: ' . ($data['attach_front_face'] instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+            
+            if ($data['attach_front_face'] instanceof \Illuminate\Http\UploadedFile) {
+                try {
+                    Log::info('  - Original name: ' . $data['attach_front_face']->getClientOriginalName());
+                    Log::info('  - Size: ' . $data['attach_front_face']->getSize() . ' bytes');
+                    $uploadedPath = $imageStorageService->uploadImage($data['attach_front_face'], 'insurance-cards');
+                    Log::info('  - Uploaded to: ' . $uploadedPath);
+                    $data['attach_front_face'] = $uploadedPath;
+                } catch (\Exception $e) {
+                    Log::error('  - Failed to upload attach_front_face: ' . $e->getMessage());
+                    Log::error('  - Exception trace: ' . $e->getTraceAsString());
+                    $data['attach_front_face'] = null;
+                }
+            } elseif (is_string($data['attach_front_face'])) {
+                Log::warning('  - attach_front_face is a string (temp path?): ' . substr($data['attach_front_face'], 0, 100));
+                $data['attach_front_face'] = null;
+            } else {
+                Log::warning('  - attach_front_face is unexpected type: ' . gettype($data['attach_front_face']));
+                $data['attach_front_face'] = null;
+            }
+        } else {
+            Log::info('attach_front_face not set in data');
         }
         
         // Handle attach_back_face
-        if (isset($data['attach_back_face']) && $data['attach_back_face'] instanceof \Illuminate\Http\UploadedFile) {
-            $data['attach_back_face'] = $imageStorageService->uploadImage($data['attach_back_face'], 'insurance-cards');
+        if (isset($data['attach_back_face'])) {
+            Log::info('Processing attach_back_face');
+            Log::info('  - Type: ' . gettype($data['attach_back_face']));
+            Log::info('  - Is UploadedFile: ' . ($data['attach_back_face'] instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+            
+            if ($data['attach_back_face'] instanceof \Illuminate\Http\UploadedFile) {
+                try {
+                    Log::info('  - Original name: ' . $data['attach_back_face']->getClientOriginalName());
+                    Log::info('  - Size: ' . $data['attach_back_face']->getSize() . ' bytes');
+                    $uploadedPath = $imageStorageService->uploadImage($data['attach_back_face'], 'insurance-cards');
+                    Log::info('  - Uploaded to: ' . $uploadedPath);
+                    $data['attach_back_face'] = $uploadedPath;
+                } catch (\Exception $e) {
+                    Log::error('  - Failed to upload attach_back_face: ' . $e->getMessage());
+                    Log::error('  - Exception trace: ' . $e->getTraceAsString());
+                    $data['attach_back_face'] = null;
+                }
+            } elseif (is_string($data['attach_back_face'])) {
+                Log::warning('  - attach_back_face is a string (temp path?): ' . substr($data['attach_back_face'], 0, 100));
+                $data['attach_back_face'] = null;
+            } else {
+                Log::warning('  - attach_back_face is unexpected type: ' . gettype($data['attach_back_face']));
+                $data['attach_back_face'] = null;
+            }
+        } else {
+            Log::info('attach_back_face not set in data');
         }
         
+        Log::info('=== HANDLE FILE UPLOADS: Finished ===');
         return $data;
     }
 

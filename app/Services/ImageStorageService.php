@@ -9,7 +9,8 @@ use Illuminate\Support\Str;
 class ImageStorageService
 {
     /**
-     * Upload an image file to Laravel Storage (public disk).
+     * Upload an image or file to Laravel Storage (public disk).
+     * Supports images (jpg, png, webp) and PDFs.
      *
      * @param UploadedFile $file
      * @param string $folder
@@ -17,9 +18,16 @@ class ImageStorageService
      */
     public function uploadImage(UploadedFile $file, string $folder = 'images'): string
     {
-        // Validate it's an image
-        if (!$file->isValid() || !str_starts_with($file->getMimeType(), 'image/')) {
-            throw new \InvalidArgumentException('File must be a valid image');
+        if (!$file->isValid()) {
+            throw new \InvalidArgumentException('File must be valid');
+        }
+
+        // Allow images and PDFs
+        $mimeType = $file->getMimeType();
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'application/pdf'];
+        
+        if (!in_array($mimeType, $allowedMimes)) {
+            throw new \InvalidArgumentException('File must be an image (jpg, png, webp) or PDF');
         }
 
         // Generate unique filename
