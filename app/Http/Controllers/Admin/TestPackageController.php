@@ -142,6 +142,10 @@ class TestPackageController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        // Normalize form-data inputs before validation
+        $normalized = $this->normalizeFormData($request);
+        $request->merge($normalized);
+        
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'results' => 'required|string|max:255',
@@ -355,6 +359,10 @@ class TestPackageController extends Controller
      */
     public function update(Request $request, TestPackage $testPackage): JsonResponse
     {
+        // Normalize form-data inputs before validation
+        $normalized = $this->normalizeFormData($request);
+        $request->merge($normalized);
+        
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'results' => 'sometimes|string|max:255',
@@ -496,5 +504,106 @@ class TestPackageController extends Controller
             'success' => true,
             'message' => 'Test package deleted successfully.',
         ], 200);
+    }
+
+    /**
+     * Normalize form-data inputs for validation.
+     * Handles:
+     * - Boolean strings (true/false/1/0) -> boolean
+     * - Array strings ([1,2,3] or "1,2,3") -> array
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function normalizeFormData(Request $request): array
+    {
+        $normalized = [];
+        
+        // Normalize show_details: accepts true/false/1/0/on/yes/no
+        if ($request->has('show_details')) {
+            $value = $request->input('show_details');
+            $normalized['show_details'] = $this->normalizeBoolean($value);
+        }
+        
+        // Normalize test_ids: handles multiple formats
+        if ($request->has('test_ids')) {
+            $value = $request->input('test_ids');
+            $normalized['test_ids'] = $this->normalizeArray($value);
+        }
+        
+        return $normalized;
+    }
+    
+    /**
+     * Normalize boolean value from form-data.
+     * Accepts: true, false, "true", "false", "1", "0", "on", "yes", "no"
+     *
+     * @param mixed $value
+     * @return bool|null
+     */
+    private function normalizeBoolean($value): ?bool
+    {
+        if ($value === null) {
+            return null;
+        }
+        
+        if (is_bool($value)) {
+            return $value;
+        }
+        
+        if (is_string($value)) {
+            $value = strtolower(trim($value));
+            return in_array($value, ['true', '1', 'on', 'yes'], true);
+        }
+        
+        if (is_numeric($value)) {
+            return (bool) $value;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Normalize array value from form-data.
+     * Handles:
+     * - JSON string: "[1,2,3]" -> [1,2,3]
+     * - Comma-separated: "1,2,3" -> [1,2,3]
+     * - Already array: [1,2,3] -> [1,2,3]
+     * - Multiple form fields with same name: test_ids[] -> [1,2,3]
+     *
+     * @param mixed $value
+     * @return array
+     */
+    private function normalizeArray($value): array
+    {
+        // Already an array
+        if (is_array($value)) {
+            // Filter out empty values and convert to integers
+            return array_filter(array_map('intval', $value), fn($v) => $v > 0);
+        }
+        
+        // JSON string like "[1,2,3]"
+        if (is_string($value) && (str_starts_with($value, '[') || str_starts_with($value, '{'))) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return array_filter(array_map('intval', $decoded), fn($v) => $v > 0);
+            }
+        }
+        
+        // Comma-separated string like "1,2,3"
+        if (is_string($value) && str_contains($value, ',')) {
+            $parts = explode(',', $value);
+            return array_filter(array_map(function($part) {
+                return intval(trim($part));
+            }, $parts), fn($v) => $v > 0);
+        }
+        
+        // Single value - convert to array
+        if (is_numeric($value)) {
+            $intValue = intval($value);
+            return $intValue > 0 ? [$intValue] : [];
+        }
+        
+        return [];
     }
 }
