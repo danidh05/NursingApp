@@ -289,11 +289,11 @@ class TestPackageController extends Controller
         ], 200);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/admin/test-packages/{id}",
-     *     summary="Update a test package (Admin)",
-     *     description="Update an existing test package with image, translations, and test relationships. Use form-data (multipart/form-data) for file uploads.",
+        /**
+         * @OA\Put(
+         *     path="/api/admin/test-packages/{id}",
+         *     summary="Update a test package (Admin)",
+         *     description="Update an existing test package with image, translations, and test relationships. **CRITICAL FOR FILE UPLOADS:** This endpoint accepts both PUT (for non-file updates) and POST with `_method=PUT` (for file uploads). When uploading files, you MUST: 1) Use POST method (not PUT), 2) Include `_method=PUT` in form-data, 3) Use multipart/form-data. This is Laravel's method spoofing - required because PHP only populates \$_FILES for POST requests.",
      *     tags={"Admin - Test Packages"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -307,11 +307,12 @@ class TestPackageController extends Controller
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(property="name", type="string", example="Basic Package Updated"),
-     *                 @OA\Property(property="results", type="string", example="within 48 hours"),
-     *                 @OA\Property(property="price", type="number", format="float", example=160.00),
-     *                 @OA\Property(property="image", type="string", format="binary", description="New package image (optional)"),
+         *             @OA\Schema(
+         *                 @OA\Property(property="_method", type="string", example="PUT", description="**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads)."),
+         *                 @OA\Property(property="name", type="string", example="Basic Package Updated"),
+         *                 @OA\Property(property="results", type="string", example="within 48 hours"),
+         *                 @OA\Property(property="price", type="number", format="float", example=160.00),
+         *                 @OA\Property(property="image", type="string", format="binary", description="New package image (optional)"),
      *                 @OA\Property(property="show_details", type="boolean", example=true),
      *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
      *                 @OA\Property(property="about_test", type="string", example="Updated description"),
@@ -453,6 +454,7 @@ class TestPackageController extends Controller
             'data' => $data,
         ], 200);
     }
+
 
     /**
      * @OA\Delete(

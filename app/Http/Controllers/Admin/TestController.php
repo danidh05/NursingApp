@@ -8,7 +8,6 @@ use App\Services\ImageStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -224,11 +223,11 @@ class TestController extends Controller
         ], 200);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/admin/tests/{id}",
-     *     summary="Update a test (Admin)",
-     *     description="Update an existing test with image upload and translations. Use form-data (multipart/form-data) for file uploads.",
+        /**
+         * @OA\Put(
+         *     path="/api/admin/tests/{id}",
+         *     summary="Update a test (Admin)",
+         *     description="Update an existing test with image upload and translations. **CRITICAL FOR FILE UPLOADS:** This endpoint accepts both PUT (for non-file updates) and POST with `_method=PUT` (for file uploads). When uploading files, you MUST: 1) Use POST method (not PUT), 2) Include `_method=PUT` in form-data, 3) Use multipart/form-data. This is Laravel's method spoofing - required because PHP only populates \$_FILES for POST requests.",
      *     tags={"Admin - Tests"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -242,10 +241,11 @@ class TestController extends Controller
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(property="sample_type", type="string", example="Blood"),
-     *                 @OA\Property(property="price", type="number", format="float", example=55.00),
-     *                 @OA\Property(property="image", type="string", format="binary", description="New test image (optional)"),
+         *             @OA\Schema(
+         *                 @OA\Property(property="_method", type="string", example="PUT", description="**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads)."),
+         *                 @OA\Property(property="sample_type", type="string", example="Blood"),
+         *                 @OA\Property(property="price", type="number", format="float", example=55.00),
+         *                 @OA\Property(property="image", type="string", format="binary", description="New test image (optional)"),
      *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
      *                 @OA\Property(property="about_test", type="string", example="Updated description"),
      *                 @OA\Property(property="instructions", type="string", example="Updated instructions")
@@ -276,77 +276,7 @@ class TestController extends Controller
      */
     public function update(Request $request, Test $test): JsonResponse
     {
-        // FIX: Laravel doesn't parse multipart/form-data for PUT requests automatically
-        // We need to access the parsed request parameters directly
-        // For PUT/PATCH with multipart/form-data, use $request->request (ParameterBag) instead of $request->all()
-        
-        // FIX: Laravel doesn't parse multipart/form-data for PUT requests
-        // We need to manually parse the request body or use a workaround
-        // Solution: Parse multipart/form-data manually for PUT requests
-        
-        $locale = null;
-        $formData = [];
-        
-        // For PUT requests with multipart/form-data, manually parse the request
-        if (($request->isMethod('PUT') || $request->isMethod('PATCH')) && 
-            str_contains($request->header('Content-Type', ''), 'multipart/form-data')) {
-            
-            // Try to get from request->request first (sometimes it works)
-            $requestParams = $request->request->all();
-            
-            // If empty, try to parse manually from the underlying Symfony request
-            if (empty($requestParams)) {
-                // Access the underlying Symfony Request
-                $symfonyRequest = $request->instance();
-                if ($symfonyRequest instanceof \Symfony\Component\HttpFoundation\Request) {
-                    $requestParams = $symfonyRequest->request->all();
-                    
-                    // If still empty, the form-data wasn't parsed
-                    // In this case, we need to manually parse the request content
-                    if (empty($requestParams)) {
-                        // Parse multipart/form-data manually
-                        $content = $request->getContent();
-                        $boundary = null;
-                        
-                        // Extract boundary from Content-Type header
-                        $contentType = $request->header('Content-Type', '');
-                        if (preg_match('/boundary=(.+)$/i', $contentType, $matches)) {
-                            $boundary = '--' . trim($matches[1]);
-                            
-                            // Parse multipart data
-                            $parts = explode($boundary, $content);
-                            foreach ($parts as $part) {
-                                if (preg_match('/name="([^"]+)"/', $part, $nameMatch)) {
-                                    $fieldName = $nameMatch[1];
-                                    // Extract value (text after headers, before next boundary)
-                                    if (preg_match('/\r\n\r\n(.*?)(?:\r\n--|$)/s', $part, $valueMatch)) {
-                                        $value = trim($valueMatch[1]);
-                                        // Skip file uploads (they have Content-Type in headers)
-                                        if (!str_contains($part, 'Content-Type:')) {
-                                            $formData[$fieldName] = $value;
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Merge parsed data into request
-                            if (!empty($formData)) {
-                                $request->merge($formData);
-                                $requestParams = $formData;
-                            }
-                        }
-                    } else {
-                        // Merge the parsed parameters
-                        $request->merge($requestParams);
-                    }
-                }
-            } else {
-                // Parameters were found, merge them
-                $request->merge($requestParams);
-            }
-        }
-        
-        // Now get locale from the merged request, default to 'en' if not provided
+        // Get locale from request, default to 'en' if not provided
         $locale = $request->input('locale');
         
         // Trim whitespace if it's a string
@@ -371,6 +301,7 @@ class TestController extends Controller
         $validatedData['locale'] = $locale;
 
         // Update image if provided
+        // After parseMultipartFormDataForPut, files should be accessible via hasFile()
         if ($request->hasFile('image')) {
             $imagePath = $this->imageStorageService->updateImage(
                 $request->file('image'),
@@ -427,6 +358,7 @@ class TestController extends Controller
             'data' => $data,
         ], 200);
     }
+
 
     /**
      * @OA\Delete(
