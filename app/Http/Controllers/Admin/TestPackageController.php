@@ -42,8 +42,16 @@ class TestPackageController extends Controller
      *                 @OA\Property(property="price", type="number", format="float", example=150.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/test-packages/..."),
      *                 @OA\Property(property="show_details", type="boolean", example=true),
-     *                 @OA\Property(property="translations", type="array", @OA\Items()),
-     *                 @OA\Property(property="tests", type="array", @OA\Items())
+     *                 @OA\Property(property="about_test", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="instructions", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="tests", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="sample_type", type="string", example="Blood"),
+     *                     @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                     @OA\Property(property="image", type="string"),
+     *                     @OA\Property(property="about_test", type="string", nullable=true),
+     *                     @OA\Property(property="instructions", type="string", nullable=true)
+     *                 ))
      *             ))
      *         )
      *     ),
@@ -53,20 +61,35 @@ class TestPackageController extends Controller
      */
     public function index(): JsonResponse
     {
-        $testPackages = TestPackage::with(['translations', 'tests'])->get();
+        // Get current locale (from Accept-Language header or default to 'en')
+        $locale = app()->getLocale() ?: 'en';
+        
+        $testPackages = TestPackage::with('tests')->get();
         
         return response()->json([
             'success' => true,
-            'data' => $testPackages->map(function ($package) {
+            'data' => $testPackages->map(function ($package) use ($locale) {
+                $translation = $package->translate($locale);
                 return [
                     'id' => $package->id,
-                    'name' => $package->name,
+                    'name' => $translation ? $translation->name : $package->name, // Use translated name or fallback
                     'results' => $package->results,
                     'price' => $package->price,
                     'image' => $package->image_url,
                     'show_details' => $package->show_details,
-                    'translations' => $package->translations,
-                    'tests' => $package->tests,
+                    'about_test' => $translation ? $translation->about_test : null,
+                    'instructions' => $translation ? $translation->instructions : null,
+                    'tests' => $package->tests->map(function ($test) use ($locale) {
+                        $testTranslation = $test->translate($locale);
+                        return [
+                            'id' => $test->id,
+                            'sample_type' => $test->sample_type,
+                            'price' => $test->price,
+                            'image' => $test->image_url,
+                            'about_test' => $testTranslation ? $testTranslation->about_test : null,
+                            'instructions' => $testTranslation ? $testTranslation->instructions : null,
+                        ];
+                    }),
                 ];
             }),
         ], 200);
@@ -84,13 +107,13 @@ class TestPackageController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"name","results","price","locale","test_ids"},
+     *                 required={"name","results","price","test_ids"},
      *                 @OA\Property(property="name", type="string", example="Basic Package", description="Package name"),
      *                 @OA\Property(property="results", type="string", example="within 48 hours", description="Results timeframe"),
      *                 @OA\Property(property="price", type="number", format="float", example=150.00, description="Package price (same for all areas)"),
      *                 @OA\Property(property="image", type="string", format="binary", description="Package image file (jpg, png, max 2MB)"),
      *                 @OA\Property(property="show_details", type="boolean", example=true, description="Show details flag"),
-     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
      *                 @OA\Property(property="about_test", type="string", example="Basic health screening package", description="About test (translatable)"),
      *                 @OA\Property(property="instructions", type="string", example="Follow all test instructions", description="Instructions (translatable)"),
      *                 @OA\Property(property="test_ids", type="array", @OA\Items(type="integer"), example={1,2}, description="Array of test IDs to include in package")
@@ -125,12 +148,15 @@ class TestPackageController extends Controller
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
             'show_details' => 'nullable|boolean',
-            'locale' => 'required|string|in:en,ar',
+            'locale' => 'nullable|string|in:en,ar',
             'about_test' => 'nullable|string',
             'instructions' => 'nullable|string',
             'test_ids' => 'required|array|min:1',
             'test_ids.*' => 'exists:tests,id',
         ]);
+
+        // Default locale to 'en' if not provided
+        $locale = $validatedData['locale'] ?? 'en';
 
         // Upload image if provided
         $imagePath = null;
@@ -152,7 +178,7 @@ class TestPackageController extends Controller
 
         // Create translation
         $testPackage->translations()->create([
-            'locale' => $validatedData['locale'],
+            'locale' => $locale,
             'name' => $validatedData['name'],
             'about_test' => $request->about_test ?? null,
             'instructions' => $request->instructions ?? null,
@@ -197,8 +223,16 @@ class TestPackageController extends Controller
      *                 @OA\Property(property="price", type="number", format="float", example=150.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/test-packages/..."),
      *                 @OA\Property(property="show_details", type="boolean", example=true),
-     *                 @OA\Property(property="translations", type="array", @OA\Items()),
-     *                 @OA\Property(property="tests", type="array", @OA\Items())
+     *                 @OA\Property(property="about_test", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="instructions", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="tests", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="sample_type", type="string", example="Blood"),
+     *                     @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                     @OA\Property(property="image", type="string"),
+     *                     @OA\Property(property="about_test", type="string", nullable=true),
+     *                     @OA\Property(property="instructions", type="string", nullable=true)
+     *                 ))
      *             )
      *         )
      *     ),
@@ -209,20 +243,49 @@ class TestPackageController extends Controller
      */
     public function show(TestPackage $testPackage): JsonResponse
     {
-        $testPackage->load(['translations', 'tests']);
+        // Get current locale (from Accept-Language header or default to 'en')
+        $locale = app()->getLocale() ?: 'en';
+        
+        // Get translation for current locale (with fallback to 'en')
+        $translation = $testPackage->translate($locale);
+        
+        // Load tests with their translations
+        $testPackage->load('tests');
+        
+        $data = [
+            'id' => $testPackage->id,
+            'name' => $translation ? $translation->name : $testPackage->name, // Use translated name or fallback to base name
+            'results' => $testPackage->results,
+            'price' => $testPackage->price,
+            'image' => $testPackage->image_url,
+            'show_details' => $testPackage->show_details,
+        ];
+        
+        // Add translation fields directly (not in a "translations" array)
+        if ($translation) {
+            $data['about_test'] = $translation->about_test;
+            $data['instructions'] = $translation->instructions;
+        } else {
+            $data['about_test'] = null;
+            $data['instructions'] = null;
+        }
+        
+        // Format tests with single locale translation data
+        $data['tests'] = $testPackage->tests->map(function ($test) use ($locale) {
+            $testTranslation = $test->translate($locale);
+            return [
+                'id' => $test->id,
+                'sample_type' => $test->sample_type,
+                'price' => $test->price,
+                'image' => $test->image_url,
+                'about_test' => $testTranslation ? $testTranslation->about_test : null,
+                'instructions' => $testTranslation ? $testTranslation->instructions : null,
+            ];
+        });
         
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $testPackage->id,
-                'name' => $testPackage->name,
-                'results' => $testPackage->results,
-                'price' => $testPackage->price,
-                'image' => $testPackage->image_url,
-                'show_details' => $testPackage->show_details,
-                'translations' => $testPackage->translations,
-                'tests' => $testPackage->tests,
-            ],
+            'data' => $data,
         ], 200);
     }
 
@@ -245,13 +308,12 @@ class TestPackageController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"locale"},
      *                 @OA\Property(property="name", type="string", example="Basic Package Updated"),
      *                 @OA\Property(property="results", type="string", example="within 48 hours"),
      *                 @OA\Property(property="price", type="number", format="float", example=160.00),
      *                 @OA\Property(property="image", type="string", format="binary", description="New package image (optional)"),
      *                 @OA\Property(property="show_details", type="boolean", example=true),
-     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
      *                 @OA\Property(property="about_test", type="string", example="Updated description"),
      *                 @OA\Property(property="instructions", type="string", example="Updated instructions"),
      *                 @OA\Property(property="test_ids", type="array", @OA\Items(type="integer"), example={1,2,3}, description="Updated array of test IDs")
@@ -267,9 +329,20 @@ class TestPackageController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Basic Package Updated"),
+     *                 @OA\Property(property="results", type="string", example="within 48 hours"),
      *                 @OA\Property(property="price", type="number", format="float", example=160.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/test-packages/..."),
-     *                 @OA\Property(property="tests", type="array", @OA\Items())
+     *                 @OA\Property(property="show_details", type="boolean", example=true),
+     *                 @OA\Property(property="about_test", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="instructions", type="string", nullable=true, description="Translation based on Accept-Language header (falls back to 'en')"),
+     *                 @OA\Property(property="tests", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="sample_type", type="string", example="Blood"),
+     *                     @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                     @OA\Property(property="image", type="string"),
+     *                     @OA\Property(property="about_test", type="string", nullable=true),
+     *                     @OA\Property(property="instructions", type="string", nullable=true)
+     *                 ))
      *             )
      *         )
      *     ),
@@ -287,12 +360,15 @@ class TestPackageController extends Controller
             'price' => 'sometimes|numeric|min:0',
             'image' => 'nullable|image|max:2048',
             'show_details' => 'sometimes|boolean',
-            'locale' => 'required|string|in:en,ar',
+            'locale' => 'nullable|string|in:en,ar',
             'about_test' => 'nullable|string',
             'instructions' => 'nullable|string',
             'test_ids' => 'sometimes|array|min:1',
             'test_ids.*' => 'exists:tests,id',
         ]);
+
+        // Default locale to 'en' if not provided
+        $locale = $validatedData['locale'] ?? 'en';
 
         // Update image if provided
         if ($request->hasFile('image')) {
@@ -323,7 +399,7 @@ class TestPackageController extends Controller
 
         // Update or create translation
         $testPackage->translations()->updateOrCreate(
-            ['locale' => $validatedData['locale']],
+            ['locale' => $locale],
             [
                 'name' => $validatedData['name'] ?? $testPackage->name,
                 'about_test' => $request->about_test ?? null,
@@ -331,16 +407,50 @@ class TestPackageController extends Controller
             ]
         );
 
+        // Get current locale (from Accept-Language header or default to 'en')
+        $locale = app()->getLocale() ?: 'en';
+        
+        // Get translation for current locale (with fallback to 'en')
+        $translation = $testPackage->translate($locale);
+        
+        // Load tests
+        $testPackage->load('tests');
+        
+        $data = [
+            'id' => $testPackage->id,
+            'name' => $translation ? $translation->name : $testPackage->name, // Use translated name or fallback to base name
+            'results' => $testPackage->results,
+            'price' => $testPackage->price,
+            'image' => $testPackage->image_url,
+            'show_details' => $testPackage->show_details,
+        ];
+        
+        // Add translation fields directly (not in a "translations" array)
+        if ($translation) {
+            $data['about_test'] = $translation->about_test;
+            $data['instructions'] = $translation->instructions;
+        } else {
+            $data['about_test'] = null;
+            $data['instructions'] = null;
+        }
+        
+        // Format tests with single locale translation data
+        $data['tests'] = $testPackage->tests->map(function ($test) use ($locale) {
+            $testTranslation = $test->translate($locale);
+            return [
+                'id' => $test->id,
+                'sample_type' => $test->sample_type,
+                'price' => $test->price,
+                'image' => $test->image_url,
+                'about_test' => $testTranslation ? $testTranslation->about_test : null,
+                'instructions' => $testTranslation ? $testTranslation->instructions : null,
+            ];
+        });
+        
         return response()->json([
             'success' => true,
             'message' => 'Test package updated successfully.',
-            'data' => [
-                'id' => $testPackage->id,
-                'name' => $testPackage->name,
-                'price' => $testPackage->price,
-                'image' => $testPackage->image_url,
-                'tests' => $testPackage->tests,
-            ],
+            'data' => $data,
         ], 200);
     }
 

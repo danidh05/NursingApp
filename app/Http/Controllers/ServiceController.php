@@ -182,8 +182,11 @@ class ServiceController extends Controller
             'details' => 'nullable|string',
             'instructions' => 'nullable|string',
             'service_includes' => 'nullable|string',
-            'locale' => 'required|string|in:en,ar',
+            'locale' => 'nullable|string|in:en,ar',
         ]);
+
+        // Default locale to 'en' if not provided
+        $locale = $validatedData['locale'] ?? 'en';
 
         // Upload image if provided
         $imagePath = null;
@@ -201,16 +204,14 @@ class ServiceController extends Controller
         ]);
 
         // Create translation
-        if ($request->has('locale')) {
-            $service->translations()->create([
-                'locale' => $request->locale,
-                'name' => $validatedData['name'],
-                'description' => $request->description ?? null,
-                'details' => $request->details ?? null,
-                'instructions' => $request->instructions ?? null,
-                'service_includes' => $request->service_includes ?? null,
-            ]);
-        }
+        $service->translations()->create([
+            'locale' => $locale,
+            'name' => $validatedData['name'],
+            'description' => $request->description ?? null,
+            'details' => $request->details ?? null,
+            'instructions' => $request->instructions ?? null,
+            'service_includes' => $request->service_includes ?? null,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -321,7 +322,6 @@ class ServiceController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"locale"},
      *                 @OA\Property(property="name", type="string", example="Home Nursing Care - Updated", description="Service name"),
      *                 @OA\Property(property="price", type="number", format="float", example=55.00, description="Service price"),
      *                 @OA\Property(property="discount_price", type="number", format="float", example=50.00, description="Discounted price (must be less than regular price)"),
@@ -331,7 +331,7 @@ class ServiceController extends Controller
      *                 @OA\Property(property="details", type="string", example="Updated comprehensive services", description="Translatable details"),
      *                 @OA\Property(property="instructions", type="string", example="Updated instructions", description="Translatable instructions"),
      *                 @OA\Property(property="service_includes", type="string", example="Updated includes", description="Translatable service includes"),
-     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (REQUIRED)")
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)")
      *             )
      *         )
      *     ),
@@ -375,6 +375,82 @@ class ServiceController extends Controller
         // Ensure the correct policy is called with the proper arguments
         $this->authorize('update', $service);
     
+        // FIX: Laravel doesn't parse multipart/form-data for PUT requests automatically
+        // We need to manually parse the request body for PUT/PATCH requests
+        $formData = [];
+        
+        // For PUT requests with multipart/form-data, manually parse the request
+        if (($request->isMethod('PUT') || $request->isMethod('PATCH')) && 
+            str_contains($request->header('Content-Type', ''), 'multipart/form-data')) {
+            
+            // Try to get from request->request first (sometimes it works)
+            $requestParams = $request->request->all();
+            
+            // If empty, try to parse manually from the underlying Symfony request
+            if (empty($requestParams)) {
+                // Access the underlying Symfony Request
+                $symfonyRequest = $request->instance();
+                if ($symfonyRequest instanceof \Symfony\Component\HttpFoundation\Request) {
+                    $requestParams = $symfonyRequest->request->all();
+                    
+                    // If still empty, the form-data wasn't parsed
+                    // In this case, we need to manually parse the request content
+                    if (empty($requestParams)) {
+                        // Parse multipart/form-data manually
+                        $content = $request->getContent();
+                        $boundary = null;
+                        
+                        // Extract boundary from Content-Type header
+                        $contentType = $request->header('Content-Type', '');
+                        if (preg_match('/boundary=(.+)$/i', $contentType, $matches)) {
+                            $boundary = '--' . trim($matches[1]);
+                            
+                            // Parse multipart data
+                            $parts = explode($boundary, $content);
+                            foreach ($parts as $part) {
+                                if (preg_match('/name="([^"]+)"/', $part, $nameMatch)) {
+                                    $fieldName = $nameMatch[1];
+                                    // Extract value (text after headers, before next boundary)
+                                    if (preg_match('/\r\n\r\n(.*?)(?:\r\n--|$)/s', $part, $valueMatch)) {
+                                        $value = trim($valueMatch[1]);
+                                        // Skip file uploads (they have Content-Type in headers)
+                                        if (!str_contains($part, 'Content-Type:')) {
+                                            $formData[$fieldName] = $value;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Merge parsed data into request
+                            if (!empty($formData)) {
+                                $request->merge($formData);
+                                $requestParams = $formData;
+                            }
+                        }
+                    } else {
+                        // Merge the parsed parameters
+                        $request->merge($requestParams);
+                    }
+                }
+            } else {
+                // Parameters were found, merge them
+                $request->merge($requestParams);
+            }
+        }
+        
+        // Get locale from request, default to 'en' if not provided
+        $locale = $request->input('locale');
+        
+        // Trim whitespace if it's a string
+        if (is_string($locale)) {
+            $locale = trim($locale);
+        }
+        
+        // Default to 'en' if locale is not provided or invalid
+        if (!$locale || !in_array($locale, ['en', 'ar'])) {
+            $locale = 'en';
+        }
+    
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
@@ -386,8 +462,10 @@ class ServiceController extends Controller
             'details' => 'nullable|string',
             'instructions' => 'nullable|string',
             'service_includes' => 'nullable|string',
-            'locale' => 'required|string|in:en,ar',
         ]);
+        
+        // Add locale to validated data
+        $validatedData['locale'] = $locale;
 
         // Update image if provided
         if ($request->hasFile('image')) {
@@ -412,18 +490,16 @@ class ServiceController extends Controller
         }
 
         // Update or create translation
-        if ($request->has('locale')) {
-            $service->translations()->updateOrCreate(
-                ['locale' => $request->locale],
-                [
-                    'name' => $validatedData['name'] ?? $service->name,
-                    'description' => $request->description ?? null,
-                    'details' => $request->details ?? null,
-                    'instructions' => $request->instructions ?? null,
-                    'service_includes' => $request->service_includes ?? null,
-                ]
-            );
-        }
+        $service->translations()->updateOrCreate(
+            ['locale' => $locale],
+            [
+                'name' => $validatedData['name'] ?? $service->name,
+                'description' => $request->description ?? null,
+                'details' => $request->details ?? null,
+                'instructions' => $request->instructions ?? null,
+                'service_includes' => $request->service_includes ?? null,
+            ]
+        );
     
         return response()->json([
             'success' => true,
