@@ -152,12 +152,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Service management routes
         Route::post('/services', [ServiceController::class, 'store']); // Create a new service
-        Route::put('/services/{service}', [ServiceController::class, 'update']); // Update a service
+        Route::match(['put', 'post'], '/services/{service}', [ServiceController::class, 'update'])->name('admin.services.update'); // Update a service (supports POST with _method=PUT for file uploads)
         Route::delete('/services/{service}', [ServiceController::class, 'destroy']); // Delete a service
         
         // Test management routes (Category 2)
-        Route::apiResource('tests', AdminTestController::class); // CRUD for tests
-        Route::apiResource('test-packages', AdminTestPackageController::class); // CRUD for test packages
+        // Note: apiResource creates PUT routes, but we need POST support for file uploads with method spoofing
+        Route::get('/tests', [AdminTestController::class, 'index']);
+        Route::post('/tests', [AdminTestController::class, 'store']);
+        Route::get('/tests/{test}', [AdminTestController::class, 'show']);
+        Route::match(['put', 'post'], '/tests/{test}', [AdminTestController::class, 'update'])->name('admin.tests.update'); // Supports POST with _method=PUT for file uploads
+        Route::delete('/tests/{test}', [AdminTestController::class, 'destroy']);
+        
+        Route::get('/test-packages', [AdminTestPackageController::class, 'index']);
+        Route::post('/test-packages', [AdminTestPackageController::class, 'store']);
+        Route::get('/test-packages/{testPackage}', [AdminTestPackageController::class, 'show']);
+        Route::match(['put', 'post'], '/test-packages/{testPackage}', [AdminTestPackageController::class, 'update'])->name('admin.test-packages.update'); // Supports POST with _method=PUT for file uploads
+        Route::delete('/test-packages/{testPackage}', [AdminTestPackageController::class, 'destroy']);
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category
