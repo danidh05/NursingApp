@@ -13,6 +13,44 @@ class CreateRequestRequest extends FormRequest
         return true; // Authorization will be handled by policies
     }
 
+    /**
+     * Prepare the data for validation.
+     * Normalize boolean strings from form-data before validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Normalize boolean strings from form-data
+        $this->merge([
+            'use_saved_address' => $this->normalizeBooleanString($this->input('use_saved_address')),
+            'request_with_insurance' => $this->normalizeBooleanString($this->input('request_with_insurance')),
+        ]);
+    }
+
+    /**
+     * Normalize boolean string values from form-data.
+     * Converts "true", "1", "on", "yes" to true, everything else to false.
+     *
+     * @param mixed $value
+     * @return bool|null
+     */
+    private function normalizeBooleanString($value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        
+        if (is_bool($value)) {
+            return $value;
+        }
+        
+        if (is_string($value)) {
+            $value = strtolower(trim($value));
+            return in_array($value, ['true', '1', 'on', 'yes'], true);
+        }
+        
+        return (bool) $value;
+    }
+
     public function rules(): array
     {
         // Get category_id from request (defaults to 1: Service Request)

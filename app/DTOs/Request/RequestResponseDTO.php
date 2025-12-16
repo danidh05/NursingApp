@@ -22,7 +22,7 @@ class RequestResponseDTO
         public ?string $time_type,
         public ?string $scheduled_time,
         public ?string $ending_time,
-        public string $location,
+        public ?string $location,     // Can be null for some categories
         public ?float $latitude,      // This comes from user info, not database
         public ?float $longitude,     // This comes from user info, not database
         public ?float $total_price,
