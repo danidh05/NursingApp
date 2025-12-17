@@ -18,70 +18,85 @@ class TestSeeder extends Seeder
         // Create tests
         $tests = [
             [
+                'name' => 'Complete Blood Count',
                 'sample_type' => 'Blood',
                 'price' => 50.00,
                 'translations' => [
                     'en' => [
+                        'name' => 'Complete Blood Count',
                         'about_test' => 'Complete blood count test to check for various health conditions including anemia, infections, and blood disorders.',
                         'instructions' => 'Fasting required for 8 hours before the test. Avoid alcohol 24 hours before.',
                     ],
                     'ar' => [
+                        'name' => 'تعداد الدم الكامل',
                         'about_test' => 'فحص تعداد الدم الكامل للتحقق من حالات صحية مختلفة بما في ذلك فقر الدم والالتهابات واضطرابات الدم.',
                         'instructions' => 'الصيام مطلوب لمدة 8 ساعات قبل الفحص. تجنب الكحول قبل 24 ساعة.',
                     ],
                 ],
             ],
             [
+                'name' => 'Urine Analysis',
                 'sample_type' => 'Urine',
                 'price' => 30.00,
                 'translations' => [
                     'en' => [
+                        'name' => 'Urine Analysis',
                         'about_test' => 'Urine analysis to detect infections, kidney problems, and diabetes.',
                         'instructions' => 'Collect first morning urine sample in a clean container.',
                     ],
                     'ar' => [
+                        'name' => 'تحليل البول',
                         'about_test' => 'تحليل البول للكشف عن الالتهابات ومشاكل الكلى ومرض السكري.',
                         'instructions' => 'اجمع عينة البول الأولى في الصباح في وعاء نظيف.',
                     ],
                 ],
             ],
             [
+                'name' => 'Saliva Test',
                 'sample_type' => 'Saliva',
                 'price' => 25.00,
                 'translations' => [
                     'en' => [
+                        'name' => 'Saliva Test',
                         'about_test' => 'Saliva test for DNA analysis and hormone testing.',
                         'instructions' => 'Do not eat, drink, or brush teeth 30 minutes before sample collection.',
                     ],
                     'ar' => [
+                        'name' => 'فحص اللعاب',
                         'about_test' => 'فحص اللعاب لتحليل الحمض النووي وفحص الهرمونات.',
                         'instructions' => 'لا تأكل أو تشرب أو تنظف أسنانك قبل 30 دقيقة من جمع العينة.',
                     ],
                 ],
             ],
             [
+                'name' => 'Stool Analysis',
                 'sample_type' => 'Stool',
                 'price' => 40.00,
                 'translations' => [
                     'en' => [
+                        'name' => 'Stool Analysis',
                         'about_test' => 'Stool analysis to detect parasites, bacteria, and digestive issues.',
                         'instructions' => 'Collect sample in provided container. Avoid contamination with urine.',
                     ],
                     'ar' => [
+                        'name' => 'تحليل البراز',
                         'about_test' => 'تحليل البراز للكشف عن الطفيليات والبكتيريا ومشاكل الجهاز الهضمي.',
                         'instructions' => 'اجمع العينة في الحاوية الم provided. تجنب التلوث بالبول.',
                     ],
                 ],
             ],
             [
+                'name' => 'Swab Test',
                 'sample_type' => 'Swab',
                 'price' => 35.00,
                 'translations' => [
                     'en' => [
+                        'name' => 'Swab Test',
                         'about_test' => 'Swab test for bacterial and viral infections.',
                         'instructions' => 'Sample will be collected by healthcare professional.',
                     ],
                     'ar' => [
+                        'name' => 'فحص المسحة',
                         'about_test' => 'فحص المسحة للعدوى البكتيرية والفيروسية.',
                         'instructions' => 'سيتم جمع العينة من قبل أخصائي الرعاية الصحية.',
                     ],
@@ -92,6 +107,7 @@ class TestSeeder extends Seeder
         $createdTests = [];
         foreach ($tests as $testData) {
             $test = Test::create([
+                'name' => $testData['name'],
                 'sample_type' => $testData['sample_type'],
                 'price' => $testData['price'],
             ]);
@@ -100,6 +116,7 @@ class TestSeeder extends Seeder
             foreach ($testData['translations'] as $locale => $translation) {
                 $test->translations()->create([
                     'locale' => $locale,
+                    'name' => $translation['name'],
                     'about_test' => $translation['about_test'],
                     'instructions' => $translation['instructions'],
                 ]);

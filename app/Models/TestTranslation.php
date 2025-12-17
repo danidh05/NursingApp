@@ -12,6 +12,7 @@ class TestTranslation extends Model
     protected $fillable = [
         'test_id',
         'locale',
+        'name',
         'about_test',
         'instructions',
     ];

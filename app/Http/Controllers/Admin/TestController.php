@@ -37,6 +37,7 @@ class TestController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Complete Blood Count", description="Test name (translatable)"),
      *                 @OA\Property(property="sample_type", type="string", example="Blood"),
      *                 @OA\Property(property="price", type="number", format="float", example=50.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/tests/..."),
@@ -62,6 +63,7 @@ class TestController extends Controller
                 $translation = $test->translate($locale);
                 return [
                     'id' => $test->id,
+                    'name' => $translation ? $translation->name : $test->name,
                     'sample_type' => $test->sample_type,
                     'price' => $test->price,
                     'image' => $test->image_url,
@@ -83,15 +85,16 @@ class TestController extends Controller
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 required={"sample_type","price"},
-     *                 @OA\Property(property="sample_type", type="string", example="Blood", description="Type of sample (e.g., Blood, Urine)"),
-     *                 @OA\Property(property="price", type="number", format="float", example=50.00, description="Test price (same for all areas)"),
-     *                 @OA\Property(property="image", type="string", format="binary", description="Test image file (jpg, png, max 2MB)"),
-     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
-     *                 @OA\Property(property="about_test", type="string", example="Complete blood count test description", description="About test description (translatable)"),
-     *                 @OA\Property(property="instructions", type="string", example="Fasting required for 8 hours", description="Test instructions (translatable)")
-     *             )
+         *             @OA\Schema(
+         *                 required={"name","sample_type","price"},
+         *                 @OA\Property(property="name", type="string", example="Complete Blood Count", description="Test name (translatable)"),
+         *                 @OA\Property(property="sample_type", type="string", example="Blood", description="Type of sample (e.g., Blood, Urine)"),
+         *                 @OA\Property(property="price", type="number", format="float", example=50.00, description="Test price (same for all areas)"),
+         *                 @OA\Property(property="image", type="string", format="binary", description="Test image file (jpg, png, max 2MB)"),
+         *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
+         *                 @OA\Property(property="about_test", type="string", example="Complete blood count test description", description="About test description (translatable)"),
+         *                 @OA\Property(property="instructions", type="string", example="Fasting required for 8 hours", description="Test instructions (translatable)")
+         *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -116,6 +119,7 @@ class TestController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
             'sample_type' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
@@ -135,6 +139,7 @@ class TestController extends Controller
 
         // Create test
         $test = Test::create([
+            'name' => $validatedData['name'],
             'sample_type' => $validatedData['sample_type'],
             'price' => $validatedData['price'],
             'image' => $imagePath,
@@ -143,18 +148,25 @@ class TestController extends Controller
         // Create translation
         $test->translations()->create([
             'locale' => $locale,
+            'name' => $validatedData['name'],
             'about_test' => $request->about_test ?? null,
             'instructions' => $request->instructions ?? null,
         ]);
+
+        // Get translation for response
+        $translation = $test->translate($locale);
 
         return response()->json([
             'success' => true,
             'message' => 'Test created successfully.',
             'data' => [
                 'id' => $test->id,
+                'name' => $translation ? $translation->name : $test->name,
                 'sample_type' => $test->sample_type,
                 'price' => $test->price,
                 'image' => $test->image_url,
+                'about_test' => $translation?->about_test,
+                'instructions' => $translation?->instructions,
             ],
         ], 201);
     }
@@ -180,6 +192,7 @@ class TestController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Complete Blood Count", description="Test name (translatable)"),
      *                 @OA\Property(property="sample_type", type="string", example="Blood"),
      *                 @OA\Property(property="price", type="number", format="float", example=50.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/tests/..."),
@@ -243,12 +256,13 @@ class TestController extends Controller
      *             mediaType="multipart/form-data",
          *             @OA\Schema(
          *                 @OA\Property(property="_method", type="string", example="PUT", description="**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads)."),
+         *                 @OA\Property(property="name", type="string", example="Complete Blood Count - Updated", description="Test name (translatable)"),
          *                 @OA\Property(property="sample_type", type="string", example="Blood"),
          *                 @OA\Property(property="price", type="number", format="float", example=55.00),
          *                 @OA\Property(property="image", type="string", format="binary", description="New test image (optional)"),
      *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
-     *                 @OA\Property(property="about_test", type="string", example="Updated description"),
-     *                 @OA\Property(property="instructions", type="string", example="Updated instructions")
+         *                 @OA\Property(property="about_test", type="string", example="Updated description"),
+         *                 @OA\Property(property="instructions", type="string", example="Updated instructions")
      *             )
      *         )
      *     ),
@@ -290,6 +304,7 @@ class TestController extends Controller
         }
         
         $validatedData = $request->validate([
+            'name' => 'sometimes|string|max:255',
             'sample_type' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
             'image' => 'nullable|image|max:2048',
@@ -313,6 +328,7 @@ class TestController extends Controller
 
         // Update test fields
         $updateData = array_filter([
+            'name' => $validatedData['name'] ?? null,
             'sample_type' => $validatedData['sample_type'] ?? null,
             'price' => $validatedData['price'] ?? null,
         ], fn($value) => $value !== null);
@@ -325,6 +341,7 @@ class TestController extends Controller
         $test->translations()->updateOrCreate(
             ['locale' => $validatedData['locale']],
             [
+                'name' => $validatedData['name'] ?? $test->name,
                 'about_test' => $request->about_test ?? null,
                 'instructions' => $request->instructions ?? null,
             ]

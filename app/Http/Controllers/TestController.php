@@ -35,6 +35,7 @@ class TestController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Complete Blood Count", description="Test name (translatable)"),
      *                 @OA\Property(property="sample_type", type="string", example="Blood"),
      *                 @OA\Property(property="price", type="number", format="float", example=50.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/tests/..."),
@@ -56,6 +57,7 @@ class TestController extends Controller
             
             return [
                 'id' => $test->id,
+                'name' => $translation ? $translation->name : $test->name,
                 'sample_type' => $test->sample_type,
                 'price' => $test->price,
                 'image' => $test->image_url,
@@ -98,6 +100,7 @@ class TestController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Complete Blood Count", description="Test name (translatable)"),
      *                 @OA\Property(property="sample_type", type="string", example="Blood"),
      *                 @OA\Property(property="price", type="number", format="float", example=50.00),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/tests/..."),
@@ -121,6 +124,7 @@ class TestController extends Controller
             'success' => true,
             'data' => [
                 'id' => $test->id,
+                'name' => $translation ? $translation->name : $test->name,
                 'sample_type' => $test->sample_type,
                 'price' => $test->price,
                 'image' => $test->image_url,

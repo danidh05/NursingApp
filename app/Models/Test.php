@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Test extends Model
 {
     use HasFactory, HasTranslations;
 
     protected $fillable = [
+        'name',
         'sample_type',
         'price',
         'image',
@@ -38,6 +40,6 @@ class Test extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->image);
+        return Storage::disk('public')->url($this->image);
     }
 }
