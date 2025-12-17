@@ -3958,6 +3958,11 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
+                                                    "name": {
+                                                        "description": "Test name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Complete Blood Count"
+                                                    },
                                                     "sample_type": {
                                                         "type": "string",
                                                         "example": "Blood"
@@ -4019,10 +4024,16 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
+                                    "name",
                                     "sample_type",
                                     "price"
                                 ],
                                 "properties": {
+                                    "name": {
+                                        "description": "Test name (translatable)",
+                                        "type": "string",
+                                        "example": "Complete Blood Count"
+                                    },
                                     "sample_type": {
                                         "description": "Type of sample (e.g., Blood, Urine)",
                                         "type": "string",
@@ -4161,6 +4172,11 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "name": {
+                                                    "description": "Test name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Complete Blood Count"
+                                                },
                                                 "sample_type": {
                                                     "type": "string",
                                                     "example": "Blood"
@@ -4238,6 +4254,11 @@
                                         "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
                                         "type": "string",
                                         "example": "PUT"
+                                    },
+                                    "name": {
+                                        "description": "Test name (translatable)",
+                                        "type": "string",
+                                        "example": "Complete Blood Count - Updated"
                                     },
                                     "sample_type": {
                                         "type": "string",
@@ -11514,6 +11535,11 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
+                                                    "name": {
+                                                        "description": "Test name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Complete Blood Count"
+                                                    },
                                                     "sample_type": {
                                                         "type": "string",
                                                         "example": "Blood"
@@ -11604,6 +11630,11 @@
                                                 "id": {
                                                     "type": "integer",
                                                     "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Test name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Complete Blood Count"
                                                 },
                                                 "sample_type": {
                                                     "type": "string",
