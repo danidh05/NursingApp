@@ -164,6 +164,16 @@ class RayController extends Controller
             'additional_information' => $request->additional_information ?? null,
         ]);
 
+        // Automatically create area prices for all areas using the base price
+        $areas = \App\Models\Area::all();
+        foreach ($areas as $area) {
+            \App\Models\RayAreaPrice::create([
+                'ray_id' => $ray->id,
+                'area_id' => $area->id,
+                'price' => $validatedData['price'], // Use the same base price for all areas initially
+            ]);
+        }
+
         // Get translation for response
         $translation = $ray->translate($locale);
 
