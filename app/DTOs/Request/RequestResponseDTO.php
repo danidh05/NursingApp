@@ -56,6 +56,9 @@ class RequestResponseDTO
         public array $services = [],
         public ?array $test_package = null,  // Test package information (Category 2)
         public ?array $test = null,          // Test information (Category 2)
+        // Category 3: Rays specific fields
+        public ?int $ray_id = null,
+        public ?array $ray = null,          // Ray information (Category 3)
     ) {}
 
     public static function fromModel(Request $request): self
@@ -174,6 +177,14 @@ class RequestResponseDTO
                 'sample_type' => $request->test->sample_type,
                 'price' => $request->test->price,
                 'image' => $request->test->image_url,
+            ] : null,
+            // Category 3: Rays specific fields
+            ray_id: $request->ray_id,
+            ray: $request->ray ? [
+                'id' => $request->ray->id,
+                'name' => $request->ray->name,
+                'price' => $request->ray->price,
+                'image' => $request->ray->image_url,
             ] : null,
         );
     }

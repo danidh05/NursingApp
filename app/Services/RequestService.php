@@ -35,7 +35,7 @@ class RequestService implements IRequestService
         // Get category-specific handler
         $handler = CategoryRequestHandlerFactory::getHandler($categoryId);
         
-        // Handle file uploads for Category 2 before mapping to DTO
+        // Handle file uploads for Category 2 and Category 3 before mapping to DTO
         // IMPORTANT: Files must be UploadedFile instances, not strings
         if ($categoryId == 2) { // Use == instead of === to handle string "2" vs int 2
             Log::info('=== REQUEST SERVICE: Starting file upload processing ===');
@@ -83,6 +83,9 @@ class RequestService implements IRequestService
             if (isset($data['attach_back_face'])) {
                 Log::info('attach_back_face AFTER upload: ' . $data['attach_back_face']);
             }
+        } elseif ($categoryId == 3) { // Category 3: Rays
+            Log::info('=== REQUEST SERVICE: Starting Category 3 file upload processing ===');
+            $data = $this->handleCategory3FileUploads($data);
         }
         
         // Map data to DTO using category-specific handler

@@ -22,6 +22,8 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestPackageController;
 use App\Http\Controllers\Admin\TestController as AdminTestController;
 use App\Http\Controllers\Admin\TestPackageController as AdminTestPackageController;
+use App\Http\Controllers\RayController;
+use App\Http\Controllers\Admin\RayController as AdminRayController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -86,6 +88,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/tests/{id}', [TestController::class, 'show']); // View a specific test
         Route::get('/test-packages', [TestPackageController::class, 'index']); // List all test packages
         Route::get('/test-packages/{id}', [TestPackageController::class, 'show']); // View a specific test package
+        
+        // Rays (Category 3)
+        Route::get('/rays', [RayController::class, 'index']); // List all rays
+        Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -168,6 +174,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/test-packages/{testPackage}', [AdminTestPackageController::class, 'show']);
         Route::match(['put', 'post'], '/test-packages/{testPackage}', [AdminTestPackageController::class, 'update'])->name('admin.test-packages.update'); // Supports POST with _method=PUT for file uploads
         Route::delete('/test-packages/{testPackage}', [AdminTestPackageController::class, 'destroy']);
+
+        // Rays management (Category 3)
+        Route::get('/rays', [AdminRayController::class, 'index']);
+        Route::post('/rays', [AdminRayController::class, 'store']);
+        Route::get('/rays/{ray}', [AdminRayController::class, 'show']);
+        Route::match(['put', 'post'], '/rays/{ray}', [AdminRayController::class, 'update'])->name('admin.rays.update'); // Supports POST with _method=PUT for file uploads
+        Route::delete('/rays/{ray}', [AdminRayController::class, 'destroy']);
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

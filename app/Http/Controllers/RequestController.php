@@ -253,11 +253,11 @@ class RequestController extends Controller
         $validated = $httpRequest->validated();
         Log::info('Validated data keys: ' . json_encode(array_keys($validated)));
         
-        // For Category 2, merge file uploads back into validated data
+        // For Category 2 and Category 3, merge file uploads back into validated data
         $categoryId = $httpRequest->input('category_id', 1);
         Log::info('Category ID: ' . $categoryId);
         
-        if ($categoryId === 2) {
+        if ($categoryId === 2 || $categoryId === 3) {
             // DEBUG STEP 2: Check each file field
             // IMPORTANT: Always extract files from allFiles() first, as validated() may have converted them
             // Handle request_details_files - Postman sends as 'request_details_files[]' but Laravel receives as 'request_details_files'

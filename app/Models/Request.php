@@ -67,6 +67,8 @@ class Request extends Model
         'request_with_insurance',
         'attach_front_face',
         'attach_back_face',
+        // Category 3: Rays specific fields
+        'ray_id',
     ];
 
     /**
@@ -186,6 +188,14 @@ class Request extends Model
     public function test()
     {
         return $this->belongsTo(Test::class);
+    }
+
+    /**
+     * Get the ray for this request (Category 3 only).
+     */
+    public function ray()
+    {
+        return $this->belongsTo(\App\Models\Ray::class);
     }
 
     /**

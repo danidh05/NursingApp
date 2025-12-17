@@ -33,6 +33,8 @@ class CreateRequestDTO
         public ?bool $request_with_insurance = false,
         public ?string $attach_front_face = null, // File path
         public ?string $attach_back_face = null, // File path
+        // Category 3: Rays specific fields
+        public ?int $ray_id = null,
         // Common field for all categories
         public ?string $additional_information = null,
     ) {}
@@ -67,6 +69,8 @@ class CreateRequestDTO
             request_with_insurance: $data['request_with_insurance'] ?? false,
             attach_front_face: $data['attach_front_face'] ?? null,
             attach_back_face: $data['attach_back_face'] ?? null,
+            // Category 3 fields
+            ray_id: $data['ray_id'] ?? null,
             additional_information: $data['additional_information'] ?? null,
         );
     }

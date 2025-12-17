@@ -2890,6 +2890,534 @@
                 ]
             }
         },
+        "/api/admin/rays": {
+            "get": {
+                "tags": [
+                    "Admin - Rays"
+                ],
+                "summary": "List all rays",
+                "description": "Retrieve all rays with translations based on Accept-Language header",
+                "operationId": "9453ed9f503c558eeb67dd61d621b551",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rays retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Ray name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/rays/..."
+                                                    },
+                                                    "about_ray": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray description...",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Follow instructions...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Rays"
+                ],
+                "summary": "Create a new ray",
+                "description": "Create a new ray with translations. Supports multipart/form-data for image upload.",
+                "operationId": "098bbb82dd1acef23d61ce60592995f0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Ray name (translatable)",
+                                        "type": "string",
+                                        "example": "Chest X-Ray"
+                                    },
+                                    "price": {
+                                        "description": "Ray price (same for all areas)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "image": {
+                                        "description": "Ray image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_ray": {
+                                        "description": "About ray description (translatable)",
+                                        "type": "string",
+                                        "example": "Chest X-Ray description"
+                                    },
+                                    "instructions": {
+                                        "description": "Ray instructions (translatable)",
+                                        "type": "string",
+                                        "example": "Follow all instructions carefully"
+                                    },
+                                    "additional_information": {
+                                        "description": "Additional information (translatable)",
+                                        "type": "string",
+                                        "example": "Additional information"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ray created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Chest X-Ray"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/rays/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/rays/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Rays"
+                ],
+                "summary": "Get a specific ray",
+                "description": "Retrieve a specific ray with translations based on Accept-Language header",
+                "operationId": "e1a5e265f406533aa78bddb66c93c419",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ray retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Ray name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Chest X-Ray"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/rays/..."
+                                                },
+                                                "about_ray": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Ray not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Rays"
+                ],
+                "summary": "Update a ray",
+                "description": "Update an existing ray. Use POST with _method=PUT for file uploads. Supports multipart/form-data.",
+                "operationId": "a326e6e035eb9a15b943fc7e9afcb425",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "description": "Ray name (translatable)",
+                                        "type": "string",
+                                        "example": "Chest X-Ray - Updated"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 110
+                                    },
+                                    "image": {
+                                        "description": "New ray image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "about_ray": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "instructions": {
+                                        "type": "string",
+                                        "example": "Updated instructions"
+                                    },
+                                    "additional_information": {
+                                        "type": "string",
+                                        "example": "Updated additional information"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ray updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Ray name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Chest X-Ray - Updated"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 110
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/rays/..."
+                                                },
+                                                "about_ray": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Ray not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Rays"
+                ],
+                "summary": "Delete a ray",
+                "description": "Delete a ray (soft delete if supported, otherwise hard delete)",
+                "operationId": "7014b25d5885ec5782b0eb9bd5cb6a24",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ray deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Ray not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/service-area-prices": {
             "get": {
                 "tags": [
@@ -8948,6 +9476,194 @@
                 ]
             }
         },
+        "/api/rays": {
+            "get": {
+                "tags": [
+                    "Rays"
+                ],
+                "summary": "List all rays",
+                "description": "Retrieve all rays with translations based on Accept-Language header",
+                "operationId": "be0fe1b8f9e466726e560fa2d197d3a5",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rays retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Ray name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/rays/..."
+                                                    },
+                                                    "about_ray": {
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray description...",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "type": "string",
+                                                        "example": "Follow instructions...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/rays/{id}": {
+            "get": {
+                "tags": [
+                    "Rays"
+                ],
+                "summary": "Get a specific ray",
+                "description": "Retrieve a specific ray with translations based on Accept-Language header",
+                "operationId": "14431030ef35bbfb0b6d1bf486835330",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ray retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Ray name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Chest X-Ray"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/rays/..."
+                                                },
+                                                "about_ray": {
+                                                    "type": "string",
+                                                    "example": "Chest X-Ray description...",
+                                                    "nullable": true
+                                                },
+                                                "instructions": {
+                                                    "type": "string",
+                                                    "example": "Follow instructions...",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "type": "string",
+                                                    "example": "Additional info...",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Ray not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/requests": {
             "get": {
                 "tags": [
@@ -13170,6 +13886,10 @@
             "description": "API Endpoints for FAQ management (Admin only)"
         },
         {
+            "name": "Admin - Rays",
+            "description": "API Endpoints for managing Rays (Admin only)"
+        },
+        {
             "name": "Admin - Tests",
             "description": "API Endpoints for Test management (Admin only)"
         },
@@ -13228,6 +13948,10 @@
         {
             "name": "FAQs",
             "description": "API Endpoints for FAQ management"
+        },
+        {
+            "name": "Rays",
+            "description": "API Endpoints for viewing Rays (User accessible)"
         },
         {
             "name": "Settings",
