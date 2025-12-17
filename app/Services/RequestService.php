@@ -356,6 +356,7 @@ class RequestService implements IRequestService
 
     /**
      * Calculate the total price for a Category 3 (Rays) request based on ray and area.
+     * Falls back to ray's base price if no area-specific pricing is found.
      *
      * @param Request $request
      * @return float
@@ -372,16 +373,19 @@ class RequestService implements IRequestService
         // Use request's area_id if available, otherwise fall back to user's registered area
         $areaId = $request->area_id ?? $request->user->area_id;
         
+        // If no area is specified, use base price
         if (!$areaId) {
-            throw new \Exception('No area specified for pricing calculation');
+            return $ray->price;
         }
         
+        // Try to find area-specific pricing
         $rayAreaPrice = \App\Models\RayAreaPrice::where('ray_id', $ray->id)
                                                ->where('area_id', $areaId)
                                                ->first();
 
+        // If no area-specific pricing found, fallback to base price
         if (!$rayAreaPrice) {
-            throw new \Exception("No pricing found for ray {$ray->id} in area {$areaId}");
+            return $ray->price;
         }
 
         return $rayAreaPrice->price;
