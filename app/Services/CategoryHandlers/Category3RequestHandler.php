@@ -51,43 +51,37 @@ class Category3RequestHandler extends BaseCategoryRequestHandler
         }
 
         return new CreateRequestDTO(
-            user_id: $data['user_id'],
-            category_id: 3, // Category 3: Rays
             first_name: $data['first_name'] ?? null,
             last_name: $data['last_name'] ?? null,
-            full_name: $data['full_name'] ?? null,
+            full_name: $this->buildFullName($data) ?? $data['full_name'] ?? null,
             phone_number: $data['phone_number'] ?? null,
-            name: $data['name'] ?? null,
             problem_description: $data['problem_description'] ?? null,
-            status: $data['status'] ?? 'submitted',
+            service_id: null, // Category 3 doesn't use service_id
+            area_id: null, // Category 3 doesn't use area pricing
+            category_id: 3, // Category 3: Rays
+            name: $data['name'] ?? null,
             nurse_gender: $data['nurse_gender'] ?? null,
             time_type: null, // Not used for Category 3
             scheduled_time: null, // Not used for Category 3
             ending_time: null, // Not used for Category 3
             location: $data['location'] ?? null,
-            latitude: $data['latitude'] ?? null,
-            longitude: $data['longitude'] ?? null,
-            total_price: $data['total_price'] ?? null,
-            discount_percentage: $data['discount_percentage'] ?? null,
-            discounted_price: $data['discounted_price'] ?? null,
-            use_saved_address: $data['use_saved_address'] ?? null,
+            // Address fields
+            use_saved_address: $this->normalizeBoolean($data['use_saved_address'] ?? false),
             address_city: $data['address_city'] ?? null,
             address_street: $data['address_street'] ?? null,
             address_building: $data['address_building'] ?? null,
             address_additional_information: $data['address_additional_information'] ?? null,
-            additional_information: $data['additional_information'] ?? null,
-            area_id: null, // Not used for Category 3
-            service_id: null, // Not used for Category 3
-            // Category 3 specific fields
-            ray_id: $data['ray_id'] ?? null,
-            notes: $data['notes'] ?? null,
-            request_details_files: $requestDetailsFiles,
             // Category 2 fields (not used for Category 3)
             test_package_id: null,
             test_id: null,
+            request_details_files: $requestDetailsFiles,
+            notes: $data['notes'] ?? null,
             request_with_insurance: null,
             attach_front_face: null,
             attach_back_face: null,
+            // Category 3 specific fields
+            ray_id: $data['ray_id'] ?? null,
+            additional_information: $data['additional_information'] ?? null,
         );
     }
 }

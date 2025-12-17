@@ -5,6 +5,8 @@ namespace App\DTOs\Request;
 use App\Models\Request;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class RequestResponseDTO
 {
@@ -66,7 +68,7 @@ class RequestResponseDTO
         // Get cached time_needed_to_arrive if available and calculate remaining time
         $timeNeededToArrive = null;
         $cacheKey = 'time_needed_to_arrive_' . $request->id;
-        $cachedData = \Cache::get($cacheKey);
+        $cachedData = Cache::get($cacheKey);
         
         if ($cachedData) {
             // Calculate elapsed time correctly - start time should be the first parameter
@@ -90,7 +92,7 @@ class RequestResponseDTO
                 array_map(function ($filePath) {
                     // Only process string file paths
                     if (is_string($filePath) && !empty($filePath)) {
-                        return \Illuminate\Support\Facades\Storage::disk('public')->url($filePath);
+                        return Storage::disk('public')->url($filePath);
                     }
                     return null;
                 }, $files),
@@ -102,11 +104,11 @@ class RequestResponseDTO
         
         // attach_front_face and attach_back_face are strings, check if not empty
         $attachFrontFace = (!empty($request->attach_front_face) && is_string($request->attach_front_face))
-            ? \Illuminate\Support\Facades\Storage::disk('public')->url($request->attach_front_face)
+            ? Storage::disk('public')->url($request->attach_front_face)
             : null;
             
         $attachBackFace = (!empty($request->attach_back_face) && is_string($request->attach_back_face))
-            ? \Illuminate\Support\Facades\Storage::disk('public')->url($request->attach_back_face)
+            ? Storage::disk('public')->url($request->attach_back_face)
             : null;
         
         return new self(
@@ -180,12 +182,19 @@ class RequestResponseDTO
             ] : null,
             // Category 3: Rays specific fields
             ray_id: $request->ray_id,
-            ray: $request->ray ? [
-                'id' => $request->ray->id,
-                'name' => $request->ray->name,
-                'price' => $request->ray->price,
-                'image' => $request->ray->image_url,
-            ] : null,
+            ray: $request->ray ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->ray->translate($locale);
+                return [
+                    'id' => $request->ray->id,
+                    'name' => $translation ? $translation->name : $request->ray->name,
+                    'price' => $request->ray->price,
+                    'image' => $request->ray->image_url,
+                    'about_ray' => $translation?->about_ray,
+                    'instructions' => $translation?->instructions,
+                    'additional_information' => $translation?->additional_information,
+                ];
+            })() : null,
         );
     }
 } 

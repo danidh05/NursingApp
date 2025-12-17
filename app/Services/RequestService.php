@@ -257,6 +257,68 @@ class RequestService implements IRequestService
     }
 
     /**
+     * Handle file uploads for Category 3: Rays
+     * Only handles request_details_files (PDF files)
+     */
+    private function handleCategory3FileUploads(array $data): array
+    {
+        Log::info('=== HANDLE CATEGORY 3 FILE UPLOADS: Starting ===');
+        $imageStorageService = app(\App\Services\ImageStorageService::class);
+        
+        // Handle request_details_files (PDF files)
+        if (isset($data['request_details_files'])) {
+            Log::info('Processing request_details_files for Category 3, is_array: ' . (is_array($data['request_details_files']) ? 'YES' : 'NO'));
+            Log::info('Type: ' . gettype($data['request_details_files']));
+            
+            $filePaths = [];
+            
+            // Handle both array and single file cases
+            $files = is_array($data['request_details_files']) 
+                ? $data['request_details_files'] 
+                : [$data['request_details_files']];
+            
+            foreach ($files as $index => $file) {
+                Log::info("Processing request_details_files[$index]");
+                Log::info("  - Type: " . gettype($file));
+                Log::info("  - Is UploadedFile: " . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+                
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    try {
+                        Log::info("  - Original name: " . $file->getClientOriginalName());
+                        Log::info("  - Size: " . $file->getSize() . " bytes");
+                        $uploadedPath = $imageStorageService->uploadImage($file, 'rays');
+                        Log::info("  - Uploaded to: " . $uploadedPath);
+                        $filePaths[] = $uploadedPath;
+                    } catch (\Exception $e) {
+                        Log::error("  - Failed to upload request_details_files[$index]: " . $e->getMessage());
+                        Log::error("  - Exception trace: " . $e->getTraceAsString());
+                        // Continue with other files
+                    }
+                } elseif (is_string($file)) {
+                    // Already a path string (shouldn't happen, but handle it)
+                    Log::info("  - Already a path string: " . substr($file, 0, 100));
+                    $filePaths[] = $file;
+                } else {
+                    Log::warning("  - request_details_files[$index] is unexpected type: " . gettype($file));
+                }
+            }
+            
+            if (!empty($filePaths)) {
+                $data['request_details_files'] = $filePaths;
+                Log::info('Successfully uploaded ' . count($filePaths) . ' files for request_details_files');
+            } else {
+                Log::warning('No files were successfully uploaded for request_details_files');
+                $data['request_details_files'] = null;
+            }
+        } else {
+            Log::info('request_details_files not set in data for Category 3');
+        }
+        
+        Log::info('=== HANDLE CATEGORY 3 FILE UPLOADS: Finished ===');
+        return $data;
+    }
+
+    /**
      * Calculate the total price for a request based on its service and request's area.
      * Category 1 only supports a single service per request.
      */

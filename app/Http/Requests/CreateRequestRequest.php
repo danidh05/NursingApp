@@ -28,8 +28,8 @@ class CreateRequestRequest extends FormRequest
             'request_with_insurance' => $this->normalizeBooleanString($this->input('request_with_insurance')),
         ];
         
-        // For Category 2, normalize request_details_files to always be an array
-        if ($categoryId === 2) {
+        // For Category 2 and Category 3, normalize request_details_files to always be an array
+        if ($categoryId === 2 || $categoryId === 3) {
             // Check if request_details_files exists as a file (single or array)
             if ($this->hasFile('request_details_files')) {
                 $files = $this->file('request_details_files');

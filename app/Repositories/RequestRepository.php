@@ -81,8 +81,21 @@ class RequestRepository implements IRequestRepository
                 $requestData['attach_back_face'] = $dto->attach_back_face;
             }
             // Do NOT include Category 1 fields (area_id, time_type, scheduled_time, ending_time)
+        } elseif ($categoryId === 3) {
+            // Category 3: Rays
+            if ($dto->ray_id !== null) {
+                $requestData['ray_id'] = $dto->ray_id;
+            }
+            if ($dto->request_details_files !== null) {
+                // request_details_files is an array, encode as JSON for database storage
+                $requestData['request_details_files'] = json_encode($dto->request_details_files);
+            }
+            if ($dto->notes !== null) {
+                $requestData['notes'] = $dto->notes;
+            }
+            // Do NOT include Category 1 or Category 2 specific fields
         } else {
-            // Future categories (3-8): Only common fields, no category-specific fields yet
+            // Future categories (4-8): Only common fields, no category-specific fields yet
             // Can be extended when implementing other categories
         }
         
