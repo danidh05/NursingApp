@@ -82,7 +82,8 @@ class RequestRepository implements IRequestRepository
             }
             // Do NOT include Category 1 fields (area_id, time_type, scheduled_time, ending_time)
         } elseif ($categoryId === 3) {
-            // Category 3: Rays
+            // Category 3: Rays (with area-based pricing)
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
             if ($dto->ray_id !== null) {
                 $requestData['ray_id'] = $dto->ray_id;
             }

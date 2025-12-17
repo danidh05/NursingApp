@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\StreamController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\Admin\PopupController as AdminPopupController;
 use App\Http\Controllers\Admin\ServiceAreaPriceController;
+use App\Http\Controllers\Admin\RayAreaPriceController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ContactController;
@@ -91,6 +92,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         // Rays (Category 3)
         Route::get('/rays', [RayController::class, 'index']); // List all rays
+        Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get rays for a specific area with pricing
         Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
         
         // FAQ APIs accessible by both users and admins (with translation support)
@@ -181,6 +183,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/rays/{ray}', [AdminRayController::class, 'show']);
         Route::match(['put', 'post'], '/rays/{ray}', [AdminRayController::class, 'update'])->name('admin.rays.update'); // Supports POST with _method=PUT for file uploads
         Route::delete('/rays/{ray}', [AdminRayController::class, 'destroy']);
+        
+        // Ray Area Price management routes
+        Route::get('/ray-area-prices', [RayAreaPriceController::class, 'index']); // List all ray area prices
+        Route::post('/ray-area-prices', [RayAreaPriceController::class, 'store']); // Create a new ray area price
+        Route::put('/ray-area-prices/{id}', [RayAreaPriceController::class, 'update']); // Update a ray area price
+        Route::delete('/ray-area-prices/{id}', [RayAreaPriceController::class, 'destroy']); // Delete a ray area price
+        Route::get('/ray-area-prices/ray/{rayId}', [RayAreaPriceController::class, 'getRayPrices']); // Get prices for a specific ray
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

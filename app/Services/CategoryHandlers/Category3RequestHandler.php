@@ -20,6 +20,7 @@ class Category3RequestHandler extends BaseCategoryRequestHandler
         return array_merge($this->getCommonRules(), [
             // Category 3: Rays specific fields
             'ray_id' => ['required', 'integer', 'exists:rays,id'],
+            'area_id' => ['nullable', 'integer', 'exists:areas,id'],
             'notes' => ['nullable', 'string'],
             // Accept either a single file or an array of files (PDF)
             'request_details_files' => ['nullable'], // Can be file or array, validated separately
@@ -57,7 +58,7 @@ class Category3RequestHandler extends BaseCategoryRequestHandler
             phone_number: $data['phone_number'] ?? null,
             problem_description: $data['problem_description'] ?? null,
             service_id: null, // Category 3 doesn't use service_id
-            area_id: null, // Category 3 doesn't use area pricing
+            area_id: $data['area_id'] ?? null, // Category 3 uses area-based pricing
             category_id: 3, // Category 3: Rays
             name: $data['name'] ?? null,
             nurse_gender: $data['nurse_gender'] ?? null,

@@ -30,6 +30,24 @@ class Ray extends Model
     }
 
     /**
+     * Get the area prices for this ray.
+     */
+    public function areaPrices()
+    {
+        return $this->hasMany(RayAreaPrice::class);
+    }
+
+    /**
+     * Get the areas for this ray through pricing.
+     */
+    public function areas()
+    {
+        return $this->belongsToMany(Area::class, 'ray_area_price')
+                    ->withPivot('price')
+                    ->withTimestamps();
+    }
+
+    /**
      * Get the image URL (full URL for frontend).
      */
     public function getImageUrlAttribute(): ?string

@@ -94,9 +94,15 @@ class RequestService implements IRequestService
         // Create the request
         $request = $this->requestRepository->create($dto, $user);
         
-        // Calculate and set total price (only for Category 1: Service Request)
+        // Calculate and set total price (for Category 1: Service Request and Category 3: Rays)
         if ($categoryId === 1 && $dto->service_id) {
             $totalPrice = $this->calculateRequestTotalPrice($request);
+            $request->update([
+                'total_price' => $totalPrice,
+                'discounted_price' => $totalPrice // Initially same as total price
+            ]);
+        } elseif ($categoryId === 3 && $dto->ray_id) {
+            $totalPrice = $this->calculateCategory3RequestTotalPrice($request);
             $request->update([
                 'total_price' => $totalPrice,
                 'discounted_price' => $totalPrice // Initially same as total price
@@ -346,6 +352,39 @@ class RequestService implements IRequestService
         }
 
         return $serviceAreaPrice->price;
+    }
+
+    /**
+     * Calculate the total price for a Category 3 (Rays) request based on ray and area.
+     *
+     * @param Request $request
+     * @return float
+     * @throws \Exception
+     */
+    private function calculateCategory3RequestTotalPrice(Request $request): float
+    {
+        $ray = $request->ray;
+        
+        if (!$ray) {
+            throw new \Exception('No ray attached to request');
+        }
+        
+        // Use request's area_id if available, otherwise fall back to user's registered area
+        $areaId = $request->area_id ?? $request->user->area_id;
+        
+        if (!$areaId) {
+            throw new \Exception('No area specified for pricing calculation');
+        }
+        
+        $rayAreaPrice = \App\Models\RayAreaPrice::where('ray_id', $ray->id)
+                                               ->where('area_id', $areaId)
+                                               ->first();
+
+        if (!$rayAreaPrice) {
+            throw new \Exception("No pricing found for ray {$ray->id} in area {$areaId}");
+        }
+
+        return $rayAreaPrice->price;
     }
 
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO

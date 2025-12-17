@@ -50,19 +50,42 @@ class RayController extends Controller
     public function index(): JsonResponse
     {
         $locale = app()->getLocale();
-        $rays = Ray::with('translations')->get();
+        $user = Auth::user();
+        $userAreaId = $user->area_id ?? null;
         
-        $rays = $rays->map(function ($ray) use ($locale) {
+        $rays = Ray::with(['translations', 'areaPrices.area:id,name'])->get();
+        
+        $rays = $rays->map(function ($ray) use ($locale, $userAreaId) {
             $translation = $ray->translate($locale);
+            
+            // Get all area prices for this ray
+            $areaPrices = $ray->areaPrices->map(function ($areaPrice) {
+                return [
+                    'area_id' => $areaPrice->area_id,
+                    'area_name' => $areaPrice->area->name ?? null,
+                    'price' => $areaPrice->price,
+                ];
+            });
+            
+            // Get user's area price if available, otherwise use base price
+            $userPrice = $ray->price; // Default to base price
+            if ($userAreaId) {
+                $userAreaPrice = $ray->areaPrices->where('area_id', $userAreaId)->first();
+                if ($userAreaPrice) {
+                    $userPrice = $userAreaPrice->price;
+                }
+            }
             
             return [
                 'id' => $ray->id,
                 'name' => $translation ? $translation->name : $ray->name,
-                'price' => $ray->price,
+                'price' => $userPrice, // Price for user's area (or base price)
+                'base_price' => $ray->price, // Base price (fallback)
                 'image' => $ray->image_url,
                 'about_ray' => $translation?->about_ray,
                 'instructions' => $translation?->instructions,
                 'additional_information' => $translation?->additional_information,
+                'area_prices' => $areaPrices, // All area prices for this ray
             ];
         });
         
@@ -116,20 +139,43 @@ class RayController extends Controller
     public function show($id): JsonResponse
     {
         $locale = app()->getLocale();
-        $ray = Ray::with('translations')->findOrFail($id);
+        $user = Auth::user();
+        $userAreaId = $user->area_id ?? null;
+        
+        $ray = Ray::with(['translations', 'areaPrices.area:id,name'])->findOrFail($id);
         
         $translation = $ray->translate($locale);
+        
+        // Get all area prices for this ray
+        $areaPrices = $ray->areaPrices->map(function ($areaPrice) {
+            return [
+                'area_id' => $areaPrice->area_id,
+                'area_name' => $areaPrice->area->name ?? null,
+                'price' => $areaPrice->price,
+            ];
+        });
+        
+        // Get user's area price if available, otherwise use base price
+        $userPrice = $ray->price; // Default to base price
+        if ($userAreaId) {
+            $userAreaPrice = $ray->areaPrices->where('area_id', $userAreaId)->first();
+            if ($userAreaPrice) {
+                $userPrice = $userAreaPrice->price;
+            }
+        }
         
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $ray->id,
                 'name' => $translation ? $translation->name : $ray->name,
-                'price' => $ray->price,
+                'price' => $userPrice, // Price for user's area (or base price)
+                'base_price' => $ray->price, // Base price (fallback)
                 'image' => $ray->image_url,
                 'about_ray' => $translation?->about_ray,
                 'instructions' => $translation?->instructions,
                 'additional_information' => $translation?->additional_information,
+                'area_prices' => $areaPrices, // All area prices for this ray
             ],
         ], 200);
     }
