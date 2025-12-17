@@ -13,6 +13,7 @@ use App\Models\About;
 use App\Models\Area;
 use App\Models\ServiceAreaPrice;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class TestDataSeeder extends Seeder
 {
@@ -148,67 +149,65 @@ class TestDataSeeder extends Seeder
     {
         $this->command->info('🏥 Seeding services...');
         
-        $categories = Category::all();
+        // Get Category 1: Service Request (the only category with services)
+        $category1 = Category::find(1); // Category 1: Service Request
+        
+        if (!$category1) {
+            $this->command->warn('   ⚠️  Category 1 (Service Request) not found. Skipping services seeding.');
+            return;
+        }
         
         $services = [
-            // Home Care Services
+            // Category 1: Service Request services
             [
                 'name' => 'Basic Home Nursing',
                 'price' => 75.00,
-                'category_id' => $categories->where('name', 'Home Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
             [
                 'name' => 'Advanced Home Care',
                 'price' => 120.00,
-                'category_id' => $categories->where('name', 'Home Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
-            
-            // Emergency Care Services
             [
                 'name' => 'Emergency Response',
                 'price' => 200.00,
-                'category_id' => $categories->where('name', 'Emergency Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
             [
                 'name' => '24/7 Critical Care',
                 'price' => 300.00,
-                'category_id' => $categories->where('name', 'Emergency Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
-            
-            // Elderly Care Services
             [
                 'name' => 'Senior Companion Care',
                 'price' => 60.00,
-                'category_id' => $categories->where('name', 'Elderly Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
             [
                 'name' => 'Dementia Care',
                 'price' => 150.00,
-                'category_id' => $categories->where('name', 'Elderly Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
-            
-            // Post-Surgery Care
             [
                 'name' => 'Post-Operative Care',
                 'price' => 100.00,
-                'category_id' => $categories->where('name', 'Post-Surgery Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
             [
                 'name' => 'Rehabilitation Support',
                 'price' => 90.00,
-                'category_id' => $categories->where('name', 'Post-Surgery Care')->first()?->id,
+                'category_id' => $category1->id,
             ],
-            
-            // Chronic Disease Management
             [
                 'name' => 'Diabetes Management',
                 'price' => 80.00,
-                'category_id' => $categories->where('name', 'Chronic Disease Management')->first()?->id,
+                'category_id' => $category1->id,
             ],
             [
                 'name' => 'Cardiac Care',
                 'price' => 110.00,
-                'category_id' => $categories->where('name', 'Chronic Disease Management')->first()?->id,
+                'category_id' => $category1->id,
             ],
         ];
 
@@ -402,15 +401,15 @@ class TestDataSeeder extends Seeder
             );
 
             // Attach one random service to each request (Category 1 only supports single service)
-            if ($request->wasRecentlyCreated && $request->category_id === 1) {
-                $randomService = $services->random(1)->id;
-                $request->services()->attach($randomService);
+            if ($request->wasRecentlyCreated && $request->category_id === 1 && $services->isNotEmpty()) {
+                $randomService = $services->random(); // random() without parameter returns a single model
+                $request->services()->attach($randomService->id);
             }
 
             // Add time_needed_to_arrive to cache for requests with ASSIGNED status
             if ($request->status === Request::STATUS_ASSIGNED && $request->wasRecentlyCreated) {
                 $cacheKey = 'time_needed_to_arrive_' . $request->id;
-                \Cache::put($cacheKey, [
+                Cache::put($cacheKey, [
                     'time_needed' => 45, // 45 minutes for assigned requests
                     'start_time' => now()
                 ], 3600);
