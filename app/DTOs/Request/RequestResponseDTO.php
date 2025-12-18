@@ -195,6 +195,22 @@ class RequestResponseDTO
                     'additional_information' => $translation?->additional_information,
                 ];
             })() : null,
+            // Category 4: Machines specific fields
+            machine_id: $request->machine_id,
+            from_date: $request->from_date?->format('Y-m-d'),
+            to_date: $request->to_date?->format('Y-m-d'),
+            machine: $request->machine ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->machine->translate($locale);
+                return [
+                    'id' => $request->machine->id,
+                    'name' => $translation ? $translation->name : $request->machine->name,
+                    'price' => $request->machine->price,
+                    'image' => $request->machine->image_url,
+                    'description' => $translation?->description,
+                    'additional_information' => $translation?->additional_information,
+                ];
+            })() : null,
         );
     }
 } 

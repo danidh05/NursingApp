@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             TestDataSeeder::class,
             TestSeeder::class, // Category 2: Tests and Test Packages
+            RaySeeder::class, // Category 3: Rays
+            MachineSeeder::class, // Category 4: Machines
         ]);
     }
 }

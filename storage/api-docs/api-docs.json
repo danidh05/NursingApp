@@ -2269,6 +2269,922 @@
                 ]
             }
         },
+        "/api/admin/machine-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Machine Region Pricing"
+                ],
+                "summary": "List all machine area prices (Admin only)",
+                "description": "Retrieve a list of all machine area prices for admin management.",
+                "operationId": "06478846019f60fee29661dec94f96f3",
+                "responses": {
+                    "200": {
+                        "description": "Machine area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "machine_area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "machine_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "machine": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Ventilator Machine"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Machine Region Pricing"
+                ],
+                "summary": "Create machine area price (Admin only)",
+                "description": "Create a new machine area price for region-based pricing.",
+                "operationId": "e4ce780c3c764dd9168a0d11ad7abbf4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "machine_id",
+                                    "area_id",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "machine_id": {
+                                        "description": "Machine ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "description": "Area ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "price": {
+                                        "description": "Price for this machine in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Machine area price created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine area price created successfully."
+                                        },
+                                        "machine_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "machine_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/machine-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Machine Region Pricing"
+                ],
+                "summary": "Update machine area price (Admin only)",
+                "description": "Update an existing machine area price.",
+                "operationId": "9bcf82296c7568fd514746d5807ce179",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "description": "Updated price for this machine in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 550
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Machine area price updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine area price updated successfully."
+                                        },
+                                        "machine_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "machine_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 550
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Machine area price not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Machine Region Pricing"
+                ],
+                "summary": "Delete machine area price (Admin only)",
+                "description": "Delete a machine area price.",
+                "operationId": "99f17754c8749fcc07c11dc4e0cb60b1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machine area price deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine area price deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Machine area price not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/machine-area-prices/machine/{machineId}": {
+            "get": {
+                "tags": [
+                    "Admin - Machine Region Pricing"
+                ],
+                "summary": "Get prices for a specific machine (Admin only)",
+                "description": "Retrieve all area prices for a specific machine.",
+                "operationId": "9bcba286dc5966caa9d191d0ddce6181",
+                "parameters": [
+                    {
+                        "name": "machineId",
+                        "in": "path",
+                        "description": "Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machine area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "machine": {
+                                            "type": "object"
+                                        },
+                                        "area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/machines": {
+            "get": {
+                "tags": [
+                    "Admin - Machines"
+                ],
+                "summary": "List all machines",
+                "description": "Retrieve all machines with translations based on Accept-Language header",
+                "operationId": "b51552b133a6b385b8e1cfdbee71d5a7",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Machine name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Ventilator Machine"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/machines/..."
+                                                    },
+                                                    "description": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Machine description...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Machines"
+                ],
+                "summary": "Create a new machine",
+                "description": "Create a new machine with translations. Supports multipart/form-data for image upload.",
+                "operationId": "33c75b5d4bb3c5ba99178d75eb3f7b5f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Machine name (translatable)",
+                                        "type": "string",
+                                        "example": "Ventilator Machine"
+                                    },
+                                    "price": {
+                                        "description": "Machine price (same for all areas initially)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    },
+                                    "image": {
+                                        "description": "Machine image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "description": "Machine description (translatable)",
+                                        "type": "string",
+                                        "example": "Machine description"
+                                    },
+                                    "additional_information": {
+                                        "description": "Additional information (translatable)",
+                                        "type": "string",
+                                        "example": "Additional information"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Machine created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Ventilator Machine"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/machines/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/machines/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Machines"
+                ],
+                "summary": "Get a specific machine",
+                "description": "Retrieve a specific machine with translations based on Accept-Language header",
+                "operationId": "f40125e4d8349fccba6b185e957d996a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machine retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Machine name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Ventilator Machine"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/machines/..."
+                                                },
+                                                "description": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Machines"
+                ],
+                "summary": "Update a machine",
+                "description": "Update an existing machine. Use POST with _method=PUT for file uploads. Supports multipart/form-data.",
+                "operationId": "242647ce3f69fd25ad145091f057ffc5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method. This enables Laravel method spoofing. Omit this field if using actual PUT request (without file uploads).",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "description": "Machine name (translatable)",
+                                        "type": "string",
+                                        "example": "Ventilator Machine - Updated"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 550
+                                    },
+                                    "image": {
+                                        "description": "New machine image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "additional_information": {
+                                        "type": "string",
+                                        "example": "Updated additional information"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Machine updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Machine name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Ventilator Machine - Updated"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 550
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/machines/..."
+                                                },
+                                                "description": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Machines"
+                ],
+                "summary": "Delete a machine",
+                "description": "Delete a machine (soft delete if supported, otherwise hard delete)",
+                "operationId": "04466dd4e6f88c683c1fd4c50bc7715a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machine deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Machine deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/popups": {
             "get": {
                 "tags": [
@@ -9042,6 +9958,381 @@
                 ]
             }
         },
+        "/api/machines": {
+            "get": {
+                "tags": [
+                    "Machines"
+                ],
+                "summary": "List all machines",
+                "description": "Retrieve all machines with translations and area-based pricing based on Accept-Language header",
+                "operationId": "6ff4867034bb9ff9201b60fe9aaaec64",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Machine name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Ventilator Machine"
+                                                    },
+                                                    "price": {
+                                                        "description": "Price for user's area (or base price)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "base_price": {
+                                                        "description": "Base price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/machines/..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Machine description...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    },
+                                                    "area_prices": {
+                                                        "description": "All area prices for this machine",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 600
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/machines/{id}": {
+            "get": {
+                "tags": [
+                    "Machines"
+                ],
+                "summary": "Get a specific machine",
+                "description": "Retrieve a specific machine with translations and area-based pricing based on Accept-Language header",
+                "operationId": "80801a1961c6e326ea14057d0dde714f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machine retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Machine name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Ventilator Machine"
+                                                },
+                                                "price": {
+                                                    "description": "Price for user's area (or base price)",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "base_price": {
+                                                    "description": "Base price (fallback)",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/machines/..."
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Machine description...",
+                                                    "nullable": true
+                                                },
+                                                "additional_information": {
+                                                    "type": "string",
+                                                    "example": "Additional info...",
+                                                    "nullable": true
+                                                },
+                                                "area_prices": {
+                                                    "description": "All area prices for this machine",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "area_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "area_name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 600
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/machines/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Machines"
+                ],
+                "summary": "Get all machines for a specific area with pricing",
+                "description": "Retrieve all machines available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+                "operationId": "eda4fd2f71a8ffece63d6f68ad8ed376",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "description": "Area ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Machines for area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Machine name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Ventilator Machine"
+                                                    },
+                                                    "price": {
+                                                        "description": "Area-specific price if available, otherwise base price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 600
+                                                    },
+                                                    "base_price": {
+                                                        "description": "Base price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/machines/..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Machine description...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    },
+                                                    "has_area_pricing": {
+                                                        "description": "Whether this machine has area-specific pricing",
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Area not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/notifications": {
             "get": {
                 "tags": [
@@ -10414,6 +11705,23 @@
                                         "description": "REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided.",
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "machine_id": {
+                                        "description": "REQUIRED for Category 4 only: Machine ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "from_date": {
+                                        "description": "Optional for Category 4 only: Rental start date (YYYY-MM-DD)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-15"
+                                    },
+                                    "to_date": {
+                                        "description": "Optional for Category 4 only: Rental end date (YYYY-MM-DD, must be after from_date)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-20"
                                     },
                                     "first_name": {
                                         "description": "Optional: First name",
@@ -14443,6 +15751,10 @@
             "description": "API Endpoints for FAQ management (Admin only)"
         },
         {
+            "name": "Admin - Machines",
+            "description": "API Endpoints for managing Machines (Admin only)"
+        },
+        {
             "name": "Admin - Rays",
             "description": "API Endpoints for managing Rays (Admin only)"
         },
@@ -14507,6 +15819,10 @@
             "description": "API Endpoints for FAQ management"
         },
         {
+            "name": "Machines",
+            "description": "API Endpoints for viewing Machines (User accessible)"
+        },
+        {
             "name": "Rays",
             "description": "API Endpoints for viewing Rays (User accessible)"
         },
@@ -14525,6 +15841,10 @@
         {
             "name": "Admin - Custom Notifications",
             "description": "Admin - Custom Notifications"
+        },
+        {
+            "name": "Admin - Machine Region Pricing",
+            "description": "Admin - Machine Region Pricing"
         },
         {
             "name": "Admin - Popups",

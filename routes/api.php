@@ -25,6 +25,9 @@ use App\Http\Controllers\Admin\TestController as AdminTestController;
 use App\Http\Controllers\Admin\TestPackageController as AdminTestPackageController;
 use App\Http\Controllers\RayController;
 use App\Http\Controllers\Admin\RayController as AdminRayController;
+use App\Http\Controllers\MachineController;
+use App\Http\Controllers\Admin\MachineController as AdminMachineController;
+use App\Http\Controllers\Admin\MachineAreaPriceController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -94,6 +97,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/rays', [RayController::class, 'index']); // List all rays
         Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get all rays for a specific area with pricing
         Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
+        
+        // Machines (Category 4)
+        Route::get('/machines', [MachineController::class, 'index']); // List all machines
+        Route::get('/machines/area/{area_id}', [MachineController::class, 'getMachinesByArea']); // Get all machines for a specific area with pricing
+        Route::get('/machines/{id}', [MachineController::class, 'show']); // View a specific machine
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -190,6 +198,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/ray-area-prices/{id}', [RayAreaPriceController::class, 'update']); // Update a ray area price
         Route::delete('/ray-area-prices/{id}', [RayAreaPriceController::class, 'destroy']); // Delete a ray area price
         Route::get('/ray-area-prices/ray/{rayId}', [RayAreaPriceController::class, 'getRayPrices']); // Get prices for a specific ray
+        
+        // Machines management (Category 4)
+        Route::get('/machines', [AdminMachineController::class, 'index']);
+        Route::post('/machines', [AdminMachineController::class, 'store']);
+        Route::get('/machines/{machine}', [AdminMachineController::class, 'show']);
+        Route::match(['put', 'post'], '/machines/{machine}', [AdminMachineController::class, 'update'])->name('admin.machines.update'); // Supports POST with _method=PUT for file uploads
+        Route::delete('/machines/{machine}', [AdminMachineController::class, 'destroy']);
+        
+        // Machine Area Price management routes
+        Route::get('/machine-area-prices', [MachineAreaPriceController::class, 'index']); // List all machine area prices
+        Route::post('/machine-area-prices', [MachineAreaPriceController::class, 'store']); // Create a new machine area price
+        Route::put('/machine-area-prices/{id}', [MachineAreaPriceController::class, 'update']); // Update a machine area price
+        Route::delete('/machine-area-prices/{id}', [MachineAreaPriceController::class, 'destroy']); // Delete a machine area price
+        Route::get('/machine-area-prices/machine/{machineId}', [MachineAreaPriceController::class, 'getMachinePrices']); // Get prices for a specific machine
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

@@ -35,6 +35,10 @@ class CreateRequestDTO
         public ?string $attach_back_face = null, // File path
         // Category 3: Rays specific fields
         public ?int $ray_id = null,
+        // Category 4: Machines specific fields
+        public ?int $machine_id = null,
+        public ?string $from_date = null, // Category 4 only: rental start date
+        public ?string $to_date = null, // Category 4 only: rental end date
         // Common field for all categories
         public ?string $additional_information = null,
     ) {}
@@ -71,6 +75,10 @@ class CreateRequestDTO
             attach_back_face: $data['attach_back_face'] ?? null,
             // Category 3 fields
             ray_id: $data['ray_id'] ?? null,
+            // Category 4 fields
+            machine_id: $data['machine_id'] ?? null,
+            from_date: $data['from_date'] ?? null,
+            to_date: $data['to_date'] ?? null,
             additional_information: $data['additional_information'] ?? null,
         );
     }

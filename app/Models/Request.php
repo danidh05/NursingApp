@@ -69,6 +69,9 @@ class Request extends Model
         'attach_back_face',
         // Category 3: Rays specific fields
         'ray_id',
+        'machine_id',
+        'from_date',
+        'to_date',
     ];
 
     /**
@@ -79,6 +82,8 @@ class Request extends Model
     protected $casts = [
         'scheduled_time' => 'datetime',
         'ending_time' => 'datetime',
+        'from_date' => 'date', // Category 4: Machine rental start date
+        'to_date' => 'date', // Category 4: Machine rental end date
         'discount_percentage' => 'decimal:2',
         'total_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
@@ -196,6 +201,14 @@ class Request extends Model
     public function ray()
     {
         return $this->belongsTo(\App\Models\Ray::class);
+    }
+
+    /**
+     * Get the machine for this request (Category 4 only).
+     */
+    public function machine()
+    {
+        return $this->belongsTo(\App\Models\Machine::class);
     }
 
     /**

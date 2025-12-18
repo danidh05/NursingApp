@@ -94,9 +94,22 @@ class RequestRepository implements IRequestRepository
             if ($dto->notes !== null) {
                 $requestData['notes'] = $dto->notes;
             }
-            // Do NOT include Category 1 or Category 2 specific fields
+            // Do NOT include Category 1, 2, or 4 specific fields
+        } elseif ($categoryId === 4) {
+            // Category 4: Machines (with area-based pricing)
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
+            if ($dto->machine_id !== null) {
+                $requestData['machine_id'] = $dto->machine_id;
+            }
+            if ($dto->from_date !== null) {
+                $requestData['from_date'] = $dto->from_date;
+            }
+            if ($dto->to_date !== null) {
+                $requestData['to_date'] = $dto->to_date;
+            }
+            // Do NOT include Category 1, 2, or 3 specific fields
         } else {
-            // Future categories (4-8): Only common fields, no category-specific fields yet
+            // Future categories (5-8): Only common fields, no category-specific fields yet
             // Can be extended when implementing other categories
         }
         
@@ -116,6 +129,8 @@ class RequestRepository implements IRequestRepository
             $relationships[] = 'test';
         } elseif ($categoryId === 3) {
             $relationships[] = 'ray';
+        } elseif ($categoryId === 4) {
+            $relationships[] = 'machine';
         }
 
         return $request->load($relationships);
@@ -126,7 +141,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management
         // For updates, admins should be able to update any request
         if ($user->role->name === 'admin') {
-            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test'])->whereNull('deleted_at')->findOrFail($id);
+            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine'])->whereNull('deleted_at')->findOrFail($id);
         } else {
             $request = $this->findById($id, $user);
         }
@@ -150,12 +165,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -170,7 +185,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

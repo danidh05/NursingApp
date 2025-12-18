@@ -94,7 +94,7 @@ class RequestService implements IRequestService
         // Create the request
         $request = $this->requestRepository->create($dto, $user);
         
-        // Calculate and set total price (for Category 1: Service Request and Category 3: Rays)
+        // Calculate and set total price (for Category 1: Service Request, Category 3: Rays, and Category 4: Machines)
         if ($categoryId === 1 && $dto->service_id) {
             $totalPrice = $this->calculateRequestTotalPrice($request);
             $request->update([
@@ -103,6 +103,12 @@ class RequestService implements IRequestService
             ]);
         } elseif ($categoryId === 3 && $dto->ray_id) {
             $totalPrice = $this->calculateCategory3RequestTotalPrice($request);
+            $request->update([
+                'total_price' => $totalPrice,
+                'discounted_price' => $totalPrice // Initially same as total price
+            ]);
+        } elseif ($categoryId === 4 && $dto->machine_id) {
+            $totalPrice = $this->calculateCategory4RequestTotalPrice($request);
             $request->update([
                 'total_price' => $totalPrice,
                 'discounted_price' => $totalPrice // Initially same as total price
