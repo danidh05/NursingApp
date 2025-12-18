@@ -61,6 +61,11 @@ class RequestResponseDTO
         // Category 3: Rays specific fields
         public ?int $ray_id = null,
         public ?array $ray = null,          // Ray information (Category 3)
+        // Category 4: Machines specific fields
+        public ?int $machine_id = null,     // Machine ID (Category 4)
+        public ?array $machine = null,      // Machine information (Category 4)
+        public ?string $from_date = null,   // Category 4: rental start date
+        public ?string $to_date = null,     // Category 4: rental end date
     ) {}
 
     public static function fromModel(Request $request): self
@@ -197,8 +202,8 @@ class RequestResponseDTO
             })() : null,
             // Category 4: Machines specific fields
             machine_id: $request->machine_id,
-            from_date: $request->from_date?->format('Y-m-d'),
-            to_date: $request->to_date?->format('Y-m-d'),
+            from_date: $request->from_date ? (is_string($request->from_date) ? $request->from_date : $request->from_date->format('Y-m-d')) : null,
+            to_date: $request->to_date ? (is_string($request->to_date) ? $request->to_date : $request->to_date->format('Y-m-d')) : null,
             machine: $request->machine ? (function() use ($request) {
                 $locale = app()->getLocale() ?: 'en';
                 $translation = $request->machine->translate($locale);

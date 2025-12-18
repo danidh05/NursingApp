@@ -397,6 +397,43 @@ class RequestService implements IRequestService
         return $rayAreaPrice->price;
     }
 
+    /**
+     * Calculate the total price for a Category 4 (Machines) request based on machine and area.
+     * Falls back to machine's base price if no area-specific pricing is found.
+     *
+     * @param Request $request
+     * @return float
+     * @throws \Exception
+     */
+    private function calculateCategory4RequestTotalPrice(Request $request): float
+    {
+        $machine = $request->machine;
+        
+        if (!$machine) {
+            throw new \Exception('No machine attached to request');
+        }
+        
+        // Use request's area_id if available, otherwise fall back to user's registered area
+        $areaId = $request->area_id ?? $request->user->area_id;
+        
+        // If no area is specified, use base price
+        if (!$areaId) {
+            return $machine->price;
+        }
+        
+        // Try to find area-specific pricing
+        $machineAreaPrice = \App\Models\MachineAreaPrice::where('machine_id', $machine->id)
+                                               ->where('area_id', $areaId)
+                                               ->first();
+
+        // If no area-specific pricing found, fallback to base price
+        if (!$machineAreaPrice) {
+            return $machine->price;
+        }
+
+        return $machineAreaPrice->price;
+    }
+
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO
     {
         $dto = UpdateRequestDTO::fromArray($data);
