@@ -179,5 +179,104 @@ class RayController extends Controller
             ],
         ], 200);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/rays/area/{area_id}",
+     *     summary="Get all rays for a specific area with pricing",
+     *     description="Retrieve all rays available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+     *     tags={"Rays"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="area_id",
+     *         in="path",
+     *         required=true,
+     *         description="Area ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="en")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Rays for area retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="area", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Beirut")
+     *             ),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Chest X-Ray", description="Ray name (translatable)"),
+     *                 @OA\Property(property="price", type="number", format="float", example=120.00, description="Area-specific price if available, otherwise base price"),
+     *                 @OA\Property(property="base_price", type="number", format="float", example=100.00, description="Base price (fallback)"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/rays/..."),
+     *                 @OA\Property(property="about_ray", type="string", example="Chest X-Ray description...", nullable=true),
+     *                 @OA\Property(property="instructions", type="string", example="Follow instructions...", nullable=true),
+     *                 @OA\Property(property="additional_information", type="string", example="Additional info...", nullable=true),
+     *                 @OA\Property(property="has_area_pricing", type="boolean", example=true, description="Whether this ray has area-specific pricing")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Area not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Area not found")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
+    public function getRaysByArea($areaId): JsonResponse
+    {
+        $locale = app()->getLocale();
+        
+        // Verify area exists
+        $area = \App\Models\Area::findOrFail($areaId);
+        
+        $rays = Ray::with([
+            'translations',
+            'areaPrices' => function ($query) use ($areaId) {
+                $query->where('area_id', $areaId);
+            }
+        ])->get();
+        
+        $rays = $rays->map(function ($ray) use ($locale, $areaId) {
+            $translation = $ray->translate($locale);
+            
+            // Get area-specific price
+            $areaPrice = $ray->areaPrices->first();
+            $price = $areaPrice ? $areaPrice->price : $ray->price;
+            $hasAreaPricing = $areaPrice !== null;
+            
+            return [
+                'id' => $ray->id,
+                'name' => $translation ? $translation->name : $ray->name,
+                'price' => $price,
+                'base_price' => $ray->price,
+                'image' => $ray->image_url,
+                'about_ray' => $translation?->about_ray,
+                'instructions' => $translation?->instructions,
+                'additional_information' => $translation?->additional_information,
+                'has_area_pricing' => $hasAreaPricing,
+            ];
+        });
+        
+        return response()->json([
+            'success' => true,
+            'area' => [
+                'id' => $area->id,
+                'name' => $area->name,
+            ],
+            'data' => $rays,
+        ], 200);
+    }
 }
 

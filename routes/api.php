@@ -92,7 +92,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         // Rays (Category 3)
         Route::get('/rays', [RayController::class, 'index']); // List all rays
-        Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get rays for a specific area with pricing
+        Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get all rays for a specific area with pricing
         Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
         
         // FAQ APIs accessible by both users and admins (with translation support)

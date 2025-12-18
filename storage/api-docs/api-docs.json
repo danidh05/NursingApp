@@ -2890,6 +2890,419 @@
                 ]
             }
         },
+        "/api/admin/ray-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Ray Region Pricing"
+                ],
+                "summary": "List all ray area prices (Admin only)",
+                "description": "Retrieve a list of all ray area prices for admin management.",
+                "operationId": "12b93ca77d760a68140a31b5b6e7d151",
+                "responses": {
+                    "200": {
+                        "description": "Ray area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ray_area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "ray_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "ray": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Chest X-Ray"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Ray Region Pricing"
+                ],
+                "summary": "Create ray area price (Admin only)",
+                "description": "Create a new ray area price for region-based pricing.",
+                "operationId": "826e22d66e70b83495eb9fa0c174eb40",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ray_id",
+                                    "area_id",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "ray_id": {
+                                        "description": "Ray ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "description": "Area ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "price": {
+                                        "description": "Price for this ray in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ray area price created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray area price created successfully."
+                                        },
+                                        "ray_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "ray_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ray-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Ray Region Pricing"
+                ],
+                "summary": "Update ray area price (Admin only)",
+                "description": "Update an existing ray area price.",
+                "operationId": "3f96ee63fe842c738f98411e51f41b38",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "description": "Updated price for this ray in this area",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 120
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ray area price updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray area price updated successfully."
+                                        },
+                                        "ray_area_price": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "ray_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ray area price not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Ray Region Pricing"
+                ],
+                "summary": "Delete ray area price (Admin only)",
+                "description": "Delete a ray area price.",
+                "operationId": "995f92e284863261ac1893cc01ab0480",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ray area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ray area price deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ray area price deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ray area price not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/ray-area-prices/ray/{rayId}": {
+            "get": {
+                "tags": [
+                    "Admin - Ray Region Pricing"
+                ],
+                "summary": "Get prices for a specific ray (Admin only)",
+                "description": "Retrieve all area prices for a specific ray.",
+                "operationId": "9e043f5239de3801dbc4e2da220befdb",
+                "parameters": [
+                    {
+                        "name": "rayId",
+                        "in": "path",
+                        "description": "Ray ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ray area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ray": {
+                                            "type": "object"
+                                        },
+                                        "area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ray not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/rays": {
             "get": {
                 "tags": [
@@ -9664,6 +10077,150 @@
                 ]
             }
         },
+        "/api/rays/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Rays"
+                ],
+                "summary": "Get all rays for a specific area with pricing",
+                "description": "Retrieve all rays available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+                "operationId": "0b45cb8c00ea675b207978d2d3320c59",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "description": "Area ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rays for area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Ray name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray"
+                                                    },
+                                                    "price": {
+                                                        "description": "Area-specific price if available, otherwise base price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 120
+                                                    },
+                                                    "base_price": {
+                                                        "description": "Base price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/rays/..."
+                                                    },
+                                                    "about_ray": {
+                                                        "type": "string",
+                                                        "example": "Chest X-Ray description...",
+                                                        "nullable": true
+                                                    },
+                                                    "instructions": {
+                                                        "type": "string",
+                                                        "example": "Follow instructions...",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "type": "string",
+                                                        "example": "Additional info...",
+                                                        "nullable": true
+                                                    },
+                                                    "has_area_pricing": {
+                                                        "description": "Whether this ray has area-specific pricing",
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Area not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/requests": {
             "get": {
                 "tags": [
@@ -13972,6 +14529,10 @@
         {
             "name": "Admin - Popups",
             "description": "Admin - Popups"
+        },
+        {
+            "name": "Admin - Ray Region Pricing",
+            "description": "Admin - Ray Region Pricing"
         },
         {
             "name": "Admin - Region Pricing",
