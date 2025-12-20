@@ -137,13 +137,13 @@ class RequestController extends Controller
     /**
      * @OA\Post(
      *     path="/api/requests",
-     *     summary="Create a new request",
-     *     description="Create a new service request. Supports multiple categories with different payloads. ALL categories use multipart/form-data format (for consistency and future file upload support). Only accessible by users.",
+     *     summary="Create a new request or multiple requests",
+     *     description="Create one or multiple service requests. Supports multiple categories with different payloads. Can accept either: 1) A single request object (multipart/form-data or JSON), or 2) An array of request objects (JSON only). For single requests with file uploads, use multipart/form-data. For multiple requests or JSON-only single requests, use application/json. Only accessible by users.",
      *     tags={"Requests"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         description="All categories use multipart/form-data. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
+     *         description="For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
@@ -241,6 +241,34 @@ class RequestController extends Controller
      * )
      */
     public function store(CreateRequestRequest $httpRequest): JsonResponse
+    {
+        // Check if the request body is a JSON array
+        $jsonContent = $httpRequest->getContent();
+        $isJsonArray = false;
+        $requestsData = null;
+        
+        if ($httpRequest->isJson() && !empty($jsonContent)) {
+            $decoded = json_decode($jsonContent, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && isset($decoded[0])) {
+                // It's a JSON array
+                $isJsonArray = true;
+                $requestsData = $decoded;
+            }
+        }
+        
+        // If it's an array, process each request
+        if ($isJsonArray && is_array($requestsData)) {
+            return $this->processMultipleRequests($requestsData);
+        }
+        
+        // Otherwise, process as a single request (existing behavior)
+        return $this->processSingleRequest($httpRequest);
+    }
+    
+    /**
+     * Process a single request (existing behavior).
+     */
+    private function processSingleRequest($httpRequest): JsonResponse
     {
         // DEBUG STEP 1: Check what files are in the raw request
         Log::info('=== REQUEST CONTROLLER: File Upload Debug Start ===');
@@ -360,6 +388,67 @@ class RequestController extends Controller
         Log::info('=== REQUEST CONTROLLER: File Upload Debug End ===');
         
         return response()->json($request, 201);
+    }
+    
+    /**
+     * Process multiple requests from a JSON array.
+     */
+    private function processMultipleRequests(array $requestsData): JsonResponse
+    {
+        $results = [];
+        $errors = [];
+        
+        foreach ($requestsData as $index => $requestData) {
+            try {
+                // Validate each request individually
+                $validator = \Illuminate\Support\Facades\Validator::make($requestData, $this->getValidationRulesForRequest($requestData));
+                
+                if ($validator->fails()) {
+                    $errors[] = [
+                        'index' => $index,
+                        'errors' => $validator->errors()->toArray(),
+                    ];
+                    continue;
+                }
+                
+                // Process the validated request
+                $validated = $validator->validated();
+                $request = $this->requestService->createRequest($validated, Auth::user());
+                
+                $results[] = $request;
+            } catch (\Exception $e) {
+                $errors[] = [
+                    'index' => $index,
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+        
+        // Return response with results and any errors
+        $response = [
+            'success' => count($errors) === 0,
+            'total' => count($requestsData),
+            'created' => count($results),
+            'failed' => count($errors),
+            'data' => $results,
+        ];
+        
+        if (count($errors) > 0) {
+            $response['errors'] = $errors;
+        }
+        
+        $statusCode = count($results) > 0 ? 201 : 422;
+        
+        return response()->json($response, $statusCode);
+    }
+    
+    /**
+     * Get validation rules for a single request based on its category.
+     */
+    private function getValidationRulesForRequest(array $requestData): array
+    {
+        $categoryId = $requestData['category_id'] ?? 1;
+        return \App\Services\CategoryHandlers\CategoryRequestHandlerFactory::getValidationRules($categoryId);
     }
 
     /**

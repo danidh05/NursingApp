@@ -11689,11 +11689,11 @@
                 "tags": [
                     "Requests"
                 ],
-                "summary": "Create a new request",
-                "description": "Create a new service request. Supports multiple categories with different payloads. ALL categories use multipart/form-data format (for consistency and future file upload support). Only accessible by users.",
+                "summary": "Create a new request or multiple requests",
+                "description": "Create one or multiple service requests. Supports multiple categories with different payloads. Can accept either: 1) A single request object (multipart/form-data or JSON), or 2) An array of request objects (JSON only). For single requests with file uploads, use multipart/form-data. For multiple requests or JSON-only single requests, use application/json. Only accessible by users.",
                 "operationId": "b78212afe2734cba4b079913cc3d3855",
                 "requestBody": {
-                    "description": "All categories use multipart/form-data. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
+                    "description": "For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
                     "required": true,
                     "content": {
                         "multipart/form-data": {

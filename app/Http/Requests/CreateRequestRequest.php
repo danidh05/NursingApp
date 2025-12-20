@@ -12,6 +12,23 @@ class CreateRequestRequest extends FormRequest
     {
         return true; // Authorization will be handled by policies
     }
+    
+    /**
+     * Determine if the request should skip validation for JSON arrays.
+     * Arrays will be validated individually in the controller.
+     */
+    protected function shouldSkipValidation(): bool
+    {
+        // If it's JSON and an array, skip form request validation
+        // The controller will handle array validation individually
+        if ($this->isJson() && !empty($this->getContent())) {
+            $decoded = json_decode($this->getContent(), true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && isset($decoded[0])) {
+                return true; // Skip validation for arrays
+            }
+        }
+        return false;
+    }
 
     /**
      * Prepare the data for validation.
@@ -72,6 +89,11 @@ class CreateRequestRequest extends FormRequest
 
     public function rules(): array
     {
+        // Skip validation for JSON arrays (will be validated individually in controller)
+        if ($this->shouldSkipValidation()) {
+            return []; // Return empty rules for arrays
+        }
+        
         // Get category_id from request (defaults to 1: Service Request)
         $categoryId = $this->input('category_id', 1);
         
