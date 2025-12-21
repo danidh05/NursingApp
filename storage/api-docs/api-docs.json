@@ -3185,6 +3185,680 @@
                 ]
             }
         },
+        "/api/admin/offer-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Offer Region Pricing"
+                ],
+                "summary": "List all offer area prices (Admin only)",
+                "description": "Retrieve a list of all offer area prices for admin management.",
+                "operationId": "30178fe9dbbbad16f5fb92afe8a3d192",
+                "responses": {
+                    "200": {
+                        "description": "Offer area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "offer_area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "offer_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "offer_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 10
+                                                    },
+                                                    "old_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "offer": {
+                                                        "type": "object"
+                                                    },
+                                                    "area": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Offer Region Pricing"
+                ],
+                "summary": "Create offer area price (Admin only)",
+                "description": "Create a new offer area price for region-based pricing.",
+                "operationId": "194538bec18fef61adfaac0118c1aca2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "offer_id",
+                                    "area_id",
+                                    "offer_price",
+                                    "old_price"
+                                ],
+                                "properties": {
+                                    "offer_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "offer_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    },
+                                    "old_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 20
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Offer area price created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/offer-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Offer Region Pricing"
+                ],
+                "summary": "Update offer area price (Admin only)",
+                "description": "Update an existing offer area price.",
+                "operationId": "48363a594a87ae2703096d3a3cc4c0e3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "offer_price",
+                                    "old_price"
+                                ],
+                                "properties": {
+                                    "offer_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12
+                                    },
+                                    "old_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 25
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Offer area price updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Offer Region Pricing"
+                ],
+                "summary": "Delete offer area price (Admin only)",
+                "description": "Delete an offer area price.",
+                "operationId": "da8f3bf0383200c09496b10723a9bc5d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offer area price deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/offer-area-prices/offer/{offerId}": {
+            "get": {
+                "tags": [
+                    "Admin - Offer Region Pricing"
+                ],
+                "summary": "Get prices for a specific offer (Admin only)",
+                "description": "Retrieve all area prices for a specific offer.",
+                "operationId": "84d31b58f6e3efd4873166f26132143e",
+                "parameters": [
+                    {
+                        "name": "offerId",
+                        "in": "path",
+                        "description": "Offer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offer area prices retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/offers": {
+            "get": {
+                "tags": [
+                    "Admin - Offers"
+                ],
+                "summary": "List all offers",
+                "description": "Retrieve all offers with translations based on Accept-Language header",
+                "operationId": "c52fd6aa567b3935c5ce3cf0318cea82",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offers retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Offer name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Special Service Offer"
+                                                    },
+                                                    "offer_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 10
+                                                    },
+                                                    "old_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "offer_available_until": {
+                                                        "type": "string",
+                                                        "example": "3 Days"
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/offers/..."
+                                                    },
+                                                    "description": {
+                                                        "description": "Translation based on Accept-Language header",
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Offers"
+                ],
+                "summary": "Create a new offer",
+                "description": "Create a new offer with translations. Supports multipart/form-data for image upload.",
+                "operationId": "c02bfe3664a1d385f9d5fee64ca2cd83",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "offer_price",
+                                    "old_price",
+                                    "offer_available_until"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Offer name (translatable)",
+                                        "type": "string",
+                                        "example": "Special Service Offer"
+                                    },
+                                    "offer_price": {
+                                        "description": "Base offer price (same for all areas initially)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    },
+                                    "old_price": {
+                                        "description": "Base old price (same for all areas initially)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 20
+                                    },
+                                    "offer_available_until": {
+                                        "description": "Offer availability (e.g., '3 Days', '2026-01-31')",
+                                        "type": "string",
+                                        "example": "3 Days"
+                                    },
+                                    "category_id": {
+                                        "description": "Optional: Link to a category",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "image": {
+                                        "description": "Offer image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "description": "Description (translatable)",
+                                        "type": "string",
+                                        "example": "Special offer description..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Offer created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Offer created successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/offers/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Offers"
+                ],
+                "summary": "Get a specific offer",
+                "description": "Retrieve a specific offer with translations based on Accept-Language header",
+                "operationId": "8a26d6177595338ef5e52bceae2f23f8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offer retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Offer not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Offers"
+                ],
+                "summary": "Update an offer",
+                "description": "Update an existing offer. Use POST with _method=PUT for file uploads. Supports multipart/form-data.",
+                "operationId": "1c39bd606527ed0815c2383a3f1cd53b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method.",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Special Service Offer - Updated"
+                                    },
+                                    "offer_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12
+                                    },
+                                    "old_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 25
+                                    },
+                                    "offer_available_until": {
+                                        "type": "string",
+                                        "example": "5 Days"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "image": {
+                                        "description": "New image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Offer updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Offer updated successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Offers"
+                ],
+                "summary": "Delete an offer",
+                "description": "Delete an offer",
+                "operationId": "e6862a7e80c99aa1956bc5224fdf8a93",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offer deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Offer deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/physio-machines": {
             "get": {
                 "tags": [
@@ -12216,6 +12890,317 @@
                 ]
             }
         },
+        "/api/offers": {
+            "get": {
+                "tags": [
+                    "Offers"
+                ],
+                "summary": "List all offers",
+                "description": "Retrieve all offers with translations and area-based pricing based on Accept-Language header",
+                "operationId": "3a56496f000faffd87f42c4036770f0e",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offers retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Offer name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Special Service Offer"
+                                                    },
+                                                    "offer_price": {
+                                                        "description": "Offer price for user's area (or base price)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 10
+                                                    },
+                                                    "old_price": {
+                                                        "description": "Old price for user's area (or base price)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "base_offer_price": {
+                                                        "description": "Base offer price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 10
+                                                    },
+                                                    "base_old_price": {
+                                                        "description": "Base old price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "offer_available_until": {
+                                                        "type": "string",
+                                                        "example": "3 Days"
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/offers/..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "area_prices": {
+                                                        "description": "All area prices for this offer",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "offer_price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 12
+                                                                },
+                                                                "old_price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 25
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/offers/{id}": {
+            "get": {
+                "tags": [
+                    "Offers"
+                ],
+                "summary": "Get a specific offer",
+                "description": "Retrieve a specific offer with translations and area-based pricing",
+                "operationId": "1dbd23184465d2160e3b001e85798a37",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Offer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offer retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Offer not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/offers/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Offers"
+                ],
+                "summary": "Get all offers for a specific area with pricing",
+                "description": "Retrieve all offers available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+                "operationId": "2ac23a77aa716db84175104093902914",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "description": "Area ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offers for area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Special Service Offer"
+                                                    },
+                                                    "offer_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 12
+                                                    },
+                                                    "old_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 25
+                                                    },
+                                                    "base_offer_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 10
+                                                    },
+                                                    "base_old_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20
+                                                    },
+                                                    "has_area_pricing": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Area not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/physio-machines": {
             "get": {
                 "tags": [
@@ -17261,6 +18246,10 @@
             "description": "API Endpoints for managing Machines (Admin only)"
         },
         {
+            "name": "Admin - Offers",
+            "description": "API Endpoints for managing Offers (Admin only)"
+        },
+        {
             "name": "Admin - Physio Machines",
             "description": "API Endpoints for managing Physio Machines (Admin only)"
         },
@@ -17337,6 +18326,10 @@
             "description": "API Endpoints for viewing Machines (User accessible)"
         },
         {
+            "name": "Offers",
+            "description": "API Endpoints for viewing Offers (User accessible)"
+        },
+        {
             "name": "Physio Machines",
             "description": "API Endpoints for viewing Physio Machines (User accessible)"
         },
@@ -17367,6 +18360,10 @@
         {
             "name": "Admin - Machine Region Pricing",
             "description": "Admin - Machine Region Pricing"
+        },
+        {
+            "name": "Admin - Offer Region Pricing",
+            "description": "Admin - Offer Region Pricing"
         },
         {
             "name": "Admin - Physiotherapist Region Pricing",

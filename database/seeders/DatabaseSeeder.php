@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             RaySeeder::class, // Category 3: Rays
             MachineSeeder::class, // Category 4: Machines
             PhysiotherapistSeeder::class, // Category 5: Physiotherapists
+            OfferSeeder::class, // Category 6: Offers
         ]);
     }
 }
