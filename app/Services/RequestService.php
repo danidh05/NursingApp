@@ -89,14 +89,17 @@ class RequestService implements IRequestService
         } elseif ($categoryId == 5) { // Category 5: Physiotherapists
             Log::info('=== REQUEST SERVICE: Starting Category 5 file upload processing ===');
             $data = $this->handleCategory5FileUploads($data);
+        } elseif ($categoryId == 7) { // Category 7: Duties
+            Log::info('=== REQUEST SERVICE: Starting Category 7 file upload processing ===');
+            $data = $this->handleCategory7FileUploads($data);
         }
         
         // Map data to DTO using category-specific handler
         $dto = $handler->mapToDTO($data);
         
-        // Extract total_price from data for Category 5 (frontend-calculated)
+        // Extract total_price from data for Category 5 and 7 (frontend-calculated)
         $totalPrice = null;
-        if ($categoryId === 5 && isset($data['total_price'])) {
+        if (($categoryId === 5 || $categoryId === 7) && isset($data['total_price'])) {
             $totalPrice = (float)$data['total_price'];
         }
         
@@ -125,6 +128,16 @@ class RequestService implements IRequestService
         } elseif ($categoryId === 5 && $totalPrice !== null) {
             // Category 5: Use total_price from frontend (already set in create method)
             // No additional update needed
+        } elseif ($categoryId === 7) {
+            // Category 7: Calculate price if not provided by frontend, otherwise use frontend price
+            if ($totalPrice === null) {
+                $totalPrice = $this->calculateCategory7RequestTotalPrice($request);
+                $request->update([
+                    'total_price' => $totalPrice,
+                    'discounted_price' => $totalPrice
+                ]);
+            }
+            // If total_price was provided by frontend, it's already set in create method
         } elseif ($categoryId === 2) {
             // Category 2: Set price from test package or individual test (no area pricing)
             if ($dto->test_package_id) {
@@ -487,6 +500,118 @@ class RequestService implements IRequestService
         }
         
         return $data;
+    }
+
+    /**
+     * Handle file uploads for Category 7: Duties
+     * Uploads request_details (PDF file)
+     */
+    private function handleCategory7FileUploads(array $data): array
+    {
+        Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Starting ===');
+        $imageStorageService = app(\App\Services\ImageStorageService::class);
+        
+        // Handle request_details (single PDF file)
+        if (isset($data['request_details']) && $data['request_details'] instanceof \Illuminate\Http\UploadedFile) {
+            $file = $data['request_details'];
+            
+            Log::info('Processing request_details for Category 7');
+            Log::info('  - Type: ' . gettype($file));
+            Log::info('  - Is UploadedFile: ' . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+            Log::info('  - MIME Type: ' . $file->getMimeType());
+            Log::info('  - Original Name: ' . $file->getClientOriginalName());
+            
+            // Validate it's a PDF
+            if ($file->getMimeType() !== 'application/pdf') {
+                throw new \Exception('request_details must be a PDF file.');
+            }
+            
+            // Upload the file using ImageStorageService (handles PDFs too)
+            $filePath = $imageStorageService->uploadImage($file, 'duties/requests');
+            Log::info('  - Uploaded to: ' . $filePath);
+            
+            // Replace UploadedFile with file path (as array for consistency with request_details_files)
+            $data['request_details_files'] = [$filePath];
+            unset($data['request_details']);
+            
+            Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Completed ===');
+        } else {
+            Log::info('No request_details file found for Category 7');
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Calculate total price for Category 7: Duties requests
+     * This is optional - frontend can send total_price directly
+     */
+    private function calculateCategory7RequestTotalPrice(Request $request): float
+    {
+        $areaId = $request->area_id;
+        
+        // Nurse Visits subcategory
+        if ($request->nurse_visit_id) {
+            $nurseVisit = \App\Models\NurseVisit::find($request->nurse_visit_id);
+            if (!$nurseVisit) {
+                throw new \Exception("Nurse visit not found: {$request->nurse_visit_id}");
+            }
+            
+            $pricePerDay = $nurseVisit->getPriceForVisits($request->visits_per_day ?? 1, $areaId);
+            $fromDate = \Carbon\Carbon::parse($request->from_date);
+            $toDate = \Carbon\Carbon::parse($request->to_date);
+            $numberOfDays = $fromDate->diffInDays($toDate) + 1;
+            
+            return $pricePerDay * $numberOfDays;
+        }
+        
+        // Duties subcategory
+        if ($request->duty_id) {
+            $duty = \App\Models\Duty::find($request->duty_id);
+            if (!$duty) {
+                throw new \Exception("Duty not found: {$request->duty_id}");
+            }
+            
+            // Continuous care (1 month fixed price)
+            if ($request->is_continuous_care) {
+                return $duty->getContinuousCarePrice($areaId);
+            }
+            
+            // Duration-based pricing
+            $durationHours = $request->duration_hours;
+            if (!$durationHours) {
+                throw new \Exception("duration_hours is required for duty requests (unless is_continuous_care is true)");
+            }
+            
+            $pricePerDay = $duty->getPriceForDuration($durationHours, $request->is_day_shift ?? true, $areaId);
+            $fromDate = \Carbon\Carbon::parse($request->from_date);
+            $toDate = \Carbon\Carbon::parse($request->to_date);
+            $numberOfDays = $fromDate->diffInDays($toDate) + 1;
+            
+            return $pricePerDay * $numberOfDays;
+        }
+        
+        // Babysitter subcategory
+        if ($request->babysitter_id) {
+            $babysitter = \App\Models\Babysitter::find($request->babysitter_id);
+            if (!$babysitter) {
+                throw new \Exception("Babysitter not found: {$request->babysitter_id}");
+            }
+            
+            $durationHours = $request->duration_hours;
+            if (!$durationHours || !in_array($durationHours, [12, 24])) {
+                throw new \Exception("duration_hours must be 12 or 24 for babysitter requests");
+            }
+            
+            $pricePerDay = $babysitter->getPriceForDuration($durationHours, $request->is_day_shift ?? true, $areaId);
+            $fromDate = \Carbon\Carbon::parse($request->from_date);
+            $toDate = \Carbon\Carbon::parse($request->to_date);
+            $numberOfDays = $fromDate->diffInDays($toDate) + 1;
+            
+            return $pricePerDay * $numberOfDays;
+        }
+        
+        throw new \Exception("Category 7 request must have one of: nurse_visit_id, duty_id, or babysitter_id");
     }
 
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO

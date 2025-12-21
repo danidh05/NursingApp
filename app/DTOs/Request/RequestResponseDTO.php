@@ -72,6 +72,17 @@ class RequestResponseDTO
         public ?int $sessions_per_month = null,     // Category 5: number of sessions per month
         public ?bool $machines_included = false,    // Category 5: whether machines are included
         public ?array $physio_machines = null,       // Category 5: array of physio machine data
+        // Category 7: Duties specific fields
+        public ?int $nurse_visit_id = null,          // Category 7: Nurse Visits subcategory
+        public ?int $duty_id = null,                 // Category 7: Duties subcategory
+        public ?int $babysitter_id = null,           // Category 7: Babysitter subcategory
+        public ?int $visits_per_day = null,          // Category 7: Nurse Visits - visits per day (1-4)
+        public ?int $duration_hours = null,          // Category 7: Duties/Babysitter - duration in hours
+        public ?bool $is_continuous_care = false,    // Category 7: Duties - continuous care
+        public ?bool $is_day_shift = true,           // Category 7: Duties/Babysitter - day shift or night shift
+        public ?array $nurse_visit = null,           // Category 7: Nurse Visit information
+        public ?array $duty = null,                  // Category 7: Duty information
+        public ?array $babysitter = null,            // Category 7: Babysitter information
     ) {}
 
     public static function fromModel(Request $request): self
@@ -243,6 +254,76 @@ class RequestResponseDTO
                     'specialization' => $request->physiotherapist->specialization,
                     'years_of_experience' => $request->physiotherapist->years_of_experience,
                     'description' => $translation?->description,
+                ];
+            })() : null,
+            // Category 7: Duties specific fields
+            nurse_visit_id: $request->nurse_visit_id,
+            duty_id: $request->duty_id,
+            babysitter_id: $request->babysitter_id,
+            visits_per_day: $request->visits_per_day,
+            duration_hours: $request->duration_hours,
+            is_continuous_care: $request->is_continuous_care ?? false,
+            is_day_shift: $request->is_day_shift ?? true,
+            nurse_visit: $request->nurseVisit ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->nurseVisit->translate($locale);
+                return [
+                    'id' => $request->nurseVisit->id,
+                    'name' => $request->nurseVisit->name,
+                    'image' => $request->nurseVisit->image_url,
+                    'price_per_1_visit' => $request->nurseVisit->price_per_1_visit,
+                    'price_per_2_visits' => $request->nurseVisit->price_per_2_visits,
+                    'price_per_3_visits' => $request->nurseVisit->price_per_3_visits,
+                    'price_per_4_visits' => $request->nurseVisit->price_per_4_visits,
+                    'about' => $translation?->about,
+                    'terms_and_conditions' => $translation?->terms_and_conditions,
+                    'additional_instructions' => $translation?->additional_instructions,
+                    'service_include' => $translation?->service_include,
+                    'description' => $translation?->description,
+                    'additional_information' => $translation?->additional_information,
+                ];
+            })() : null,
+            duty: $request->duty ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->duty->translate($locale);
+                return [
+                    'id' => $request->duty->id,
+                    'name' => $request->duty->name,
+                    'image' => $request->duty->image_url,
+                    'day_shift_price_4_hours' => $request->duty->day_shift_price_4_hours,
+                    'day_shift_price_6_hours' => $request->duty->day_shift_price_6_hours,
+                    'day_shift_price_8_hours' => $request->duty->day_shift_price_8_hours,
+                    'day_shift_price_12_hours' => $request->duty->day_shift_price_12_hours,
+                    'night_shift_price_4_hours' => $request->duty->night_shift_price_4_hours,
+                    'night_shift_price_6_hours' => $request->duty->night_shift_price_6_hours,
+                    'night_shift_price_8_hours' => $request->duty->night_shift_price_8_hours,
+                    'night_shift_price_12_hours' => $request->duty->night_shift_price_12_hours,
+                    'continuous_care_price' => $request->duty->continuous_care_price,
+                    'about' => $translation?->about,
+                    'terms_and_conditions' => $translation?->terms_and_conditions,
+                    'additional_instructions' => $translation?->additional_instructions,
+                    'service_include' => $translation?->service_include,
+                    'description' => $translation?->description,
+                    'additional_information' => $translation?->additional_information,
+                ];
+            })() : null,
+            babysitter: $request->babysitter ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->babysitter->translate($locale);
+                return [
+                    'id' => $request->babysitter->id,
+                    'name' => $request->babysitter->name,
+                    'image' => $request->babysitter->image_url,
+                    'day_shift_price_12_hours' => $request->babysitter->day_shift_price_12_hours,
+                    'day_shift_price_24_hours' => $request->babysitter->day_shift_price_24_hours,
+                    'night_shift_price_12_hours' => $request->babysitter->night_shift_price_12_hours,
+                    'night_shift_price_24_hours' => $request->babysitter->night_shift_price_24_hours,
+                    'about' => $translation?->about,
+                    'terms_and_conditions' => $translation?->terms_and_conditions,
+                    'additional_instructions' => $translation?->additional_instructions,
+                    'service_include' => $translation?->service_include,
+                    'description' => $translation?->description,
+                    'additional_information' => $translation?->additional_information,
                 ];
             })() : null,
         );

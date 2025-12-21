@@ -35,6 +35,9 @@ use App\Http\Controllers\Admin\PhysioMachineController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\OfferAreaPriceController;
+use App\Http\Controllers\Admin\NurseVisitController as AdminNurseVisitController;
+use App\Http\Controllers\Admin\DutyController as AdminDutyController;
+use App\Http\Controllers\Admin\BabysitterController as AdminBabysitterController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -123,6 +126,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/offers', [OfferController::class, 'index']); // List all offers
         Route::get('/offers/area/{area_id}', [OfferController::class, 'getOffersByArea']); // Get all offers for a specific area with pricing
         Route::get('/offers/{id}', [OfferController::class, 'show']); // View a specific offer
+        
+        // Duties (Category 7) - Nurse Visits, Duties, Babysitters
+        Route::get('/nurse-visits', [\App\Http\Controllers\NurseVisitController::class, 'index']); // List all nurse visits
+        Route::get('/nurse-visits/area/{area_id}', [\App\Http\Controllers\NurseVisitController::class, 'getNurseVisitsByArea']); // Get all nurse visits for a specific area
+        Route::get('/nurse-visits/{id}', [\App\Http\Controllers\NurseVisitController::class, 'show']); // View a specific nurse visit
+        Route::post('/nurse-visits/calculate-price', [\App\Http\Controllers\NurseVisitController::class, 'calculatePrice']); // Calculate price for nurse visits
+        
+        Route::get('/duties', [\App\Http\Controllers\DutyController::class, 'index']); // List all duties
+        Route::get('/duties/area/{area_id}', [\App\Http\Controllers\DutyController::class, 'getDutiesByArea']); // Get all duties for a specific area
+        Route::get('/duties/{id}', [\App\Http\Controllers\DutyController::class, 'show']); // View a specific duty
+        Route::post('/duties/calculate-price', [\App\Http\Controllers\DutyController::class, 'calculatePrice']); // Calculate price for duties
+        
+        Route::get('/babysitters', [\App\Http\Controllers\BabysitterController::class, 'index']); // List all babysitters
+        Route::get('/babysitters/area/{area_id}', [\App\Http\Controllers\BabysitterController::class, 'getBabysittersByArea']); // Get all babysitters for a specific area
+        Route::get('/babysitters/{id}', [\App\Http\Controllers\BabysitterController::class, 'show']); // View a specific babysitter
+        Route::post('/babysitters/calculate-price', [\App\Http\Controllers\BabysitterController::class, 'calculatePrice']); // Calculate price for babysitters
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -268,6 +287,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'update']);
         Route::delete('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'destroy']);
         Route::get('/offer-area-prices/offer/{offerId}', [OfferAreaPriceController::class, 'getOfferPrices']);
+
+        // Category 7: Duties - Admin routes
+        // Nurse Visits
+        Route::get('/nurse-visits', [\App\Http\Controllers\Admin\NurseVisitController::class, 'index']);
+        Route::post('/nurse-visits', [\App\Http\Controllers\Admin\NurseVisitController::class, 'store']);
+        Route::get('/nurse-visits/{nurseVisit}', [\App\Http\Controllers\Admin\NurseVisitController::class, 'show']);
+        Route::match(['put', 'post'], '/nurse-visits/{nurseVisit}', [\App\Http\Controllers\Admin\NurseVisitController::class, 'update']);
+        Route::delete('/nurse-visits/{nurseVisit}', [\App\Http\Controllers\Admin\NurseVisitController::class, 'destroy']);
+        
+        // Duties
+        Route::get('/duties', [\App\Http\Controllers\Admin\DutyController::class, 'index']);
+        Route::post('/duties', [\App\Http\Controllers\Admin\DutyController::class, 'store']);
+        Route::get('/duties/{duty}', [\App\Http\Controllers\Admin\DutyController::class, 'show']);
+        Route::match(['put', 'post'], '/duties/{duty}', [\App\Http\Controllers\Admin\DutyController::class, 'update']);
+        Route::delete('/duties/{duty}', [\App\Http\Controllers\Admin\DutyController::class, 'destroy']);
+        
+        // Babysitters
+        Route::get('/babysitters', [\App\Http\Controllers\Admin\BabysitterController::class, 'index']);
+        Route::post('/babysitters', [\App\Http\Controllers\Admin\BabysitterController::class, 'store']);
+        Route::get('/babysitters/{babysitter}', [\App\Http\Controllers\Admin\BabysitterController::class, 'show']);
+        Route::match(['put', 'post'], '/babysitters/{babysitter}', [\App\Http\Controllers\Admin\BabysitterController::class, 'update']);
+        Route::delete('/babysitters/{babysitter}', [\App\Http\Controllers\Admin\BabysitterController::class, 'destroy']);
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

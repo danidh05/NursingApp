@@ -77,6 +77,14 @@ class Request extends Model
         'sessions_per_month',
         'machines_included',
         'physio_machines',
+        // Category 7: Duties specific fields
+        'nurse_visit_id',
+        'duty_id',
+        'babysitter_id',
+        'visits_per_day',
+        'duration_hours',
+        'is_continuous_care',
+        'is_day_shift',
     ];
 
     /**
@@ -92,6 +100,11 @@ class Request extends Model
         'machines_included' => 'boolean', // Category 5: Whether physio machines are included
         'physio_machines' => 'array', // Category 5: Array of physio machine data
         'sessions_per_month' => 'integer', // Category 5: Number of sessions per month
+        // Category 7: Duties specific casts
+        'visits_per_day' => 'integer', // Category 7: Nurse Visits - visits per day (1-4)
+        'duration_hours' => 'integer', // Category 7: Duties/Babysitter - duration in hours
+        'is_continuous_care' => 'boolean', // Category 7: Duties - continuous care
+        'is_day_shift' => 'boolean', // Category 7: Duties/Babysitter - day shift or night shift
         'discount_percentage' => 'decimal:2',
         'total_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
@@ -225,6 +238,30 @@ class Request extends Model
     public function physiotherapist()
     {
         return $this->belongsTo(\App\Models\Physiotherapist::class);
+    }
+
+    /**
+     * Get the nurse visit for this request (Category 7 only - Nurse Visits subcategory).
+     */
+    public function nurseVisit()
+    {
+        return $this->belongsTo(\App\Models\NurseVisit::class);
+    }
+
+    /**
+     * Get the duty for this request (Category 7 only - Duties subcategory).
+     */
+    public function duty()
+    {
+        return $this->belongsTo(\App\Models\Duty::class);
+    }
+
+    /**
+     * Get the babysitter for this request (Category 7 only - Babysitter subcategory).
+     */
+    public function babysitter()
+    {
+        return $this->belongsTo(\App\Models\Babysitter::class);
     }
 
     /**

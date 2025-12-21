@@ -44,6 +44,14 @@ class CreateRequestDTO
         public ?int $sessions_per_month = null, // Category 5 only: number of sessions per month
         public ?bool $machines_included = false, // Category 5 only: whether machines are included
         public ?array $physio_machines = null, // Category 5 only: array of physio machine IDs
+        // Category 7: Duties specific fields
+        public ?int $nurse_visit_id = null, // Category 7: Nurse Visits subcategory
+        public ?int $duty_id = null, // Category 7: Duties subcategory
+        public ?int $babysitter_id = null, // Category 7: Babysitter subcategory
+        public ?int $visits_per_day = null, // Category 7: Nurse Visits - visits per day (1-4)
+        public ?int $duration_hours = null, // Category 7: Duties/Babysitter - duration in hours (4,6,8,12,24)
+        public ?bool $is_continuous_care = false, // Category 7: Duties - continuous care (1 month)
+        public ?bool $is_day_shift = true, // Category 7: Duties/Babysitter - day shift or night shift
         // Common field for all categories
         public ?string $additional_information = null,
     ) {}
@@ -89,6 +97,14 @@ class CreateRequestDTO
             sessions_per_month: isset($data['sessions_per_month']) ? (int)$data['sessions_per_month'] : null,
             machines_included: $data['machines_included'] ?? false,
             physio_machines: $data['physio_machines'] ?? null,
+            // Category 7 fields
+            nurse_visit_id: isset($data['nurse_visit_id']) ? (int)$data['nurse_visit_id'] : null,
+            duty_id: isset($data['duty_id']) ? (int)$data['duty_id'] : null,
+            babysitter_id: isset($data['babysitter_id']) ? (int)$data['babysitter_id'] : null,
+            visits_per_day: isset($data['visits_per_day']) ? (int)$data['visits_per_day'] : null,
+            duration_hours: isset($data['duration_hours']) ? (int)$data['duration_hours'] : null,
+            is_continuous_care: isset($data['is_continuous_care']) ? (bool)$data['is_continuous_care'] : false,
+            is_day_shift: isset($data['is_day_shift']) ? (bool)$data['is_day_shift'] : true,
             additional_information: $data['additional_information'] ?? null,
         );
     }

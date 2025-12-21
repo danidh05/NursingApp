@@ -147,6 +147,40 @@ class RequestRepository implements IRequestRepository
                 $requestData['notes'] = $dto->notes;
             }
             // Do NOT include Category 1, 2, 3, or 4 specific fields
+        } elseif ($categoryId === 7) {
+            // Category 7: Duties (with area-based pricing)
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
+            if ($dto->nurse_visit_id !== null) {
+                $requestData['nurse_visit_id'] = $dto->nurse_visit_id;
+            }
+            if ($dto->duty_id !== null) {
+                $requestData['duty_id'] = $dto->duty_id;
+            }
+            if ($dto->babysitter_id !== null) {
+                $requestData['babysitter_id'] = $dto->babysitter_id;
+            }
+            if ($dto->visits_per_day !== null) {
+                $requestData['visits_per_day'] = $dto->visits_per_day;
+            }
+            if ($dto->duration_hours !== null) {
+                $requestData['duration_hours'] = $dto->duration_hours;
+            }
+            $requestData['is_continuous_care'] = $dto->is_continuous_care ?? false;
+            $requestData['is_day_shift'] = $dto->is_day_shift ?? true;
+            if ($dto->from_date !== null) {
+                $requestData['from_date'] = $dto->from_date;
+            }
+            if ($dto->to_date !== null) {
+                $requestData['to_date'] = $dto->to_date;
+            }
+            if ($dto->request_details_files !== null && !empty($dto->request_details_files)) {
+                // request_details is a single PDF file, store as JSON array
+                $requestData['request_details_files'] = json_encode($dto->request_details_files);
+            }
+            if ($dto->notes !== null) {
+                $requestData['notes'] = $dto->notes;
+            }
+            // Do NOT include Category 1, 2, 3, 4, or 5 specific fields
         } else {
             // Future categories (6-8): Only common fields, no category-specific fields yet
             // Can be extended when implementing other categories
@@ -172,6 +206,10 @@ class RequestRepository implements IRequestRepository
             $relationships[] = 'machine';
         } elseif ($categoryId === 5) {
             $relationships[] = 'physiotherapist';
+        } elseif ($categoryId === 7) {
+            $relationships[] = 'nurseVisit';
+            $relationships[] = 'duty';
+            $relationships[] = 'babysitter';
         }
 
         return $request->load($relationships);
@@ -182,7 +220,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management
         // For updates, admins should be able to update any request
         if ($user->role->name === 'admin') {
-            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist'])->whereNull('deleted_at')->findOrFail($id);
+            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist', 'nurseVisit', 'duty', 'babysitter'])->whereNull('deleted_at')->findOrFail($id);
         } else {
             $request = $this->findById($id, $user);
         }
@@ -206,7 +244,7 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist', 'nurseVisit', 'duty', 'babysitter');
     }
 
     public function findById(int $id, User $user): Request
