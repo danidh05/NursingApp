@@ -28,6 +28,14 @@ class NurseVisit extends Model
     ];
 
     /**
+     * Override the translation foreign key to use nurse_visit_id instead of nursevisit_id.
+     */
+    protected function getTranslationForeignKey(): string
+    {
+        return 'nurse_visit_id';
+    }
+
+    /**
      * Get the requests that use this nurse visit.
      */
     public function requests()

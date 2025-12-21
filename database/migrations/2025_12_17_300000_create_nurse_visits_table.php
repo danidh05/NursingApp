@@ -19,7 +19,6 @@ return new class extends Migration
             $table->decimal('price_per_2_visits', 8, 2); // Price for 2 visits per day
             $table->decimal('price_per_3_visits', 8, 2); // Price for 3 visits per day
             $table->decimal('price_per_4_visits', 8, 2); // Price for 4 visits per day
-            $table->decimal('base_price', 8, 2); // Base price (for area pricing fallback)
             $table->timestamps();
         });
     }

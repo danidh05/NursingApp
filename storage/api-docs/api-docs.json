@@ -3185,6 +3185,259 @@
                 ]
             }
         },
+        "/api/admin/nurse-visits": {
+            "get": {
+                "tags": [
+                    "Admin - Nurse Visits"
+                ],
+                "summary": "List all nurse visits",
+                "operationId": "1c7d42989c47214c315f2f2207c24ade",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Nurse Visits"
+                ],
+                "summary": "Create a new nurse visit",
+                "operationId": "621d0887c37459762e4ecead050d4b98",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "price_per_1_visit",
+                                    "price_per_2_visits",
+                                    "price_per_3_visits",
+                                    "price_per_4_visits"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "price_per_1_visit": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_2_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_3_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_4_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "locale": {
+                                        "description": "Optional, defaults to 'en'",
+                                        "type": "string",
+                                        "example": "en"
+                                    },
+                                    "about": {
+                                        "type": "string"
+                                    },
+                                    "terms_and_conditions": {
+                                        "type": "string"
+                                    },
+                                    "additional_instructions": {
+                                        "type": "string"
+                                    },
+                                    "service_include": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "additional_information": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/nurse-visits/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Nurse Visits"
+                ],
+                "summary": "Get a specific nurse visit",
+                "operationId": "b4047a9baff9e1502d04993dd63b44e0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Nurse Visits"
+                ],
+                "summary": "Update a nurse visit",
+                "operationId": "a6275bb557572d212f5952c7ffaf9898",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "price_per_1_visit": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_2_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_3_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "price_per_4_visits": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "example": "en"
+                                    },
+                                    "about": {
+                                        "type": "string"
+                                    },
+                                    "terms_and_conditions": {
+                                        "type": "string"
+                                    },
+                                    "additional_instructions": {
+                                        "type": "string"
+                                    },
+                                    "service_include": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "additional_information": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Nurse Visits"
+                ],
+                "summary": "Delete a nurse visit",
+                "operationId": "668c6a4e416d72a16b08c35474b5fae5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/offer-area-prices": {
             "get": {
                 "tags": [
@@ -12890,6 +13143,144 @@
                 ]
             }
         },
+        "/api/nurse-visits": {
+            "get": {
+                "tags": [
+                    "Nurse Visits"
+                ],
+                "summary": "Get all nurse visits",
+                "operationId": "20620345b0444369dcf322d6f719c332",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/nurse-visits/{id}": {
+            "get": {
+                "tags": [
+                    "Nurse Visits"
+                ],
+                "summary": "Get a specific nurse visit",
+                "operationId": "762555e0d6d56f03c68dde5cdba2158c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/nurse-visits/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Nurse Visits"
+                ],
+                "summary": "Get nurse visits by area",
+                "operationId": "5622b91424070de71caf499b6fd1804e",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/nurse-visits/calculate-price": {
+            "post": {
+                "tags": [
+                    "Nurse Visits"
+                ],
+                "summary": "Calculate price for nurse visits",
+                "operationId": "02fb7fe9532884d244fd6d4bcfa209ea",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nurse_visit_id",
+                                    "visits_per_day",
+                                    "from_date",
+                                    "to_date"
+                                ],
+                                "properties": {
+                                    "nurse_visit_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "visits_per_day": {
+                                        "description": "1-4",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-20"
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/offers": {
             "get": {
                 "tags": [
@@ -18246,6 +18637,10 @@
             "description": "API Endpoints for managing Machines (Admin only)"
         },
         {
+            "name": "Admin - Nurse Visits",
+            "description": "API Endpoints for managing Nurse Visits (Admin only)"
+        },
+        {
             "name": "Admin - Offers",
             "description": "API Endpoints for managing Offers (Admin only)"
         },
@@ -18324,6 +18719,10 @@
         {
             "name": "Machines",
             "description": "API Endpoints for viewing Machines (User accessible)"
+        },
+        {
+            "name": "Nurse Visits",
+            "description": "API Endpoints for viewing Nurse Visits (User)"
         },
         {
             "name": "Offers",

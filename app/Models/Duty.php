@@ -38,6 +38,14 @@ class Duty extends Model
     ];
 
     /**
+     * Override the translation foreign key to use duty_id (already correct, but explicit).
+     */
+    protected function getTranslationForeignKey(): string
+    {
+        return 'duty_id';
+    }
+
+    /**
      * Get the requests that use this duty.
      */
     public function requests()

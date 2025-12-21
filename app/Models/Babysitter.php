@@ -28,6 +28,14 @@ class Babysitter extends Model
     ];
 
     /**
+     * Override the translation foreign key to use babysitter_id (already correct, but explicit).
+     */
+    protected function getTranslationForeignKey(): string
+    {
+        return 'babysitter_id';
+    }
+
+    /**
      * Get the requests that use this babysitter.
      */
     public function requests()
