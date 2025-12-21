@@ -32,6 +32,9 @@ use App\Http\Controllers\PhysiotherapistController;
 use App\Http\Controllers\Admin\PhysiotherapistController as AdminPhysiotherapistController;
 use App\Http\Controllers\Admin\PhysiotherapistAreaPriceController;
 use App\Http\Controllers\Admin\PhysioMachineController;
+use App\Http\Controllers\OfferController;
+use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\OfferAreaPriceController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -115,6 +118,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Physio Machines (for Category 5) - User accessible
         Route::get('/physio-machines', [\App\Http\Controllers\PhysioMachineController::class, 'index']); // List all physio machines
         Route::get('/physio-machines/{id}', [\App\Http\Controllers\PhysioMachineController::class, 'show']); // View a specific physio machine
+        
+        // Offers (Category 6)
+        Route::get('/offers', [OfferController::class, 'index']); // List all offers
+        Route::get('/offers/area/{area_id}', [OfferController::class, 'getOffersByArea']); // Get all offers for a specific area with pricing
+        Route::get('/offers/{id}', [OfferController::class, 'show']); // View a specific offer
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -246,6 +254,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'show']);
         Route::put('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'update']);
         Route::delete('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'destroy']);
+        
+        // Offers management (Category 6)
+        Route::get('/offers', [AdminOfferController::class, 'index']);
+        Route::post('/offers', [AdminOfferController::class, 'store']);
+        Route::get('/offers/{offer}', [AdminOfferController::class, 'show']);
+        Route::match(['put', 'post'], '/offers/{offer}', [AdminOfferController::class, 'update'])->name('admin.offers.update');
+        Route::delete('/offers/{offer}', [AdminOfferController::class, 'destroy']);
+        
+        // Offer Area Price management routes
+        Route::get('/offer-area-prices', [OfferAreaPriceController::class, 'index']);
+        Route::post('/offer-area-prices', [OfferAreaPriceController::class, 'store']);
+        Route::put('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'update']);
+        Route::delete('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'destroy']);
+        Route::get('/offer-area-prices/offer/{offerId}', [OfferAreaPriceController::class, 'getOfferPrices']);
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category
