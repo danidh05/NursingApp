@@ -288,7 +288,7 @@ class RequestController extends Controller
         $categoryId = $httpRequest->input('category_id', 1);
         Log::info('Category ID: ' . $categoryId);
         
-        if ($categoryId === 2 || $categoryId === 3) {
+        if ($categoryId === 2 || $categoryId === 3 || $categoryId === 5) {
             // DEBUG STEP 2: Check each file field
             // IMPORTANT: Always extract files from allFiles() first, as validated() may have converted them
             // Handle request_details_files - Postman sends as 'request_details_files[]' but Laravel receives as 'request_details_files'

@@ -28,6 +28,10 @@ use App\Http\Controllers\Admin\RayController as AdminRayController;
 use App\Http\Controllers\MachineController;
 use App\Http\Controllers\Admin\MachineController as AdminMachineController;
 use App\Http\Controllers\Admin\MachineAreaPriceController;
+use App\Http\Controllers\PhysiotherapistController;
+use App\Http\Controllers\Admin\PhysiotherapistController as AdminPhysiotherapistController;
+use App\Http\Controllers\Admin\PhysiotherapistAreaPriceController;
+use App\Http\Controllers\Admin\PhysioMachineController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -102,6 +106,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/machines', [MachineController::class, 'index']); // List all machines
         Route::get('/machines/area/{area_id}', [MachineController::class, 'getMachinesByArea']); // Get all machines for a specific area with pricing
         Route::get('/machines/{id}', [MachineController::class, 'show']); // View a specific machine
+        
+        // Physiotherapists (Category 5)
+        Route::get('/physiotherapists', [PhysiotherapistController::class, 'index']); // List all physiotherapists
+        Route::get('/physiotherapists/area/{area_id}', [PhysiotherapistController::class, 'getPhysiotherapistsByArea']); // Get all physiotherapists for a specific area with pricing
+        Route::get('/physiotherapists/{id}', [PhysiotherapistController::class, 'show']); // View a specific physiotherapist
+        
+        // Physio Machines (for Category 5) - User accessible
+        Route::get('/physio-machines', [\App\Http\Controllers\PhysioMachineController::class, 'index']); // List all physio machines
+        Route::get('/physio-machines/{id}', [\App\Http\Controllers\PhysioMachineController::class, 'show']); // View a specific physio machine
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -212,6 +225,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/machine-area-prices/{id}', [MachineAreaPriceController::class, 'update']); // Update a machine area price
         Route::delete('/machine-area-prices/{id}', [MachineAreaPriceController::class, 'destroy']); // Delete a machine area price
         Route::get('/machine-area-prices/machine/{machineId}', [MachineAreaPriceController::class, 'getMachinePrices']); // Get prices for a specific machine
+        
+        // Physiotherapists management (Category 5)
+        Route::get('/physiotherapists', [AdminPhysiotherapistController::class, 'index']);
+        Route::post('/physiotherapists', [AdminPhysiotherapistController::class, 'store']);
+        Route::get('/physiotherapists/{physiotherapist}', [AdminPhysiotherapistController::class, 'show']);
+        Route::match(['put', 'post'], '/physiotherapists/{physiotherapist}', [AdminPhysiotherapistController::class, 'update'])->name('admin.physiotherapists.update');
+        Route::delete('/physiotherapists/{physiotherapist}', [AdminPhysiotherapistController::class, 'destroy']);
+        
+        // Physiotherapist Area Price management routes
+        Route::get('/physiotherapist-area-prices', [PhysiotherapistAreaPriceController::class, 'index']);
+        Route::post('/physiotherapist-area-prices', [PhysiotherapistAreaPriceController::class, 'store']);
+        Route::put('/physiotherapist-area-prices/{id}', [PhysiotherapistAreaPriceController::class, 'update']);
+        Route::delete('/physiotherapist-area-prices/{id}', [PhysiotherapistAreaPriceController::class, 'destroy']);
+        Route::get('/physiotherapist-area-prices/physiotherapist/{physiotherapistId}', [PhysiotherapistAreaPriceController::class, 'getPhysiotherapistPrices']);
+        
+        // Physio Machines management (Category 5)
+        Route::get('/physio-machines', [PhysioMachineController::class, 'index']);
+        Route::post('/physio-machines', [PhysioMachineController::class, 'store']);
+        Route::get('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'show']);
+        Route::put('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'update']);
+        Route::delete('/physio-machines/{physioMachine}', [PhysioMachineController::class, 'destroy']);
 
         // Category management routes
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category

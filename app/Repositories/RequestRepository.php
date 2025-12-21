@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RequestRepository implements IRequestRepository
 {
-    public function create(CreateRequestDTO $dto, User $user): Request
+    public function create(CreateRequestDTO $dto, User $user, ?float $totalPrice = null): Request
     {
         // Build full_name from first_name and last_name if provided
         $fullName = $dto->full_name;
@@ -107,9 +107,48 @@ class RequestRepository implements IRequestRepository
             if ($dto->to_date !== null) {
                 $requestData['to_date'] = $dto->to_date;
             }
-            // Do NOT include Category 1, 2, or 3 specific fields
+            // Do NOT include Category 1, 2, 3, or 5 specific fields
+        } elseif ($categoryId === 5) {
+            // Category 5: Physiotherapists (with area-based pricing)
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
+            if ($dto->physiotherapist_id !== null) {
+                $requestData['physiotherapist_id'] = $dto->physiotherapist_id;
+            }
+            if ($dto->sessions_per_month !== null) {
+                $requestData['sessions_per_month'] = $dto->sessions_per_month;
+            }
+            $requestData['machines_included'] = $dto->machines_included ?? false;
+            if ($dto->physio_machines !== null) {
+                // Fetch physio machine data and store as JSON
+                $physioMachinesData = [];
+                foreach ($dto->physio_machines as $machineId) {
+                    $machine = \App\Models\PhysioMachine::find($machineId);
+                    if ($machine) {
+                        $physioMachinesData[] = [
+                            'id' => $machine->id,
+                            'name' => $machine->name,
+                            'price' => $machine->price,
+                        ];
+                    }
+                }
+                $requestData['physio_machines'] = !empty($physioMachinesData) ? json_encode($physioMachinesData) : null;
+            }
+            if ($dto->from_date !== null) {
+                $requestData['from_date'] = $dto->from_date;
+            }
+            if ($dto->to_date !== null) {
+                $requestData['to_date'] = $dto->to_date;
+            }
+            if ($dto->request_details_files !== null && !empty($dto->request_details_files)) {
+                // request_details is a single PDF file, store as JSON array
+                $requestData['request_details_files'] = json_encode($dto->request_details_files);
+            }
+            if ($dto->notes !== null) {
+                $requestData['notes'] = $dto->notes;
+            }
+            // Do NOT include Category 1, 2, 3, or 4 specific fields
         } else {
-            // Future categories (5-8): Only common fields, no category-specific fields yet
+            // Future categories (6-8): Only common fields, no category-specific fields yet
             // Can be extended when implementing other categories
         }
         
@@ -131,6 +170,8 @@ class RequestRepository implements IRequestRepository
             $relationships[] = 'ray';
         } elseif ($categoryId === 4) {
             $relationships[] = 'machine';
+        } elseif ($categoryId === 5) {
+            $relationships[] = 'physiotherapist';
         }
 
         return $request->load($relationships);
@@ -141,7 +182,7 @@ class RequestRepository implements IRequestRepository
         // Remove any manual transaction management
         // For updates, admins should be able to update any request
         if ($user->role->name === 'admin') {
-            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine'])->whereNull('deleted_at')->findOrFail($id);
+            $request = Request::with(['services', 'user.role', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist'])->whereNull('deleted_at')->findOrFail($id);
         } else {
             $request = $this->findById($id, $user);
         }
@@ -165,12 +206,12 @@ class RequestRepository implements IRequestRepository
 
         $request->update($updateData);
 
-        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine');
+        return $request->load('services', 'user', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist');
     }
 
     public function findById(int $id, User $user): Request
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist']);
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {
             $user->load('role');
@@ -185,7 +226,7 @@ class RequestRepository implements IRequestRepository
 
     public function getAll(User $user): Collection
     {
-        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine']);
+        $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist']);
 
         // Ensure user role is loaded
         if (!$user->relationLoaded('role')) {

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             TestSeeder::class, // Category 2: Tests and Test Packages
             RaySeeder::class, // Category 3: Rays
             MachineSeeder::class, // Category 4: Machines
+            PhysiotherapistSeeder::class, // Category 5: Physiotherapists
         ]);
     }
 }

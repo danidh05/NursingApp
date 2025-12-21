@@ -86,13 +86,22 @@ class RequestService implements IRequestService
         } elseif ($categoryId == 3) { // Category 3: Rays
             Log::info('=== REQUEST SERVICE: Starting Category 3 file upload processing ===');
             $data = $this->handleCategory3FileUploads($data);
+        } elseif ($categoryId == 5) { // Category 5: Physiotherapists
+            Log::info('=== REQUEST SERVICE: Starting Category 5 file upload processing ===');
+            $data = $this->handleCategory5FileUploads($data);
         }
         
         // Map data to DTO using category-specific handler
         $dto = $handler->mapToDTO($data);
         
+        // Extract total_price from data for Category 5 (frontend-calculated)
+        $totalPrice = null;
+        if ($categoryId === 5 && isset($data['total_price'])) {
+            $totalPrice = (float)$data['total_price'];
+        }
+        
         // Create the request
-        $request = $this->requestRepository->create($dto, $user);
+        $request = $this->requestRepository->create($dto, $user, $totalPrice);
         
         // Calculate and set total price (for Category 1: Service Request, Category 3: Rays, and Category 4: Machines)
         if ($categoryId === 1 && $dto->service_id) {
@@ -113,6 +122,9 @@ class RequestService implements IRequestService
                 'total_price' => $totalPrice,
                 'discounted_price' => $totalPrice // Initially same as total price
             ]);
+        } elseif ($categoryId === 5 && $totalPrice !== null) {
+            // Category 5: Use total_price from frontend (already set in create method)
+            // No additional update needed
         } elseif ($categoryId === 2) {
             // Category 2: Set price from test package or individual test (no area pricing)
             if ($dto->test_package_id) {
@@ -432,6 +444,49 @@ class RequestService implements IRequestService
         }
 
         return $machineAreaPrice->price;
+    }
+
+    /**
+     * Handle file uploads for Category 5 (Physiotherapists).
+     * Uploads request_details (PDF file).
+     *
+     * @param array $data
+     * @return array
+     */
+    private function handleCategory5FileUploads(array $data): array
+    {
+        Log::info('=== HANDLE CATEGORY 5 FILE UPLOADS: Starting ===');
+        $imageStorageService = app(\App\Services\ImageStorageService::class);
+        
+        // Handle request_details (single PDF file)
+        if (isset($data['request_details']) && $data['request_details'] instanceof \Illuminate\Http\UploadedFile) {
+            $file = $data['request_details'];
+            
+            Log::info('Processing request_details for Category 5');
+            Log::info('  - Type: ' . gettype($file));
+            Log::info('  - Is UploadedFile: ' . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+            Log::info('  - MIME Type: ' . $file->getMimeType());
+            Log::info('  - Original Name: ' . $file->getClientOriginalName());
+            
+            // Validate it's a PDF
+            if ($file->getMimeType() !== 'application/pdf') {
+                throw new \Exception('request_details must be a PDF file.');
+            }
+            
+            // Upload the file using ImageStorageService (handles PDFs too)
+            $filePath = $imageStorageService->uploadImage($file, 'physiotherapists/requests');
+            Log::info('  - Uploaded to: ' . $filePath);
+            
+            // Replace UploadedFile with file path (as array for consistency with request_details_files)
+            $data['request_details_files'] = [$filePath];
+            unset($data['request_details']);
+            
+            Log::info('=== HANDLE CATEGORY 5 FILE UPLOADS: Completed ===');
+        } else {
+            Log::info('No request_details file found for Category 5');
+        }
+        
+        return $data;
     }
 
     public function updateRequest(int $id, array $data, User $user): RequestResponseDTO

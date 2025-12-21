@@ -64,8 +64,14 @@ class RequestResponseDTO
         // Category 4: Machines specific fields
         public ?int $machine_id = null,     // Machine ID (Category 4)
         public ?array $machine = null,      // Machine information (Category 4)
-        public ?string $from_date = null,   // Category 4: rental start date
-        public ?string $to_date = null,     // Category 4: rental end date
+        public ?string $from_date = null,   // Category 4: rental start date, Category 5: physiotherapist start date
+        public ?string $to_date = null,     // Category 4: rental end date, Category 5: physiotherapist end date
+        // Category 5: Physiotherapists specific fields
+        public ?int $physiotherapist_id = null,     // Physiotherapist ID (Category 5)
+        public ?array $physiotherapist = null,      // Physiotherapist information (Category 5)
+        public ?int $sessions_per_month = null,     // Category 5: number of sessions per month
+        public ?bool $machines_included = false,    // Category 5: whether machines are included
+        public ?array $physio_machines = null,       // Category 5: array of physio machine data
     ) {}
 
     public static function fromModel(Request $request): self
@@ -214,6 +220,29 @@ class RequestResponseDTO
                     'image' => $request->machine->image_url,
                     'description' => $translation?->description,
                     'additional_information' => $translation?->additional_information,
+                ];
+            })() : null,
+            // Category 5: Physiotherapists specific fields
+            physiotherapist_id: $request->physiotherapist_id,
+            sessions_per_month: $request->sessions_per_month,
+            machines_included: $request->machines_included ?? false,
+            physio_machines: $request->physio_machines ? (function() use ($request) {
+                // Return the physio_machines array as stored (should already contain machine data)
+                return is_array($request->physio_machines) ? $request->physio_machines : json_decode($request->physio_machines, true);
+            })() : null,
+            physiotherapist: $request->physiotherapist ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->physiotherapist->translate($locale);
+                return [
+                    'id' => $request->physiotherapist->id,
+                    'name' => $translation ? $translation->name : $request->physiotherapist->name,
+                    'price' => $request->physiotherapist->price,
+                    'image' => $request->physiotherapist->image_url,
+                    'job_name' => $request->physiotherapist->job_name,
+                    'job_specification' => $request->physiotherapist->job_specification,
+                    'specialization' => $request->physiotherapist->specialization,
+                    'years_of_experience' => $request->physiotherapist->years_of_experience,
+                    'description' => $translation?->description,
                 ];
             })() : null,
         );

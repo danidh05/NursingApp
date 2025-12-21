@@ -72,6 +72,11 @@ class Request extends Model
         'machine_id',
         'from_date',
         'to_date',
+        // Category 5: Physiotherapists specific fields
+        'physiotherapist_id',
+        'sessions_per_month',
+        'machines_included',
+        'physio_machines',
     ];
 
     /**
@@ -82,8 +87,11 @@ class Request extends Model
     protected $casts = [
         'scheduled_time' => 'datetime',
         'ending_time' => 'datetime',
-        'from_date' => 'date', // Category 4: Machine rental start date
-        'to_date' => 'date', // Category 4: Machine rental end date
+        'from_date' => 'date', // Category 4: Machine rental start date, Category 5: Physiotherapist start date
+        'to_date' => 'date', // Category 4: Machine rental end date, Category 5: Physiotherapist end date
+        'machines_included' => 'boolean', // Category 5: Whether physio machines are included
+        'physio_machines' => 'array', // Category 5: Array of physio machine data
+        'sessions_per_month' => 'integer', // Category 5: Number of sessions per month
         'discount_percentage' => 'decimal:2',
         'total_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
@@ -209,6 +217,14 @@ class Request extends Model
     public function machine()
     {
         return $this->belongsTo(\App\Models\Machine::class);
+    }
+
+    /**
+     * Get the physiotherapist for this request (Category 5 only).
+     */
+    public function physiotherapist()
+    {
+        return $this->belongsTo(\App\Models\Physiotherapist::class);
     }
 
     /**

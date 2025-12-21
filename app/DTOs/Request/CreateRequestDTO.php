@@ -39,6 +39,11 @@ class CreateRequestDTO
         public ?int $machine_id = null,
         public ?string $from_date = null, // Category 4 only: rental start date
         public ?string $to_date = null, // Category 4 only: rental end date
+        // Category 5: Physiotherapists specific fields
+        public ?int $physiotherapist_id = null,
+        public ?int $sessions_per_month = null, // Category 5 only: number of sessions per month
+        public ?bool $machines_included = false, // Category 5 only: whether machines are included
+        public ?array $physio_machines = null, // Category 5 only: array of physio machine IDs
         // Common field for all categories
         public ?string $additional_information = null,
     ) {}
@@ -79,6 +84,11 @@ class CreateRequestDTO
             machine_id: $data['machine_id'] ?? null,
             from_date: $data['from_date'] ?? null,
             to_date: $data['to_date'] ?? null,
+            // Category 5 fields
+            physiotherapist_id: $data['physiotherapist_id'] ?? null,
+            sessions_per_month: isset($data['sessions_per_month']) ? (int)$data['sessions_per_month'] : null,
+            machines_included: $data['machines_included'] ?? false,
+            physio_machines: $data['physio_machines'] ?? null,
             additional_information: $data['additional_information'] ?? null,
         );
     }

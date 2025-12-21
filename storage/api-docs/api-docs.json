@@ -3185,6 +3185,1042 @@
                 ]
             }
         },
+        "/api/admin/physio-machines": {
+            "get": {
+                "tags": [
+                    "Admin - Physio Machines"
+                ],
+                "summary": "List all physio machines",
+                "description": "Retrieve all physio machines",
+                "operationId": "9b421f10046aee4c331330471d76fb30",
+                "responses": {
+                    "200": {
+                        "description": "Physio machines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "TENS Machine"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Physio Machines"
+                ],
+                "summary": "Create a new physio machine",
+                "description": "Create a new physio machine",
+                "operationId": "ad5eef7249646ab2ac303e0f7e16a8a7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "TENS Machine"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Physio machine created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physio machine created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "TENS Machine"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physio-machines/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Physio Machines"
+                ],
+                "summary": "Get a specific physio machine",
+                "description": "Retrieve a specific physio machine",
+                "operationId": "c9d3d70300559aa96717dcfec5263623",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physio Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physio machine retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "TENS Machine"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Physio Machines"
+                ],
+                "summary": "Update a physio machine",
+                "description": "Update an existing physio machine",
+                "operationId": "84ca9dbc91b28a35c74b7573e5e6c184",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physio Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "TENS Machine - Updated"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 55
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Physio machine updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physio machine updated successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Physio Machines"
+                ],
+                "summary": "Delete a physio machine",
+                "description": "Delete a physio machine",
+                "operationId": "c67575642d75358fed0cf3fbb651cd77",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physio Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physio machine deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physio machine deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physiotherapist-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Physiotherapist Region Pricing"
+                ],
+                "summary": "List all physiotherapist area prices (Admin only)",
+                "description": "Retrieve a list of all physiotherapist area prices for admin management.",
+                "operationId": "3add2c934a714670a15e6183b22fede4",
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist area prices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "physiotherapist_area_prices": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "physiotherapist_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 200
+                                                    },
+                                                    "physiotherapist": {
+                                                        "type": "object"
+                                                    },
+                                                    "area": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Physiotherapist Region Pricing"
+                ],
+                "summary": "Create physiotherapist area price (Admin only)",
+                "description": "Create a new physiotherapist area price for region-based pricing.",
+                "operationId": "29d77cf2e3870acdaf02afb69b3f3e35",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "physiotherapist_id",
+                                    "area_id",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "physiotherapist_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 200
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Physiotherapist area price created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physiotherapist-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Physiotherapist Region Pricing"
+                ],
+                "summary": "Update physiotherapist area price (Admin only)",
+                "description": "Update an existing physiotherapist area price.",
+                "operationId": "ecddacf06f1950a7f3d56508e0d191ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 220
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist area price updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Physiotherapist Region Pricing"
+                ],
+                "summary": "Delete physiotherapist area price (Admin only)",
+                "description": "Delete a physiotherapist area price.",
+                "operationId": "dae58408bd51deb67fab6f0f12490568",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist area price ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist area price deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physiotherapist-area-prices/physiotherapist/{physiotherapistId}": {
+            "get": {
+                "tags": [
+                    "Admin - Physiotherapist Region Pricing"
+                ],
+                "summary": "Get prices for a specific physiotherapist (Admin only)",
+                "description": "Retrieve all area prices for a specific physiotherapist.",
+                "operationId": "36c31b0f969faabdee71c03c176cf09e",
+                "parameters": [
+                    {
+                        "name": "physiotherapistId",
+                        "in": "path",
+                        "description": "Physiotherapist ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist area prices retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physiotherapists": {
+            "get": {
+                "tags": [
+                    "Admin - Physiotherapists"
+                ],
+                "summary": "List all physiotherapists",
+                "description": "Retrieve all physiotherapists with translations based on Accept-Language header",
+                "operationId": "1503b7a736751ffa347501e9dda01638",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapists retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Physiotherapist name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Dr. John Smith"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 200
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                    },
+                                                    "job_name": {
+                                                        "type": "string",
+                                                        "example": "Senior Physiotherapist"
+                                                    },
+                                                    "job_specification": {
+                                                        "type": "string",
+                                                        "example": "Musculoskeletal Specialist"
+                                                    },
+                                                    "specialization": {
+                                                        "type": "string",
+                                                        "example": "Sports Medicine"
+                                                    },
+                                                    "years_of_experience": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "description": {
+                                                        "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                        "type": "string",
+                                                        "example": "Experienced physiotherapist...",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Physiotherapists"
+                ],
+                "summary": "Create a new physiotherapist",
+                "description": "Create a new physiotherapist with translations. Supports multipart/form-data for image upload.",
+                "operationId": "1e7c05fc859070e2644cb18c0a10f45a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Physiotherapist name (translatable)",
+                                        "type": "string",
+                                        "example": "Dr. John Smith"
+                                    },
+                                    "price": {
+                                        "description": "Base price (same for all areas initially)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 200
+                                    },
+                                    "image": {
+                                        "description": "Physiotherapist image file (jpg, png, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "job_name": {
+                                        "description": "Job name/title",
+                                        "type": "string",
+                                        "example": "Senior Physiotherapist"
+                                    },
+                                    "job_specification": {
+                                        "description": "Job specification",
+                                        "type": "string",
+                                        "example": "Musculoskeletal Specialist"
+                                    },
+                                    "specialization": {
+                                        "description": "Specialization",
+                                        "type": "string",
+                                        "example": "Sports Medicine"
+                                    },
+                                    "years_of_experience": {
+                                        "description": "Years of experience",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "description": "Description/about (translatable)",
+                                        "type": "string",
+                                        "example": "Experienced physiotherapist..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Physiotherapist created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physiotherapist created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Smith"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 200
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/physiotherapists/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Physiotherapists"
+                ],
+                "summary": "Get a specific physiotherapist",
+                "description": "Retrieve a specific physiotherapist with translations based on Accept-Language header",
+                "operationId": "5817bc0622f7a132be28dd8dc2902851",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Physiotherapist name (translatable)",
+                                                    "type": "string",
+                                                    "example": "Dr. John Smith"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 200
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                },
+                                                "job_name": {
+                                                    "type": "string",
+                                                    "example": "Senior Physiotherapist"
+                                                },
+                                                "job_specification": {
+                                                    "type": "string",
+                                                    "example": "Musculoskeletal Specialist"
+                                                },
+                                                "specialization": {
+                                                    "type": "string",
+                                                    "example": "Sports Medicine"
+                                                },
+                                                "years_of_experience": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "description": {
+                                                    "description": "Translation based on Accept-Language header (falls back to 'en')",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Physiotherapist not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Physiotherapists"
+                ],
+                "summary": "Update a physiotherapist",
+                "description": "Update an existing physiotherapist. Use POST with _method=PUT for file uploads. Supports multipart/form-data.",
+                "operationId": "071aee6ba259e1e056481986ba4654ed",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "**REQUIRED when using POST for file uploads:** Set this field to 'PUT' when using POST method.",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dr. John Smith - Updated"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 220
+                                    },
+                                    "image": {
+                                        "description": "New image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "job_name": {
+                                        "type": "string",
+                                        "example": "Senior Physiotherapist"
+                                    },
+                                    "job_specification": {
+                                        "type": "string",
+                                        "example": "Musculoskeletal Specialist"
+                                    },
+                                    "specialization": {
+                                        "type": "string",
+                                        "example": "Sports Medicine"
+                                    },
+                                    "years_of_experience": {
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physiotherapist updated successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Physiotherapists"
+                ],
+                "summary": "Delete a physiotherapist",
+                "description": "Delete a physiotherapist",
+                "operationId": "7b86d6039d0e9f4c544927437897695a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Physiotherapist deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/popups": {
             "get": {
                 "tags": [
@@ -11180,6 +12216,476 @@
                 ]
             }
         },
+        "/api/physio-machines": {
+            "get": {
+                "tags": [
+                    "Physio Machines"
+                ],
+                "summary": "List all physio machines",
+                "description": "Retrieve all physio machines available for Category 5 requests",
+                "operationId": "0cf37bd587643e2b421a92f01d2403b5",
+                "responses": {
+                    "200": {
+                        "description": "Physio machines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "TENS Machine"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/physio-machines/{id}": {
+            "get": {
+                "tags": [
+                    "Physio Machines"
+                ],
+                "summary": "Get a specific physio machine",
+                "description": "Retrieve a specific physio machine",
+                "operationId": "49d49f2bf6a2b145ccaa0342e8f47c02",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physio Machine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physio machine retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "TENS Machine"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Physio machine not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/physiotherapists": {
+            "get": {
+                "tags": [
+                    "Physiotherapists"
+                ],
+                "summary": "List all physiotherapists",
+                "description": "Retrieve all physiotherapists with translations and area-based pricing based on Accept-Language header",
+                "operationId": "1ecf12f84b00d2e68ea2d400f497e441",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapists retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Physiotherapist name (translatable)",
+                                                        "type": "string",
+                                                        "example": "Dr. John Smith"
+                                                    },
+                                                    "price": {
+                                                        "description": "Price for user's area (or base price)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 200
+                                                    },
+                                                    "base_price": {
+                                                        "description": "Base price (fallback)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 200
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                    },
+                                                    "job_name": {
+                                                        "type": "string",
+                                                        "example": "Senior Physiotherapist"
+                                                    },
+                                                    "job_specification": {
+                                                        "type": "string",
+                                                        "example": "Musculoskeletal Specialist"
+                                                    },
+                                                    "specialization": {
+                                                        "type": "string",
+                                                        "example": "Sports Medicine"
+                                                    },
+                                                    "years_of_experience": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Experienced physiotherapist...",
+                                                        "nullable": true
+                                                    },
+                                                    "area_prices": {
+                                                        "description": "All area prices for this physiotherapist",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 220
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/physiotherapists/{id}": {
+            "get": {
+                "tags": [
+                    "Physiotherapists"
+                ],
+                "summary": "Get a specific physiotherapist",
+                "description": "Retrieve a specific physiotherapist with translations and area-based pricing",
+                "operationId": "c4a43b811674ce6175afbaa216b7172e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Physiotherapist ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapist retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Smith"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 200
+                                                },
+                                                "base_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 200
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                },
+                                                "job_name": {
+                                                    "type": "string",
+                                                    "example": "Senior Physiotherapist"
+                                                },
+                                                "job_specification": {
+                                                    "type": "string",
+                                                    "example": "Musculoskeletal Specialist"
+                                                },
+                                                "specialization": {
+                                                    "type": "string",
+                                                    "example": "Sports Medicine"
+                                                },
+                                                "years_of_experience": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "area_prices": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Physiotherapist not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/physiotherapists/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Physiotherapists"
+                ],
+                "summary": "Get all physiotherapists for a specific area with pricing",
+                "description": "Retrieve all physiotherapists available in a specific area with area-specific pricing when available, fallback to base prices when area pricing doesn't exist. Content is translated based on Accept-Language header.",
+                "operationId": "20d12cd1ad2794d0b779aaffacb1a655",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "description": "Area ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Physiotherapists for area retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "area": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Dr. John Smith"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 220
+                                                    },
+                                                    "base_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 200
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/physiotherapists/..."
+                                                    },
+                                                    "has_area_pricing": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Area not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/rays": {
             "get": {
                 "tags": [
@@ -15755,6 +17261,14 @@
             "description": "API Endpoints for managing Machines (Admin only)"
         },
         {
+            "name": "Admin - Physio Machines",
+            "description": "API Endpoints for managing Physio Machines (Admin only)"
+        },
+        {
+            "name": "Admin - Physiotherapists",
+            "description": "API Endpoints for managing Physiotherapists (Admin only)"
+        },
+        {
             "name": "Admin - Rays",
             "description": "API Endpoints for managing Rays (Admin only)"
         },
@@ -15823,6 +17337,14 @@
             "description": "API Endpoints for viewing Machines (User accessible)"
         },
         {
+            "name": "Physio Machines",
+            "description": "API Endpoints for viewing Physio Machines (User accessible)"
+        },
+        {
+            "name": "Physiotherapists",
+            "description": "API Endpoints for viewing Physiotherapists (User accessible)"
+        },
+        {
             "name": "Rays",
             "description": "API Endpoints for viewing Rays (User accessible)"
         },
@@ -15845,6 +17367,10 @@
         {
             "name": "Admin - Machine Region Pricing",
             "description": "Admin - Machine Region Pricing"
+        },
+        {
+            "name": "Admin - Physiotherapist Region Pricing",
+            "description": "Admin - Physiotherapist Region Pricing"
         },
         {
             "name": "Admin - Popups",
