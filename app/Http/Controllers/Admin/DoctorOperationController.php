@@ -11,6 +11,12 @@ use App\Services\ImageStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Admin - Doctor Operations",
+ *     description="API Endpoints for managing Doctor Reserved Operations (Admin only)"
+ * )
+ */
 class DoctorOperationController extends Controller
 {
     protected ImageStorageService $imageStorageService;
@@ -20,6 +26,25 @@ class DoctorOperationController extends Controller
         $this->imageStorageService = $imageStorageService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/admin/doctor-operations",
+     *     summary="List all doctor operations",
+     *     description="Retrieve all doctor operations, optionally filtered by doctor_id.",
+     *     tags={"Admin - Doctor Operations"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="doctor_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by doctor ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function index(Request $request): JsonResponse
     {
         $doctorId = $request->query('doctor_id');
@@ -55,6 +80,41 @@ class DoctorOperationController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/doctor-operations",
+     *     summary="Create a new doctor operation",
+     *     description="Create a new doctor reserved operation with translations and area-based pricing. If area_prices is not provided, automatically creates pricing for all areas using the base price.",
+     *     tags={"Admin - Doctor Operations"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"doctor_id", "name"},
+     *                 @OA\Property(property="doctor_id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Heart Surgery", description="Operation name (translatable)"),
+     *                 @OA\Property(property="price", type="number", format="float", example=5000.00, description="Base price (used for all areas if area_prices not provided)"),
+     *                 @OA\Property(property="description", type="string", example="Complex heart surgery procedure", description="Description (translatable)"),
+     *                 @OA\Property(property="additional_information", type="string", nullable=true, description="Additional information (translatable)"),
+     *                 @OA\Property(property="building_name", type="string", example="Medical Center Building A"),
+     *                 @OA\Property(property="location_description", type="string", example="3rd floor, Room 301"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Operation image (jpg, png, webp, max 2MB)"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
+     *                 @OA\Property(property="area_prices", type="array", @OA\Items(
+     *                     @OA\Property(property="area_id", type="integer", example=1),
+     *                     @OA\Property(property="price", type="number", format="float", example=5000.00)
+     *                 ), description="Optional: Array of area-specific prices. If not provided, creates prices for all areas using base price.")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -117,6 +177,19 @@ class DoctorOperationController extends Controller
         return response()->json(['success' => true, 'message' => 'Operation created', 'data' => ['id' => $op->id]], 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/admin/doctor-operations/{id}",
+     *     summary="Get doctor operation details",
+     *     tags={"Admin - Doctor Operations"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function show(DoctorOperation $doctorOperation): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -145,6 +218,42 @@ class DoctorOperationController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/doctor-operations/{id}",
+     *     summary="Update doctor operation",
+     *     description="Update a doctor operation. Use POST with _method=PUT for file uploads. All fields are optional. If area_prices is provided, replaces all existing area prices.",
+     *     tags={"Admin - Doctor Operations"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="_method", type="string", example="PUT"),
+     *                 @OA\Property(property="name", type="string", example="Heart Surgery", description="Translatable"),
+     *                 @OA\Property(property="price", type="number", format="float", example=5000.00),
+     *                 @OA\Property(property="description", type="string", example="Complex heart surgery procedure", description="Translatable"),
+     *                 @OA\Property(property="additional_information", type="string", nullable=true, description="Translatable"),
+     *                 @OA\Property(property="building_name", type="string", example="Medical Center Building A"),
+     *                 @OA\Property(property="location_description", type="string", example="3rd floor, Room 301"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Operation image (jpg, png, webp, max 2MB)"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)"),
+     *                 @OA\Property(property="area_prices", type="array", @OA\Items(
+     *                     @OA\Property(property="area_id", type="integer", example=1),
+     *                     @OA\Property(property="price", type="number", format="float", example=5000.00)
+     *                 ), description="Optional: Array of area-specific prices. Replaces all existing area prices.")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function update(Request $request, DoctorOperation $doctorOperation): JsonResponse
     {
         $validated = $request->validate([
@@ -202,6 +311,19 @@ class DoctorOperationController extends Controller
         return response()->json(['success' => true, 'message' => 'Operation updated']);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/admin/doctor-operations/{id}",
+     *     summary="Delete doctor operation",
+     *     tags={"Admin - Doctor Operations"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function destroy(DoctorOperation $doctorOperation): JsonResponse
     {
         if ($doctorOperation->image) {

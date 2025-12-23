@@ -8,6 +8,12 @@ use App\Services\ImageStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Admin - Doctor Categories",
+ *     description="API Endpoints for managing Doctor Categories (Admin only)"
+ * )
+ */
 class DoctorCategoryController extends Controller
 {
     protected ImageStorageService $imageStorageService;
@@ -17,6 +23,17 @@ class DoctorCategoryController extends Controller
         $this->imageStorageService = $imageStorageService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/admin/doctor-categories",
+     *     summary="List all doctor categories",
+     *     tags={"Admin - Doctor Categories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function index(): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -35,6 +52,30 @@ class DoctorCategoryController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/doctor-categories",
+     *     summary="Create a new doctor category",
+     *     tags={"Admin - Doctor Categories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name"},
+     *                 @OA\Property(property="name", type="string", example="Cardiology", description="Category name (translatable)"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Category image (jpg, png, webp, max 2MB)"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -61,6 +102,19 @@ class DoctorCategoryController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/admin/doctor-categories/{id}",
+     *     summary="Get doctor category details",
+     *     tags={"Admin - Doctor Categories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function show(DoctorCategory $doctorCategory): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -75,6 +129,33 @@ class DoctorCategoryController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/admin/doctor-categories/{id}",
+     *     summary="Update doctor category",
+     *     description="Update a doctor category. Use POST with _method=PUT for file uploads. All fields are optional.",
+     *     tags={"Admin - Doctor Categories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="_method", type="string", example="PUT"),
+     *                 @OA\Property(property="name", type="string", example="Cardiology", description="Category name (translatable)"),
+     *                 @OA\Property(property="image", type="string", format="binary", description="Category image (jpg, png, webp, max 2MB)"),
+     *                 @OA\Property(property="locale", type="string", enum={"en","ar"}, example="en", description="Translation locale (optional, defaults to 'en' if not provided)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function update(Request $request, DoctorCategory $doctorCategory): JsonResponse
     {
         $validated = $request->validate([
@@ -109,6 +190,19 @@ class DoctorCategoryController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/admin/doctor-categories/{id}",
+     *     summary="Delete doctor category",
+     *     tags={"Admin - Doctor Categories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin access required")
+     * )
+     */
     public function destroy(DoctorCategory $doctorCategory): JsonResponse
     {
         if ($doctorCategory->image) {

@@ -1223,6 +1223,1329 @@
                 ]
             }
         },
+        "/api/admin/doctor-availabilities": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Availabilities"
+                ],
+                "summary": "List all doctor availability slots",
+                "description": "Retrieve all doctor availability slots, optionally filtered by doctor_id.",
+                "operationId": "ef42b50a814ea5d50099b3b0618a0d66",
+                "parameters": [
+                    {
+                        "name": "doctor_id",
+                        "in": "query",
+                        "description": "Filter by doctor ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Availabilities"
+                ],
+                "summary": "Create a new availability slot",
+                "operationId": "af17b19f247694712ff3856735c23d2d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "doctor_id",
+                                    "date",
+                                    "start_time",
+                                    "end_time"
+                                ],
+                                "properties": {
+                                    "doctor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-15"
+                                    },
+                                    "start_time": {
+                                        "description": "Time in HH:mm format",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "end_time": {
+                                        "description": "Time in HH:mm format, must be after start_time",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "10:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-availabilities/{id}": {
+            "post": {
+                "tags": [
+                    "Admin - Doctor Availabilities"
+                ],
+                "summary": "Update availability slot",
+                "description": "Update an availability slot. Use POST with _method=PUT. All fields are optional. If is_booked is set to false, clears booked_request_id.",
+                "operationId": "cce059daef3fef741f4df5307d7db651",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-15"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "end_time": {
+                                        "description": "Must be after start_time",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "10:00"
+                                    },
+                                    "is_booked": {
+                                        "description": "Booking status",
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Doctor Availabilities"
+                ],
+                "summary": "Delete availability slot",
+                "description": "Delete an availability slot. Cannot delete if slot is booked.",
+                "operationId": "214e808f77d3d6a58bf990d723b3a6b2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Cannot delete booked slot"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-categories": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Categories"
+                ],
+                "summary": "List all doctor categories",
+                "operationId": "17f8e39049a1df918a8165ffb5538d27",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Categories"
+                ],
+                "summary": "Create a new doctor category",
+                "operationId": "0ba5fac271924b3e38353ce86822b7ab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Category name (translatable)",
+                                        "type": "string",
+                                        "example": "Cardiology"
+                                    },
+                                    "image": {
+                                        "description": "Category image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-categories/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Categories"
+                ],
+                "summary": "Get doctor category details",
+                "operationId": "5683e294c5a8542b85a46790ec48c3b3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Categories"
+                ],
+                "summary": "Update doctor category",
+                "description": "Update a doctor category. Use POST with _method=PUT for file uploads. All fields are optional.",
+                "operationId": "f74541993c96fd754d50d9cfd825f5c2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "description": "Category name (translatable)",
+                                        "type": "string",
+                                        "example": "Cardiology"
+                                    },
+                                    "image": {
+                                        "description": "Category image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Doctor Categories"
+                ],
+                "summary": "Delete doctor category",
+                "operationId": "6ad22afd355d945227b2e8a91936f101",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctors": {
+            "get": {
+                "tags": [
+                    "Admin - Doctors"
+                ],
+                "summary": "List all doctors",
+                "operationId": "44c1542a1e0a1c5e7a0a909f79e13b11",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctors"
+                ],
+                "summary": "Create a new doctor",
+                "description": "Create a new doctor with translations and area-based pricing. If area_prices is not provided, automatically creates pricing for all areas using the base price.",
+                "operationId": "30de89fe9d54ab2c3c2f359a0c13834c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "doctor_category_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "doctor_category_id": {
+                                        "description": "Doctor category ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "description": "Doctor name",
+                                        "type": "string",
+                                        "example": "Dr. John Smith"
+                                    },
+                                    "specification": {
+                                        "description": "Doctor specification (translatable)",
+                                        "type": "string",
+                                        "example": "Cardiologist"
+                                    },
+                                    "years_of_experience": {
+                                        "description": "Years of experience",
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "image": {
+                                        "description": "Doctor image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "price": {
+                                        "description": "Base price (used for all areas if area_prices not provided)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 150
+                                    },
+                                    "job_name": {
+                                        "description": "Job name (translatable)",
+                                        "type": "string",
+                                        "example": "Senior Cardiologist"
+                                    },
+                                    "description": {
+                                        "description": "Description (translatable)",
+                                        "type": "string",
+                                        "example": "Expert in heart diseases"
+                                    },
+                                    "additional_information": {
+                                        "description": "Additional information (translatable)",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "area_prices": {
+                                        "description": "Optional: Array of area-specific prices. If not provided, creates prices for all areas using base price.",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctors/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Doctors"
+                ],
+                "summary": "Get doctor details",
+                "operationId": "26e04595da7317323b70f6eac9618cab",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctors"
+                ],
+                "summary": "Update doctor",
+                "description": "Update a doctor. Use POST with _method=PUT for file uploads. All fields are optional. If area_prices is provided, replaces all existing area prices.",
+                "operationId": "3a03ed381364b2f45bccf5759c23c359",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "doctor_category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dr. John Smith"
+                                    },
+                                    "specification": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "example": "Cardiologist"
+                                    },
+                                    "years_of_experience": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "image": {
+                                        "description": "Doctor image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 150
+                                    },
+                                    "job_name": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "example": "Senior Cardiologist"
+                                    },
+                                    "description": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "example": "Expert in heart diseases"
+                                    },
+                                    "additional_information": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "area_prices": {
+                                        "description": "Optional: Array of area-specific prices. Replaces all existing area prices.",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Doctors"
+                ],
+                "summary": "Delete doctor",
+                "operationId": "b3ee34a9d66d070b7c3cd4c56ee91821",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-operation-area-prices": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Operation Area Prices"
+                ],
+                "summary": "List all doctor operation area prices",
+                "description": "Retrieve all doctor operation area prices, optionally filtered by operation_id.",
+                "operationId": "6bc1af56a6788489539fe35771f0747a",
+                "parameters": [
+                    {
+                        "name": "operation_id",
+                        "in": "query",
+                        "description": "Filter by doctor operation ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Operation Area Prices"
+                ],
+                "summary": "Create a new doctor operation area price",
+                "operationId": "77603ea7dea05327e9d988be3be14daf",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "doctor_operation_id",
+                                    "area_id",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "doctor_operation_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-operation-area-prices/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Doctor Operation Area Prices"
+                ],
+                "summary": "Update doctor operation area price",
+                "operationId": "217d36905ca5c08725e0a09bd738de47",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Doctor Operation Area Prices"
+                ],
+                "summary": "Delete doctor operation area price",
+                "operationId": "6f69438d2e5ecd1e9921c59bc07aa0cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-operations": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Operations"
+                ],
+                "summary": "List all doctor operations",
+                "description": "Retrieve all doctor operations, optionally filtered by doctor_id.",
+                "operationId": "d6623ad0ad6fd5baad8786b4367dcce6",
+                "parameters": [
+                    {
+                        "name": "doctor_id",
+                        "in": "query",
+                        "description": "Filter by doctor ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Operations"
+                ],
+                "summary": "Create a new doctor operation",
+                "description": "Create a new doctor reserved operation with translations and area-based pricing. If area_prices is not provided, automatically creates pricing for all areas using the base price.",
+                "operationId": "ec32c4b1330a99b75e0981a3662a7b0b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "doctor_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "doctor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "description": "Operation name (translatable)",
+                                        "type": "string",
+                                        "example": "Heart Surgery"
+                                    },
+                                    "price": {
+                                        "description": "Base price (used for all areas if area_prices not provided)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5000
+                                    },
+                                    "description": {
+                                        "description": "Description (translatable)",
+                                        "type": "string",
+                                        "example": "Complex heart surgery procedure"
+                                    },
+                                    "additional_information": {
+                                        "description": "Additional information (translatable)",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "building_name": {
+                                        "type": "string",
+                                        "example": "Medical Center Building A"
+                                    },
+                                    "location_description": {
+                                        "type": "string",
+                                        "example": "3rd floor, Room 301"
+                                    },
+                                    "image": {
+                                        "description": "Operation image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "area_prices": {
+                                        "description": "Optional: Array of area-specific prices. If not provided, creates prices for all areas using base price.",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 5000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctor-operations/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Doctor Operations"
+                ],
+                "summary": "Get doctor operation details",
+                "operationId": "af5c6d845207f915d18fa0bd23e83a17",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Doctor Operations"
+                ],
+                "summary": "Update doctor operation",
+                "description": "Update a doctor operation. Use POST with _method=PUT for file uploads. All fields are optional. If area_prices is provided, replaces all existing area prices.",
+                "operationId": "5ba726e1912c791c68d062f14957bc3f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "name": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "example": "Heart Surgery"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5000
+                                    },
+                                    "description": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "example": "Complex heart surgery procedure"
+                                    },
+                                    "additional_information": {
+                                        "description": "Translatable",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "building_name": {
+                                        "type": "string",
+                                        "example": "Medical Center Building A"
+                                    },
+                                    "location_description": {
+                                        "type": "string",
+                                        "example": "3rd floor, Room 301"
+                                    },
+                                    "image": {
+                                        "description": "Operation image (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "locale": {
+                                        "description": "Translation locale (optional, defaults to 'en' if not provided)",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar"
+                                        ],
+                                        "example": "en"
+                                    },
+                                    "area_prices": {
+                                        "description": "Optional: Array of area-specific prices. Replaces all existing area prices.",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "area_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 5000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Doctor Operations"
+                ],
+                "summary": "Delete doctor operation",
+                "operationId": "61ec654e62c70878512bee34aad4924c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/faqs": {
             "get": {
                 "tags": [
@@ -11922,6 +13245,450 @@
                 ]
             }
         },
+        "/api/doctor-categories": {
+            "get": {
+                "tags": [
+                    "Doctor Categories"
+                ],
+                "summary": "List all doctor categories",
+                "description": "Retrieve all doctor categories with translations. Returns category name and image based on Accept-Language header (defaults to 'en').",
+                "operationId": "45f28762f278cc31bc8c53c21e9b9090",
+                "responses": {
+                    "200": {
+                        "description": "Doctor categories retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Category name (translated)",
+                                                        "type": "string",
+                                                        "example": "Cardiology"
+                                                    },
+                                                    "image": {
+                                                        "description": "Category image URL",
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/doctor-categories/..."
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/doctor-categories/{id}": {
+            "get": {
+                "tags": [
+                    "Doctor Categories"
+                ],
+                "summary": "Get doctor category details",
+                "description": "Retrieve details of a specific doctor category with translations.",
+                "operationId": "223f3ac98f5b5d27f66c27c8f089523a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Doctor category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctor category retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "description": "Category name (translated)",
+                                                    "type": "string",
+                                                    "example": "Cardiology"
+                                                },
+                                                "image": {
+                                                    "description": "Category image URL",
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/doctor-categories/..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Doctor category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/doctor-categories/{id}/doctors": {
+            "get": {
+                "tags": [
+                    "Doctors"
+                ],
+                "summary": "Get doctors by category and area",
+                "description": "Retrieve all doctors in a specific category, optionally filtered by area. Returns area-specific pricing if area_id is provided, otherwise returns base price. All fields are translated based on Accept-Language header.",
+                "operationId": "00d7f22e7e4429889f98bdba8ddf1ff8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Doctor category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "area_id",
+                        "in": "query",
+                        "description": "Area ID for area-specific pricing",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctors retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Dr. John Smith"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/doctors/..."
+                                                    },
+                                                    "price": {
+                                                        "description": "Area-specific price if area_id provided, otherwise base price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 150
+                                                    },
+                                                    "specification": {
+                                                        "description": "Translated",
+                                                        "type": "string",
+                                                        "example": "Cardiologist"
+                                                    },
+                                                    "job_name": {
+                                                        "description": "Translated",
+                                                        "type": "string",
+                                                        "example": "Senior Cardiologist"
+                                                    },
+                                                    "description": {
+                                                        "description": "Translated",
+                                                        "type": "string",
+                                                        "example": "Expert in heart diseases"
+                                                    },
+                                                    "additional_information": {
+                                                        "description": "Translated",
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "years_of_experience": {
+                                                        "type": "integer",
+                                                        "example": 15
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Doctor category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/doctors/{id}": {
+            "get": {
+                "tags": [
+                    "Doctors"
+                ],
+                "summary": "Get doctor details with operations and availabilities",
+                "description": "Retrieve complete doctor details including operations, availability slots (filtered by week if provided), and area-specific pricing. Availability slots are filtered to show only unbooked slots. All fields are translated based on Accept-Language header.",
+                "operationId": "800e90f10564a8eec88cd8284dac12a2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Doctor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "area_id",
+                        "in": "query",
+                        "description": "Area ID for area-specific pricing",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "week_start",
+                        "in": "query",
+                        "description": "Start date for availability filter (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-01-01"
+                        }
+                    },
+                    {
+                        "name": "week_end",
+                        "in": "query",
+                        "description": "End date for availability filter (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-01-07"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctor details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Smith"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/doctors/..."
+                                                },
+                                                "specification": {
+                                                    "description": "Translated",
+                                                    "type": "string",
+                                                    "example": "Cardiologist"
+                                                },
+                                                "job_name": {
+                                                    "description": "Translated",
+                                                    "type": "string",
+                                                    "example": "Senior Cardiologist"
+                                                },
+                                                "description": {
+                                                    "description": "Translated",
+                                                    "type": "string",
+                                                    "example": "Expert in heart diseases"
+                                                },
+                                                "additional_information": {
+                                                    "description": "Translated",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "years_of_experience": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "operations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "description": "Translated",
+                                                                "type": "string",
+                                                                "example": "Heart Surgery"
+                                                            },
+                                                            "price": {
+                                                                "description": "Area-specific price if area_id provided",
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 5000
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "http://localhost:8000/storage/doctor-operations/..."
+                                                            },
+                                                            "description": {
+                                                                "description": "Translated",
+                                                                "type": "string"
+                                                            },
+                                                            "additional_information": {
+                                                                "description": "Translated",
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "building_name": {
+                                                                "type": "string",
+                                                                "example": "Medical Center Building A"
+                                                            },
+                                                            "location_description": {
+                                                                "type": "string",
+                                                                "example": "3rd floor, Room 301"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "availabilities": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "description": "Only unbooked slots are returned, filtered by week_start/week_end if provided",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2026-01-15"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "format": "time",
+                                                                "example": "09:00:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "format": "time",
+                                                                "example": "10:00:00"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/duties": {
             "get": {
                 "tags": [
@@ -19300,6 +21067,26 @@
             "description": "API Endpoints for Contact Us management (Admin only)"
         },
         {
+            "name": "Admin - Doctor Availabilities",
+            "description": "API Endpoints for managing Doctor Availability Slots (Admin only)"
+        },
+        {
+            "name": "Admin - Doctor Categories",
+            "description": "API Endpoints for managing Doctor Categories (Admin only)"
+        },
+        {
+            "name": "Admin - Doctors",
+            "description": "API Endpoints for managing Doctors (Admin only)"
+        },
+        {
+            "name": "Admin - Doctor Operation Area Prices",
+            "description": "API Endpoints for managing Doctor Operation Area-Based Pricing (Admin only)"
+        },
+        {
+            "name": "Admin - Doctor Operations",
+            "description": "API Endpoints for managing Doctor Reserved Operations (Admin only)"
+        },
+        {
             "name": "Admin - FAQs",
             "description": "API Endpoints for FAQ management (Admin only)"
         },
@@ -19386,6 +21173,14 @@
         {
             "name": "Chat",
             "description": "Temporary request-scoped chat endpoints for real-time communication"
+        },
+        {
+            "name": "Doctor Categories",
+            "description": "API Endpoints for viewing Doctor Categories (Category 8)"
+        },
+        {
+            "name": "Doctors",
+            "description": "API Endpoints for viewing Doctors (Category 8)"
         },
         {
             "name": "Duties",
