@@ -180,6 +180,21 @@ class RequestController extends Controller
      *                 @OA\Property(property="request_with_insurance", type="string", example="true", enum={"true","false","0","1"}, description="Optional for Category 2: Request with insurance option. Send as string: 'true' or 'false'"),
      *                 @OA\Property(property="attach_front_face", type="string", format="binary", description="Optional for Category 2: Insurance card front face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
      *                 @OA\Property(property="attach_back_face", type="string", format="binary", description="Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'")
+     *                 
+     *                 @OA\Property(property="physiotherapist_id", type="integer", example=1, description="REQUIRED for Category 5: Physiotherapist ID"),
+     *                 @OA\Property(property="sessions_per_month", type="integer", example=8, description="REQUIRED for Category 5: Sessions per month"),
+     *                 @OA\Property(property="machines_included", type="string", example="false", enum={"true","false","0","1"}, description="Optional for Category 5: Whether machines are included (send as string)"),
+     *                 @OA\Property(property="physio_machines[]", type="array", @OA\Items(type="integer"), description="Optional for Category 5: Array of physio machine IDs"),
+     *                 @OA\Property(property="request_details", type="string", format="binary", description="Optional for Category 5: Single PDF file (max 5MB)"),
+     *                 
+     *                 @OA\Property(property="nurse_visit_id", type="integer", example=1, description="REQUIRED for Category 7 (Nurse Visits subcategory): Nurse visit ID"),
+     *                 @OA\Property(property="visits_per_day", type="integer", example=2, description="REQUIRED with nurse_visit_id: visits per day (1-4)"),
+     *                 @OA\Property(property="duty_id", type="integer", example=1, description="REQUIRED for Category 7 (Duties subcategory): Duty ID"),
+     *                 @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24"),
+     *                 @OA\Property(property="is_continuous_care", type="string", example="false", enum={"true","false","0","1"}, description="Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required"),
+     *                 @OA\Property(property="is_day_shift", type="string", example="true", enum={"true","false","0","1"}, description="Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)"),
+     *                 @OA\Property(property="babysitter_id", type="integer", example=1, description="REQUIRED for Category 7 (Babysitter subcategory): Babysitter ID"),
+     *                 @OA\Property(property="request_details", type="string", format="binary", description="Optional for Category 7: Single PDF file (max 5MB)"),
      *             )
      *         )
      *     ),

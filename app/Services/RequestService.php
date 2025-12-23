@@ -504,40 +504,56 @@ class RequestService implements IRequestService
 
     /**
      * Handle file uploads for Category 7: Duties
-     * Uploads request_details (PDF file)
+     * Uploads request_details (single PDF) and request_details_files (multiple PDFs)
      */
     private function handleCategory7FileUploads(array $data): array
     {
         Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Starting ===');
         $imageStorageService = app(\App\Services\ImageStorageService::class);
         
+        $storedPaths = [];
+
         // Handle request_details (single PDF file)
         if (isset($data['request_details']) && $data['request_details'] instanceof \Illuminate\Http\UploadedFile) {
             $file = $data['request_details'];
-            
-            Log::info('Processing request_details for Category 7');
-            Log::info('  - Type: ' . gettype($file));
-            Log::info('  - Is UploadedFile: ' . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
-            Log::info('  - MIME Type: ' . $file->getMimeType());
-            Log::info('  - Original Name: ' . $file->getClientOriginalName());
-            
-            // Validate it's a PDF
+
+            Log::info('Processing request_details for Category 7 (single)');
             if ($file->getMimeType() !== 'application/pdf') {
                 throw new \Exception('request_details must be a PDF file.');
             }
-            
-            // Upload the file using ImageStorageService (handles PDFs too)
+
             $filePath = $imageStorageService->uploadImage($file, 'duties/requests');
-            Log::info('  - Uploaded to: ' . $filePath);
-            
-            // Replace UploadedFile with file path (as array for consistency with request_details_files)
-            $data['request_details_files'] = [$filePath];
+            Log::info('  - Uploaded single request_details to: ' . $filePath);
+            $storedPaths[] = $filePath;
             unset($data['request_details']);
-            
-            Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Completed ===');
-        } else {
-            Log::info('No request_details file found for Category 7');
         }
+
+        // Handle request_details_files (multiple PDFs)
+        if (isset($data['request_details_files'])) {
+            $files = $data['request_details_files'];
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+
+            foreach ($files as $idx => $file) {
+                if (!($file instanceof \Illuminate\Http\UploadedFile)) {
+                    Log::warning("request_details_files[$idx] is not UploadedFile, type: " . gettype($file));
+                    continue;
+                }
+                if ($file->getMimeType() !== 'application/pdf') {
+                    throw new \Exception('request_details_files items must be PDF files.');
+                }
+                $filePath = $imageStorageService->uploadImage($file, 'duties/requests');
+                Log::info("  - Uploaded request_details_files[$idx] to: " . $filePath);
+                $storedPaths[] = $filePath;
+            }
+        }
+
+        if (!empty($storedPaths)) {
+            $data['request_details_files'] = array_values($storedPaths);
+        }
+
+        Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Completed ===');
         
         return $data;
     }

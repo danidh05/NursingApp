@@ -14,6 +14,46 @@ use Illuminate\Http\Request;
  */
 class BabysitterController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/babysitters",
+     *     summary="Get all babysitters",
+     *     tags={"Babysitters"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of babysitters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Baby Sitter"),
+     *                     @OA\Property(property="image", type="string", nullable=true),
+     *                     @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_24_hours", type="number", format="float"),
+     *                     @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+     *                     @OA\Property(property="night_shift_price_24_hours", type="number", format="float"),
+     *                     @OA\Property(
+     *                         property="area_prices",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             @OA\Property(property="area_id", type="integer", example=1),
+     *                             @OA\Property(property="area_name", type="string", example="Beirut"),
+     *                             @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
+     *                             @OA\Property(property="day_shift_price_24_hours", type="number", format="float"),
+     *                             @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+     *                             @OA\Property(property="night_shift_price_24_hours", type="number", format="float")
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -53,6 +93,16 @@ class BabysitterController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/babysitters/{id}",
+     *     summary="Get a specific babysitter",
+     *     tags={"Babysitters"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Babysitter details")
+     * )
+     */
     public function show(Babysitter $babysitter): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -90,6 +140,16 @@ class BabysitterController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/babysitters/area/{area_id}",
+     *     summary="Get babysitters by area",
+     *     tags={"Babysitters"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="area_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Babysitters filtered by area")
+     * )
+     */
     public function getBabysittersByArea(int $areaId): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -123,6 +183,27 @@ class BabysitterController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/babysitters/calculate-price",
+     *     summary="Calculate price for babysitters",
+     *     tags={"Babysitters"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"babysitter_id","duration_hours","from_date","to_date"},
+     *             @OA\Property(property="babysitter_id", type="integer", example=1),
+     *             @OA\Property(property="duration_hours", type="integer", example=12, description="12 or 24"),
+     *             @OA\Property(property="is_day_shift", type="boolean", example=true),
+     *             @OA\Property(property="from_date", type="string", format="date", example="2025-01-01"),
+     *             @OA\Property(property="to_date", type="string", format="date", example="2025-01-05"),
+     *             @OA\Property(property="area_id", type="integer", example=1, nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Calculated price")
+     * )
+     */
     public function calculatePrice(Request $request): JsonResponse
     {
         $validated = $request->validate([

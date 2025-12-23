@@ -19,7 +19,38 @@ class NurseVisitController extends Controller
      *     summary="Get all nurse visits",
      *     tags={"Nurse Visits"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=200, description="Success")
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of nurse visits",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Nurse Visit"),
+     *                     @OA\Property(property="image", type="string", nullable=true),
+     *                     @OA\Property(property="price_per_1_visit", type="number", format="float"),
+     *                     @OA\Property(property="price_per_2_visits", type="number", format="float"),
+     *                     @OA\Property(property="price_per_3_visits", type="number", format="float"),
+     *                     @OA\Property(property="price_per_4_visits", type="number", format="float"),
+     *                     @OA\Property(
+     *                         property="area_prices",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             @OA\Property(property="area_id", type="integer", example=1),
+     *                             @OA\Property(property="area_name", type="string", example="Beirut"),
+     *                             @OA\Property(property="price_per_1_visit", type="number", format="float"),
+     *                             @OA\Property(property="price_per_2_visits", type="number", format="float"),
+     *                             @OA\Property(property="price_per_3_visits", type="number", format="float"),
+     *                             @OA\Property(property="price_per_4_visits", type="number", format="float")
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
     public function index(): JsonResponse
@@ -68,7 +99,7 @@ class NurseVisitController extends Controller
      *     tags={"Nurse Visits"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Success")
+     *     @OA\Response(response=200, description="Nurse visit details")
      * )
      */
     public function show(NurseVisit $nurseVisit): JsonResponse
@@ -115,7 +146,7 @@ class NurseVisitController extends Controller
      *     tags={"Nurse Visits"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="area_id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Success")
+     *     @OA\Response(response=200, description="Nurse visits filtered by area")
      * )
      */
     public function getNurseVisitsByArea(int $areaId): JsonResponse

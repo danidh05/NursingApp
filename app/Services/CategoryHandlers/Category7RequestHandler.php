@@ -33,7 +33,9 @@ class Category7RequestHandler extends BaseCategoryRequestHandler
             // Common fields for all subcategories
             'from_date' => ['required', 'date', 'after_or_equal:today'],
             'to_date' => ['required', 'date', 'after:from_date'],
-            'request_details' => ['nullable', 'file', 'mimes:pdf', 'max:5120'], // PDF file, 5MB max
+            'request_details' => ['nullable', 'file', 'mimes:pdf', 'max:5120'], // PDF file, 5MB max (single)
+            'request_details_files' => ['nullable', 'array'], // Multiple files
+            'request_details_files.*' => ['file', 'mimes:pdf', 'max:5120'], // Each PDF max 5MB
             'notes' => ['nullable', 'string'],
             'additional_information' => ['nullable', 'string'],
             
@@ -58,11 +60,25 @@ class Category7RequestHandler extends BaseCategoryRequestHandler
 
     public function mapToDTO(array $data): CreateRequestDTO
     {
-        // Handle request_details file upload (will be converted to path in service)
-        $requestDetailsPath = null;
+        // Handle request_details / request_details_files (paths after upload in service)
+        $requestDetailsFiles = [];
         if (isset($data['request_details']) && is_string($data['request_details'])) {
-            $requestDetailsPath = $data['request_details'];
+            $requestDetailsFiles[] = $data['request_details'];
         }
+        if (isset($data['request_details_files'])) {
+            if (is_string($data['request_details_files'])) {
+                $decoded = json_decode($data['request_details_files'], true);
+                if (is_array($decoded)) {
+                    $requestDetailsFiles = array_merge($requestDetailsFiles, array_filter($decoded, 'is_string'));
+                }
+            } elseif (is_array($data['request_details_files'])) {
+                $requestDetailsFiles = array_merge(
+                    $requestDetailsFiles,
+                    array_filter($data['request_details_files'], 'is_string')
+                );
+            }
+        }
+        $requestDetailsFiles = !empty($requestDetailsFiles) ? array_values($requestDetailsFiles) : null;
 
         return new CreateRequestDTO(
             first_name: $data['first_name'] ?? null,
@@ -88,7 +104,7 @@ class Category7RequestHandler extends BaseCategoryRequestHandler
             // Category 2 fields (not used for Category 7)
             test_package_id: null,
             test_id: null,
-            request_details_files: $requestDetailsPath ? [$requestDetailsPath] : null,
+            request_details_files: $requestDetailsFiles,
             notes: $data['notes'] ?? null,
             request_with_insurance: null,
             attach_front_face: null,

@@ -14,6 +14,56 @@ use Illuminate\Http\Request;
  */
 class DutyController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/duties",
+     *     summary="Get all duties",
+     *     tags={"Duties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of duties",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Duty"),
+     *                     @OA\Property(property="image", type="string", nullable=true),
+     *                     @OA\Property(property="day_shift_price_4_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_6_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_8_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
+                     @OA\Property(property="night_shift_price_4_hours", type="number", format="float"),
+                     @OA\Property(property="night_shift_price_6_hours", type="number", format="float"),
+                     @OA\Property(property="night_shift_price_8_hours", type="number", format="float"),
+                     @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+                     @OA\Property(property="continuous_care_price", type="number", format="float"),
+                     @OA\Property(
+                         property="area_prices",
+                         type="array",
+                         @OA\Items(
+                             @OA\Property(property="area_id", type="integer", example=1),
+                             @OA\Property(property="area_name", type="string", example="Beirut"),
+                             @OA\Property(property="day_shift_price_4_hours", type="number", format="float"),
+                             @OA\Property(property="day_shift_price_6_hours", type="number", format="float"),
+                             @OA\Property(property="day_shift_price_8_hours", type="number", format="float"),
+                             @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
+                             @OA\Property(property="night_shift_price_4_hours", type="number", format="float"),
+                             @OA\Property(property="night_shift_price_6_hours", type="number", format="float"),
+                             @OA\Property(property="night_shift_price_8_hours", type="number", format="float"),
+                             @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+                             @OA\Property(property="continuous_care_price", type="number", format="float")
+                         )
+                     )
+                 )
+             )
+         )
+     )
+ )
+     */
     public function index(): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -63,6 +113,16 @@ class DutyController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/duties/{id}",
+     *     summary="Get a specific duty",
+     *     tags={"Duties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Duty details")
+     * )
+     */
     public function show(Duty $duty): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -110,6 +170,16 @@ class DutyController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/duties/area/{area_id}",
+     *     summary="Get duties by area",
+     *     tags={"Duties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="area_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Duties filtered by area")
+     * )
+     */
     public function getDutiesByArea(int $areaId): JsonResponse
     {
         $locale = app()->getLocale() ?: 'en';
@@ -148,6 +218,28 @@ class DutyController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/duties/calculate-price",
+     *     summary="Calculate price for duties",
+     *     tags={"Duties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"duty_id","from_date","to_date"},
+     *             @OA\Property(property="duty_id", type="integer", example=1),
+     *             @OA\Property(property="duration_hours", type="integer", example=12, nullable=true, description="Required unless is_continuous_care"),
+     *             @OA\Property(property="is_continuous_care", type="boolean", example=false),
+     *             @OA\Property(property="is_day_shift", type="boolean", example=true),
+     *             @OA\Property(property="from_date", type="string", format="date", example="2025-01-01"),
+     *             @OA\Property(property="to_date", type="string", format="date", example="2025-01-05"),
+     *             @OA\Property(property="area_id", type="integer", example=1, nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Calculated price")
+     * )
+     */
     public function calculatePrice(Request $request): JsonResponse
     {
         $validated = $request->validate([
