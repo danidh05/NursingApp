@@ -38,6 +38,13 @@ use App\Http\Controllers\Admin\OfferAreaPriceController;
 use App\Http\Controllers\Admin\NurseVisitController as AdminNurseVisitController;
 use App\Http\Controllers\Admin\DutyController as AdminDutyController;
 use App\Http\Controllers\Admin\BabysitterController as AdminBabysitterController;
+use App\Http\Controllers\Admin\DoctorCategoryController as AdminDoctorCategoryController;
+use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
+use App\Http\Controllers\Admin\DoctorAvailabilityController as AdminDoctorAvailabilityController;
+use App\Http\Controllers\Admin\DoctorOperationController as AdminDoctorOperationController;
+use App\Http\Controllers\Admin\DoctorOperationAreaPriceController as AdminDoctorOperationAreaPriceController;
+use App\Http\Controllers\DoctorCategoryController;
+use App\Http\Controllers\DoctorController;
 use Illuminate\Support\Facades\Broadcast;
 
 
@@ -142,6 +149,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/babysitters/area/{area_id}', [\App\Http\Controllers\BabysitterController::class, 'getBabysittersByArea']); // Get all babysitters for a specific area
         Route::get('/babysitters/{id}', [\App\Http\Controllers\BabysitterController::class, 'show']); // View a specific babysitter
         Route::post('/babysitters/calculate-price', [\App\Http\Controllers\BabysitterController::class, 'calculatePrice']); // Calculate price for babysitters
+        
+        // Doctors (Category 8) - area based
+        Route::get('/doctor-categories', [DoctorCategoryController::class, 'index']);
+        Route::get('/doctor-categories/{doctorCategory}', [DoctorCategoryController::class, 'show']);
+        Route::get('/doctor-categories/{doctorCategory}/doctors', [DoctorController::class, 'getDoctorsByCategory']);
+        Route::get('/doctors/{id}', [DoctorController::class, 'show']); // Includes area price, operations, availabilities
         
         // FAQ APIs accessible by both users and admins (with translation support)
         Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
@@ -287,6 +300,40 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'update']);
         Route::delete('/offer-area-prices/{id}', [OfferAreaPriceController::class, 'destroy']);
         Route::get('/offer-area-prices/offer/{offerId}', [OfferAreaPriceController::class, 'getOfferPrices']);
+
+        // Doctors management (Category 8)
+        // Categories
+        Route::get('/doctor-categories', [AdminDoctorCategoryController::class, 'index']);
+        Route::post('/doctor-categories', [AdminDoctorCategoryController::class, 'store']);
+        Route::get('/doctor-categories/{doctorCategory}', [AdminDoctorCategoryController::class, 'show']);
+        Route::match(['put','post'], '/doctor-categories/{doctorCategory}', [AdminDoctorCategoryController::class, 'update']);
+        Route::delete('/doctor-categories/{doctorCategory}', [AdminDoctorCategoryController::class, 'destroy']);
+
+        // Doctors
+        Route::get('/doctors', [AdminDoctorController::class, 'index']);
+        Route::post('/doctors', [AdminDoctorController::class, 'store']);
+        Route::get('/doctors/{doctor}', [AdminDoctorController::class, 'show']);
+        Route::match(['put','post'], '/doctors/{doctor}', [AdminDoctorController::class, 'update']);
+        Route::delete('/doctors/{doctor}', [AdminDoctorController::class, 'destroy']);
+
+        // Doctor availabilities
+        Route::get('/doctor-availabilities', [AdminDoctorAvailabilityController::class, 'index']);
+        Route::post('/doctor-availabilities', [AdminDoctorAvailabilityController::class, 'store']);
+        Route::match(['put','post'], '/doctor-availabilities/{doctorAvailability}', [AdminDoctorAvailabilityController::class, 'update']);
+        Route::delete('/doctor-availabilities/{doctorAvailability}', [AdminDoctorAvailabilityController::class, 'destroy']);
+
+        // Doctor operations
+        Route::get('/doctor-operations', [AdminDoctorOperationController::class, 'index']);
+        Route::post('/doctor-operations', [AdminDoctorOperationController::class, 'store']);
+        Route::get('/doctor-operations/{doctorOperation}', [AdminDoctorOperationController::class, 'show']);
+        Route::match(['put','post'], '/doctor-operations/{doctorOperation}', [AdminDoctorOperationController::class, 'update']);
+        Route::delete('/doctor-operations/{doctorOperation}', [AdminDoctorOperationController::class, 'destroy']);
+
+        // Doctor operation area prices
+        Route::get('/doctor-operation-area-prices', [AdminDoctorOperationAreaPriceController::class, 'index']);
+        Route::post('/doctor-operation-area-prices', [AdminDoctorOperationAreaPriceController::class, 'store']);
+        Route::put('/doctor-operation-area-prices/{id}', [AdminDoctorOperationAreaPriceController::class, 'update']);
+        Route::delete('/doctor-operation-area-prices/{id}', [AdminDoctorOperationAreaPriceController::class, 'destroy']);
 
         // Category 7: Duties - Admin routes
         // Nurse Visits

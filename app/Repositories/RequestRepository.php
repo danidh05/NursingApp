@@ -181,6 +181,18 @@ class RequestRepository implements IRequestRepository
                 $requestData['notes'] = $dto->notes;
             }
             // Do NOT include Category 1, 2, 3, 4, or 5 specific fields
+        } elseif ($categoryId === 8) {
+            // Category 8: Doctors (area-based pricing applied when reading)
+            $requestData['area_id'] = $dto->area_id ?? $user->area_id;
+            $requestData['doctor_id'] = $dto->doctor_id;
+            $requestData['appointment_type'] = $dto->appointment_type;
+            $requestData['slot_id'] = $dto->slot_id;
+            if ($dto->request_details_files !== null && !empty($dto->request_details_files)) {
+                $requestData['request_details_files'] = json_encode($dto->request_details_files);
+            }
+            if ($dto->notes !== null) {
+                $requestData['notes'] = $dto->notes;
+            }
         } else {
             // Future categories (6-8): Only common fields, no category-specific fields yet
             // Can be extended when implementing other categories
@@ -210,6 +222,9 @@ class RequestRepository implements IRequestRepository
             $relationships[] = 'nurseVisit';
             $relationships[] = 'duty';
             $relationships[] = 'babysitter';
+        } elseif ($categoryId === 8) {
+            $relationships[] = 'doctor';
+            $relationships[] = 'slot';
         }
 
         return $request->load($relationships);

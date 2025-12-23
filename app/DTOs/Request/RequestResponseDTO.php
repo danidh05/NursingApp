@@ -83,6 +83,12 @@ class RequestResponseDTO
         public ?array $nurse_visit = null,           // Category 7: Nurse Visit information
         public ?array $duty = null,                  // Category 7: Duty information
         public ?array $babysitter = null,            // Category 7: Babysitter information
+        // Category 8: Doctors
+        public ?int $doctor_id = null,
+        public ?string $appointment_type = null,
+        public ?int $slot_id = null,
+        public ?array $doctor = null,
+        public ?array $slot = null,
     ) {}
 
     public static function fromModel(Request $request): self
@@ -326,6 +332,37 @@ class RequestResponseDTO
                     'additional_information' => $translation?->additional_information,
                 ];
             })() : null,
+            // Category 8: Doctors
+            doctor_id: $request->doctor_id,
+            appointment_type: $request->appointment_type,
+            slot_id: $request->slot_id,
+            doctor: $request->doctor ? (function() use ($request) {
+                $locale = app()->getLocale() ?: 'en';
+                $translation = $request->doctor->translate($locale);
+                // area price fallback to base price
+                $areaPrice = $request->area_id
+                    ? $request->doctor->areaPrices()->where('area_id', $request->area_id)->first()
+                    : null;
+                $price = $areaPrice ? $areaPrice->price : $request->doctor->price;
+                return [
+                    'id' => $request->doctor->id,
+                    'name' => $request->doctor->name,
+                    'image' => $request->doctor->image_url,
+                    'price' => $price,
+                    'specification' => $translation?->specification ?? $request->doctor->specification,
+                    'job_name' => $translation?->job_name ?? $request->doctor->job_name,
+                    'description' => $translation?->description ?? $request->doctor->description,
+                    'additional_information' => $translation?->additional_information ?? $request->doctor->additional_information,
+                    'years_of_experience' => $request->doctor->years_of_experience,
+                ];
+            })() : null,
+            slot: $request->slot ? [
+                'id' => $request->slot->id,
+                'date' => $request->slot->date?->format('Y-m-d'),
+                'start_time' => $request->slot->start_time ? $request->slot->start_time->format('H:i:s') : null,
+                'end_time' => $request->slot->end_time ? $request->slot->end_time->format('H:i:s') : null,
+                'is_booked' => $request->slot->is_booked,
+            ] : null,
         );
     }
 } 

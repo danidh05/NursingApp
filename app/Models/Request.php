@@ -85,6 +85,10 @@ class Request extends Model
         'duration_hours',
         'is_continuous_care',
         'is_day_shift',
+        // Category 8: Doctors
+        'doctor_id',
+        'appointment_type',
+        'slot_id',
     ];
 
     /**
@@ -110,6 +114,8 @@ class Request extends Model
         'discounted_price' => 'decimal:2',
         'request_with_insurance' => 'boolean',
         'request_details_files' => 'array',
+        // Category 8
+        'slot_id' => 'integer',
     ];
 
     protected $dates = ['deleted_at'];
@@ -238,6 +244,22 @@ class Request extends Model
     public function physiotherapist()
     {
         return $this->belongsTo(\App\Models\Physiotherapist::class);
+    }
+
+    /**
+     * Get the doctor for this request (Category 8 only).
+     */
+    public function doctor()
+    {
+        return $this->belongsTo(\App\Models\Doctor::class);
+    }
+
+    /**
+     * Get the doctor availability slot for this request (Category 8 only).
+     */
+    public function slot()
+    {
+        return $this->belongsTo(\App\Models\DoctorAvailability::class, 'slot_id');
     }
 
     /**

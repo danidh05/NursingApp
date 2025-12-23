@@ -92,14 +92,17 @@ class RequestService implements IRequestService
         } elseif ($categoryId == 7) { // Category 7: Duties
             Log::info('=== REQUEST SERVICE: Starting Category 7 file upload processing ===');
             $data = $this->handleCategory7FileUploads($data);
+        } elseif ($categoryId == 8) { // Category 8: Doctors
+            Log::info('=== REQUEST SERVICE: Starting Category 8 file upload processing ===');
+            $data = $this->handleCategory8FileUploads($data);
         }
         
         // Map data to DTO using category-specific handler
         $dto = $handler->mapToDTO($data);
         
-        // Extract total_price from data for Category 5 and 7 (frontend-calculated)
+        // Extract total_price from data for Category 5, 7, 8 (frontend-calculated)
         $totalPrice = null;
-        if (($categoryId === 5 || $categoryId === 7) && isset($data['total_price'])) {
+        if (($categoryId === 5 || $categoryId === 7 || $categoryId === 8) && isset($data['total_price'])) {
             $totalPrice = (float)$data['total_price'];
         }
         
@@ -138,6 +141,15 @@ class RequestService implements IRequestService
                 ]);
             }
             // If total_price was provided by frontend, it's already set in create method
+        } elseif ($categoryId === 8) {
+            // Category 8: Calculate if not provided by frontend
+            if ($totalPrice === null) {
+                $totalPrice = $this->calculateCategory8RequestTotalPrice($request);
+                $request->update([
+                    'total_price' => $totalPrice,
+                    'discounted_price' => $totalPrice
+                ]);
+            }
         } elseif ($categoryId === 2) {
             // Category 2: Set price from test package or individual test (no area pricing)
             if ($dto->test_package_id) {
@@ -556,6 +568,62 @@ class RequestService implements IRequestService
         Log::info('=== HANDLE CATEGORY 7 FILE UPLOADS: Completed ===');
         
         return $data;
+    }
+
+    /**
+     * Handle file uploads for Category 8: Doctors (request_details_files)
+     */
+    private function handleCategory8FileUploads(array $data): array
+    {
+        Log::info('=== HANDLE CATEGORY 8 FILE UPLOADS: Starting ===');
+        $imageStorageService = app(\App\Services\ImageStorageService::class);
+
+        $storedPaths = [];
+
+        if (isset($data['request_details_files'])) {
+            $files = $data['request_details_files'];
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+            foreach ($files as $idx => $file) {
+                if (!($file instanceof \Illuminate\Http\UploadedFile)) {
+                    Log::warning("Category8 request_details_files[$idx] is not UploadedFile, type: " . gettype($file));
+                    continue;
+                }
+                $filePath = $imageStorageService->uploadImage($file, 'doctors/requests');
+                Log::info("  - Uploaded request_details_files[$idx] to: " . $filePath);
+                $storedPaths[] = $filePath;
+            }
+        }
+
+        if (!empty($storedPaths)) {
+            $data['request_details_files'] = array_values($storedPaths);
+        }
+
+        Log::info('=== HANDLE CATEGORY 8 FILE UPLOADS: Completed ===');
+        return $data;
+    }
+
+    /**
+     * Calculate total price for Category 8 based on doctor area price or fallback.
+     */
+    private function calculateCategory8RequestTotalPrice(Request $request): float
+    {
+        $doctor = \App\Models\Doctor::with('areaPrices')->find($request->doctor_id);
+        if (!$doctor) {
+            throw new \Exception("Doctor not found for request {$request->id}");
+        }
+
+        $areaId = $request->area_id;
+        $price = $doctor->price;
+        if ($areaId) {
+            $areaPrice = $doctor->areaPrices()->where('area_id', $areaId)->first();
+            if ($areaPrice) {
+                $price = $areaPrice->price;
+            }
+        }
+
+        return (float) $price;
     }
 
     /**

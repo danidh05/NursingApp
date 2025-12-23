@@ -52,6 +52,10 @@ class CreateRequestDTO
         public ?int $duration_hours = null, // Category 7: Duties/Babysitter - duration in hours (4,6,8,12,24)
         public ?bool $is_continuous_care = false, // Category 7: Duties - continuous care (1 month)
         public ?bool $is_day_shift = true, // Category 7: Duties/Babysitter - day shift or night shift
+        // Category 8: Doctors
+        public ?int $doctor_id = null,
+        public ?string $appointment_type = null, // check_at_home, check_at_clinic, video_call
+        public ?int $slot_id = null,
         // Common field for all categories
         public ?string $additional_information = null,
     ) {}
@@ -105,6 +109,10 @@ class CreateRequestDTO
             duration_hours: isset($data['duration_hours']) ? (int)$data['duration_hours'] : null,
             is_continuous_care: isset($data['is_continuous_care']) ? (bool)$data['is_continuous_care'] : false,
             is_day_shift: isset($data['is_day_shift']) ? (bool)$data['is_day_shift'] : true,
+            // Category 8 fields
+            doctor_id: $data['doctor_id'] ?? null,
+            appointment_type: $data['appointment_type'] ?? null,
+            slot_id: $data['slot_id'] ?? null,
             additional_information: $data['additional_information'] ?? null,
         );
     }

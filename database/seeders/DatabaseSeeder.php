@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             PhysiotherapistSeeder::class, // Category 5: Physiotherapists
             OfferSeeder::class, // Category 6: Offers
             Category7Seeder::class, // Category 7: Duties (Nurse Visits, Duties, Babysitters)
+            DoctorSeeder::class, // Category 8: Doctors
         ]);
     }
 }
