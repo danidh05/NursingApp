@@ -10650,6 +10650,229 @@
                 }
             }
         },
+        "/api/babysitters": {
+            "get": {
+                "tags": [
+                    "Babysitters"
+                ],
+                "summary": "Get all babysitters",
+                "operationId": "0966ae57f9a7b0c45dfcea22260bdf1c",
+                "responses": {
+                    "200": {
+                        "description": "List of babysitters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Baby Sitter"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "day_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "day_shift_price_24_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_24_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "area_prices": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "day_shift_price_12_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "day_shift_price_24_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_12_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_24_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/babysitters/{id}": {
+            "get": {
+                "tags": [
+                    "Babysitters"
+                ],
+                "summary": "Get a specific babysitter",
+                "operationId": "8f55b416f07397105d3cb533d32ba088",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Babysitter details"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/babysitters/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Babysitters"
+                ],
+                "summary": "Get babysitters by area",
+                "operationId": "10a050c5203603a7f320cb87ae0fdafd",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Babysitters filtered by area"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/babysitters/calculate-price": {
+            "post": {
+                "tags": [
+                    "Babysitters"
+                ],
+                "summary": "Calculate price for babysitters",
+                "operationId": "6a6e8842546ff1338a7016a3ff6ae24c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "babysitter_id",
+                                    "duration_hours",
+                                    "from_date",
+                                    "to_date"
+                                ],
+                                "properties": {
+                                    "babysitter_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "duration_hours": {
+                                        "description": "12 or 24",
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "is_day_shift": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-05"
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/categories": {
             "get": {
                 "tags": [
@@ -11690,6 +11913,273 @@
                     },
                     "422": {
                         "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/duties": {
+            "get": {
+                "tags": [
+                    "Duties"
+                ],
+                "summary": "Get all duties",
+                "operationId": "fe269b8cba58e7e75273ce168ebdbbc9",
+                "responses": {
+                    "200": {
+                        "description": "List of duties",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Duty"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "day_shift_price_4_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "day_shift_price_6_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "day_shift_price_8_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "day_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_4_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_6_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_8_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "continuous_care_price": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "area_prices": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "day_shift_price_4_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "day_shift_price_6_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "day_shift_price_8_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "day_shift_price_12_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_4_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_6_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_8_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "night_shift_price_12_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "continuous_care_price": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/duties/{id}": {
+            "get": {
+                "tags": [
+                    "Duties"
+                ],
+                "summary": "Get a specific duty",
+                "operationId": "4a09a3c57295e4c124a3e359fe198bc4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Duty details"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/duties/area/{area_id}": {
+            "get": {
+                "tags": [
+                    "Duties"
+                ],
+                "summary": "Get duties by area",
+                "operationId": "318933b2d50c5c5a657bce224cb7218d",
+                "parameters": [
+                    {
+                        "name": "area_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Duties filtered by area"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/duties/calculate-price": {
+            "post": {
+                "tags": [
+                    "Duties"
+                ],
+                "summary": "Calculate price for duties",
+                "operationId": "82214d31ee6d296c7644f8f0312ad0e4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "duty_id",
+                                    "from_date",
+                                    "to_date"
+                                ],
+                                "properties": {
+                                    "duty_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "duration_hours": {
+                                        "description": "Required unless is_continuous_care",
+                                        "type": "integer",
+                                        "example": 12,
+                                        "nullable": true
+                                    },
+                                    "is_continuous_care": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "is_day_shift": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-05"
+                                    },
+                                    "area_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price"
                     }
                 },
                 "security": [
@@ -13152,7 +13642,88 @@
                 "operationId": "20620345b0444369dcf322d6f719c332",
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "List of nurse visits",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Nurse Visit"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "price_per_1_visit": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "price_per_2_visits": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "price_per_3_visits": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "price_per_4_visits": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "area_prices": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "price_per_1_visit": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "price_per_2_visits": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "price_per_3_visits": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "price_per_4_visits": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -13181,7 +13752,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Nurse visit details"
                     }
                 },
                 "security": [
@@ -13210,7 +13781,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Nurse visits filtered by area"
                     }
                 },
                 "security": [
@@ -14755,6 +15326,106 @@
                                         "description": "Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "physiotherapist_id": {
+                                        "description": "REQUIRED for Category 5: Physiotherapist ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sessions_per_month": {
+                                        "description": "REQUIRED for Category 5: Sessions per month",
+                                        "type": "integer",
+                                        "example": 8
+                                    },
+                                    "machines_included": {
+                                        "description": "Optional for Category 5: Whether machines are included (send as string)",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "false"
+                                    },
+                                    "physio_machines[]": {
+                                        "description": "Optional for Category 5: Array of physio machine IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "request_details": {
+                                        "description": "Optional for Category 5: Single PDF file (max 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "nurse_visit_id": {
+                                        "description": "REQUIRED for Category 7 (Nurse Visits subcategory): Nurse visit ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "visits_per_day": {
+                                        "description": "REQUIRED with nurse_visit_id: visits per day (1-4)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "duty_id": {
+                                        "description": "REQUIRED for Category 7 (Duties subcategory): Duty ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "duration_hours": {
+                                        "description": "REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24",
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "is_continuous_care": {
+                                        "description": "Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "false"
+                                    },
+                                    "is_day_shift": {
+                                        "description": "Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "true"
+                                    },
+                                    "babysitter_id": {
+                                        "description": "REQUIRED for Category 7 (Babysitter subcategory): Babysitter ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "REQUIRED for Category 8: Doctor ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "slot_id": {
+                                        "description": "REQUIRED for Category 8: Availability slot ID",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "appointment_type": {
+                                        "description": "REQUIRED for Category 8: Appointment type",
+                                        "type": "string",
+                                        "enum": [
+                                            "check_at_home",
+                                            "check_at_clinic",
+                                            "video_call"
+                                        ],
+                                        "example": "check_at_home"
                                     }
                                 },
                                 "type": "object"
@@ -18669,6 +19340,10 @@
             "description": "Stream.io chat integration endpoints for real-time messaging"
         },
         {
+            "name": "Babysitters",
+            "description": "API Endpoints for viewing Babysitters (User)"
+        },
+        {
             "name": "Contact Us",
             "description": "API Endpoints for Contact Us form submission"
         },
@@ -18711,6 +19386,10 @@
         {
             "name": "Chat",
             "description": "Temporary request-scoped chat endpoints for real-time communication"
+        },
+        {
+            "name": "Duties",
+            "description": "API Endpoints for viewing Duties (User)"
         },
         {
             "name": "FAQs",
