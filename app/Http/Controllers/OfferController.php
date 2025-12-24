@@ -42,6 +42,13 @@ class OfferController extends Controller
      *                 @OA\Property(property="base_old_price", type="number", format="float", example=20.00, description="Base old price (fallback)"),
      *                 @OA\Property(property="offer_available_until", type="string", example="3 Days"),
      *                 @OA\Property(property="category_id", type="integer", example=1, nullable=true),
+     *                 @OA\Property(property="category", type="object", nullable=true,
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Service Request"),
+     *                     @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/...", nullable=true),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", nullable=true)
+     *                 ),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/offers/..."),
      *                 @OA\Property(property="description", type="string", nullable=true),
      *                 @OA\Property(property="area_prices", type="array", @OA\Items(
@@ -98,6 +105,9 @@ class OfferController extends Controller
                 'category' => $offer->category ? [
                     'id' => $offer->category->id,
                     'name' => $offer->category->name,
+                    'image_url' => $offer->category->image_url,
+                    'created_at' => $offer->category->created_at?->toIso8601String(),
+                    'updated_at' => $offer->category->updated_at?->toIso8601String(),
                 ] : null,
                 'image' => $offer->image_url,
                 'description' => $translation?->description,
@@ -137,7 +147,31 @@ class OfferController extends Controller
      *         description="Offer retrieved successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", type="object")
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Special Service Offer"),
+     *                 @OA\Property(property="offer_price", type="number", format="float", example=10.00),
+     *                 @OA\Property(property="old_price", type="number", format="float", example=20.00),
+     *                 @OA\Property(property="base_offer_price", type="number", format="float", example=10.00),
+     *                 @OA\Property(property="base_old_price", type="number", format="float", example=20.00),
+     *                 @OA\Property(property="offer_available_until", type="string", example="3 Days"),
+     *                 @OA\Property(property="category_id", type="integer", example=1, nullable=true),
+     *                 @OA\Property(property="category", type="object", nullable=true,
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Service Request"),
+     *                     @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/...", nullable=true),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", nullable=true)
+     *                 ),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/offers/..."),
+     *                 @OA\Property(property="description", type="string", nullable=true),
+     *                 @OA\Property(property="area_prices", type="array", @OA\Items(
+     *                     @OA\Property(property="area_id", type="integer", example=1),
+     *                     @OA\Property(property="area_name", type="string", example="Beirut"),
+     *                     @OA\Property(property="offer_price", type="number", format="float", example=12.00),
+     *                     @OA\Property(property="old_price", type="number", format="float", example=25.00)
+     *                 ))
+     *             )
      *         )
      *     ),
      *     @OA\Response(response=401, description="Unauthorized"),
@@ -187,6 +221,9 @@ class OfferController extends Controller
                 'category' => $offer->category ? [
                     'id' => $offer->category->id,
                     'name' => $offer->category->name,
+                    'image_url' => $offer->category->image_url,
+                    'created_at' => $offer->category->created_at?->toIso8601String(),
+                    'updated_at' => $offer->category->updated_at?->toIso8601String(),
                 ] : null,
                 'image' => $offer->image_url,
                 'description' => $translation?->description,
@@ -232,6 +269,16 @@ class OfferController extends Controller
      *                 @OA\Property(property="old_price", type="number", format="float", example=25.00),
      *                 @OA\Property(property="base_offer_price", type="number", format="float", example=10.00),
      *                 @OA\Property(property="base_old_price", type="number", format="float", example=20.00),
+     *                 @OA\Property(property="category_id", type="integer", example=1, nullable=true),
+     *                 @OA\Property(property="category", type="object", nullable=true,
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Service Request"),
+     *                     @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/...", nullable=true),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", nullable=true)
+     *                 ),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/offers/..."),
+     *                 @OA\Property(property="description", type="string", nullable=true),
      *                 @OA\Property(property="has_area_pricing", type="boolean", example=true)
      *             ))
      *         )
@@ -274,6 +321,9 @@ class OfferController extends Controller
                 'category' => $offer->category ? [
                     'id' => $offer->category->id,
                     'name' => $offer->category->name,
+                    'image_url' => $offer->category->image_url,
+                    'created_at' => $offer->category->created_at?->toIso8601String(),
+                    'updated_at' => $offer->category->updated_at?->toIso8601String(),
                 ] : null,
                 'image' => $offer->image_url,
                 'description' => $translation?->description,
