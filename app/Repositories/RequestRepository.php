@@ -277,7 +277,7 @@ class RequestRepository implements IRequestRepository
         return $request;
     }
 
-    public function getAll(User $user): Collection
+    public function getAll(User $user, array $filters = []): Collection
     {
         $query = Request::with(['services', 'user.role', 'area', 'chatThread', 'nurse', 'category', 'testPackage', 'test', 'ray', 'machine', 'physiotherapist']);
 
@@ -286,13 +286,29 @@ class RequestRepository implements IRequestRepository
             $user->load('role');
         }
 
+        // Apply role-based filtering
         if ($user->role->name === 'admin') {
             // Admin sees all non-deleted requests
-            return $query->whereNull('deleted_at')->get();
+            $query->whereNull('deleted_at');
         } else {
             // User sees only their own requests (including soft deleted)
-            return $query->where('user_id', $user->id)->get();
+            $query->where('user_id', $user->id);
         }
+
+        // Apply status filter
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Apply insurance filter (only for Category 2: Tests)
+        if (!empty($filters['request_with_insurance'])) {
+            $insuranceValue = filter_var($filters['request_with_insurance'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($insuranceValue !== null) {
+                $query->where('request_with_insurance', $insuranceValue);
+            }
+        }
+
+        return $query->get();
     }
 
     public function softDelete(int $id, User $user): void

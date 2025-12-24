@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request as HttpRequest;
 
 class UserRequestController extends Controller
 {
     /**
      * @OA\Get(
      *     path="/api/admin/users/{userId}/requests",
-     *     summary="Get user's request history (Admin)",
-     *     description="View all requests for a specific user to help admin decide on discount application. Shows total sessions and spending to help with discount decisions.",
+     *     summary="Get user's request history with filtering (Admin)",
+     *     description="View all requests for a specific user to help admin decide on discount application. Shows total sessions and spending to help with discount decisions. Supports filtering by status and insurance requests.",
      *     tags={"Admin - User Requests"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -22,6 +23,20 @@ class UserRequestController extends Controller
      *         description="User ID",
      *         required=true,
      *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by request status",
+     *         @OA\Schema(type="string", enum={"submitted","assigned","in_progress","completed","canceled"}, example="completed")
+     *     ),
+     *     @OA\Parameter(
+     *         name="request_with_insurance",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by insurance requests (true/false). Only applies to Category 2 (Tests) requests.",
+     *         @OA\Schema(type="string", enum={"true","false","1","0"}, example="true")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -57,7 +72,7 @@ class UserRequestController extends Controller
      *     @OA\Response(response=403, description="Forbidden - Admin access required")
      * )
      */
-    public function getUserRequests(int $userId): JsonResponse
+    public function getUserRequests(HttpRequest $httpRequest, int $userId): JsonResponse
     {
         $user = User::find($userId);
         
@@ -65,9 +80,24 @@ class UserRequestController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $requests = Request::where('user_id', $userId)
-                          ->with(['services', 'nurse', 'chatThread'])
-                          ->orderBy('created_at', 'desc')
+        // Build query with filters
+        $query = Request::where('user_id', $userId)
+                          ->with(['services', 'nurse', 'chatThread']);
+
+        // Apply status filter
+        if ($httpRequest->has('status')) {
+            $query->where('status', $httpRequest->query('status'));
+        }
+
+        // Apply insurance filter (only for Category 2: Tests)
+        if ($httpRequest->has('request_with_insurance')) {
+            $insuranceValue = filter_var($httpRequest->query('request_with_insurance'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($insuranceValue !== null) {
+                $query->where('request_with_insurance', $insuranceValue);
+            }
+        }
+
+        $requests = $query->orderBy('created_at', 'desc')
                           ->get()
                           ->map(function ($request) {
                               return [
@@ -93,16 +123,18 @@ class UserRequestController extends Controller
                               ];
                           });
 
+        // Calculate stats from ALL user requests (not filtered)
+        $allRequests = Request::where('user_id', $userId)->get();
         $userStats = [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'total_requests' => $requests->count(),
-            'completed_requests' => $requests->where('status', 'completed')->count(),
-            'total_spent' => $requests->sum('final_price'),
-            'total_savings' => $requests->sum('discount_amount'),
-            'discounted_requests' => $requests->where('has_discount', true)->count(),
-            'average_request_value' => $requests->count() > 0 ? $requests->avg('total_price') : 0,
+            'total_requests' => $allRequests->count(),
+            'completed_requests' => $allRequests->where('status', 'completed')->count(),
+            'total_spent' => $allRequests->sum(function ($r) { return $r->getFinalPrice(); }),
+            'total_savings' => $allRequests->sum(function ($r) { return $r->getDiscountAmount(); }),
+            'discounted_requests' => $allRequests->filter(function ($r) { return $r->hasDiscount(); })->count(),
+            'average_request_value' => $allRequests->count() > 0 ? $allRequests->avg('total_price') : 0,
         ];
 
         return response()->json([

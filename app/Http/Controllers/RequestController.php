@@ -39,10 +39,24 @@ class RequestController extends Controller
     /**
      * @OA\Get(
      *     path="/api/requests",
-     *     summary="List all requests with 4-stage tracking",
-     *     description="Retrieve all requests with comprehensive order tracking. Users see only their own requests, admins see all requests. Latitude/longitude come from user location info, time_needed_to_arrive is cached and decreases over time.",
+     *     summary="List all requests with 4-stage tracking and filtering",
+     *     description="Retrieve all requests with comprehensive order tracking. Users see only their own requests, admins see all requests. Supports filtering by status and insurance requests. Latitude/longitude come from user location info, time_needed_to_arrive is cached and decreases over time.",
      *     tags={"Requests"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by request status",
+     *         @OA\Schema(type="string", enum={"submitted","assigned","in_progress","completed","canceled"}, example="submitted")
+     *     ),
+     *     @OA\Parameter(
+     *         name="request_with_insurance",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by insurance requests (true/false). Only applies to Category 2 (Tests) requests.",
+     *         @OA\Schema(type="string", enum={"true","false","1","0"}, example="true")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Requests retrieved successfully",
@@ -85,10 +99,17 @@ class RequestController extends Controller
      *     )
      * )
      */
-    public function index(): JsonResponse
+    public function index(HttpRequest $request): JsonResponse
     {
         $user = Auth::user();
-        $requests = $this->requestService->getAllRequests($user);
+        
+        // Get filter parameters
+        $filters = [
+            'status' => $request->query('status'),
+            'request_with_insurance' => $request->query('request_with_insurance'),
+        ];
+        
+        $requests = $this->requestService->getAllRequests($user, $filters);
     
         return response()->json($requests);
     }

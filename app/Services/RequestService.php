@@ -740,12 +740,20 @@ class RequestService implements IRequestService
         return RequestResponseDTO::fromModel($request);
     }
 
-    public function getAllRequests(User $user): array
+    public function getAllRequests(User $user, array $filters = []): array
     {
-        $cacheKey = "user_requests_{$user->id}";
+        // Build cache key with filters
+        $filterKey = '';
+        if (!empty($filters['status'])) {
+            $filterKey .= '_status_' . $filters['status'];
+        }
+        if (!empty($filters['request_with_insurance'])) {
+            $filterKey .= '_insurance_' . $filters['request_with_insurance'];
+        }
+        $cacheKey = "user_requests_{$user->id}{$filterKey}";
         
-        return Cache::remember($cacheKey, 3600, function () use ($user) {
-            $requests = $this->requestRepository->getAll($user);
+        return Cache::remember($cacheKey, 3600, function () use ($user, $filters) {
+            $requests = $this->requestRepository->getAll($user, $filters);
             return $requests->map(fn($request) => RequestResponseDTO::fromModel($request))->toArray();
         });
     }
