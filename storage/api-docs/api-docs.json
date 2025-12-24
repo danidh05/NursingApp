@@ -4508,6 +4508,180 @@
                 ]
             }
         },
+        "/api/admin/most-requested-services": {
+            "get": {
+                "tags": [
+                    "Admin - Most Requested Services"
+                ],
+                "summary": "List all most requested services",
+                "operationId": "f4eea5f5b2cb7ca79b7f7194c3d5da9c",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Most Requested Services"
+                ],
+                "summary": "Add a service to most requested",
+                "operationId": "44467a2a24f3106fa0647412e4d326ab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "service_id"
+                                ],
+                                "properties": {
+                                    "service_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "order": {
+                                        "description": "Display order (optional)",
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/most-requested-services/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Most Requested Services"
+                ],
+                "summary": "Update most requested service order",
+                "operationId": "12c39714c649634b0cf312cd898c7666",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "order": {
+                                        "description": "Display order",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "service_id": {
+                                        "description": "Service ID (optional, to change service)",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Most Requested Services"
+                ],
+                "summary": "Remove service from most requested",
+                "operationId": "fa29470a20ee5e9e7be14c132e795df0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/nurse-visits": {
             "get": {
                 "tags": [
@@ -9074,6 +9248,180 @@
                 ]
             }
         },
+        "/api/admin/suggested-doctors": {
+            "get": {
+                "tags": [
+                    "Admin - Suggested Doctors"
+                ],
+                "summary": "List all suggested doctors",
+                "operationId": "9e9261d921b4a8b2742f67049d531ba7",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Suggested Doctors"
+                ],
+                "summary": "Add a doctor to suggested",
+                "operationId": "36af626ae23738130450dd08e60940ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "doctor_id"
+                                ],
+                                "properties": {
+                                    "doctor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "order": {
+                                        "description": "Display order (optional)",
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/suggested-doctors/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Suggested Doctors"
+                ],
+                "summary": "Update suggested doctor order",
+                "operationId": "eaa1168678f2ab9ff3e24c3435ce456b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "order": {
+                                        "description": "Display order",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "Doctor ID (optional, to change doctor)",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Suggested Doctors"
+                ],
+                "summary": "Remove doctor from suggested",
+                "operationId": "42a5a0b359ad8b10e337983aebe583ac",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/tests": {
             "get": {
                 "tags": [
@@ -10208,13 +10556,193 @@
                 ]
             }
         },
+        "/api/admin/trusted-images": {
+            "get": {
+                "tags": [
+                    "Admin - Trusted Images"
+                ],
+                "summary": "List all trusted images",
+                "operationId": "73302a4c4cb353e277ab0f0ddc887f08",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Trusted Images"
+                ],
+                "summary": "Add a trusted image",
+                "operationId": "cc126cbe20bfb919cdee7ae6ae52da57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Image file (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "order": {
+                                        "description": "Display order (optional)",
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/trusted-images/{id}": {
+            "post": {
+                "tags": [
+                    "Admin - Trusted Images"
+                ],
+                "summary": "Update trusted image",
+                "description": "Update a trusted image. Use POST with _method=PUT for file uploads.",
+                "operationId": "d399d54e382cd87570d58da7f9649d43",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "example": "PUT"
+                                    },
+                                    "image": {
+                                        "description": "Image file (jpg, png, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "order": {
+                                        "description": "Display order",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Trusted Images"
+                ],
+                "summary": "Delete trusted image",
+                "operationId": "b240c04e68c3dfa4341f35de9c0f8bcc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/users/{userId}/requests": {
             "get": {
                 "tags": [
                     "Admin - User Requests"
                 ],
-                "summary": "Get user's request history (Admin)",
-                "description": "View all requests for a specific user to help admin decide on discount application. Shows total sessions and spending to help with discount decisions.",
+                "summary": "Get user's request history with filtering (Admin)",
+                "description": "View all requests for a specific user to help admin decide on discount application. Shows total sessions and spending to help with discount decisions. Supports filtering by status and insurance requests.",
                 "operationId": "50456116e5401e24209c7c27be710edc",
                 "parameters": [
                     {
@@ -10225,6 +10753,39 @@
                         "schema": {
                             "type": "integer",
                             "example": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by request status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "submitted",
+                                "assigned",
+                                "in_progress",
+                                "completed",
+                                "canceled"
+                            ],
+                            "example": "completed"
+                        }
+                    },
+                    {
+                        "name": "request_with_insurance",
+                        "in": "query",
+                        "description": "Filter by insurance requests (true/false). Only applies to Category 2 (Tests) requests.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false",
+                                "1",
+                                "0"
+                            ],
+                            "example": "true"
                         }
                     }
                 ],
@@ -16737,9 +17298,44 @@
                 "tags": [
                     "Requests"
                 ],
-                "summary": "List all requests with 4-stage tracking",
-                "description": "Retrieve all requests with comprehensive order tracking. Users see only their own requests, admins see all requests. Latitude/longitude come from user location info, time_needed_to_arrive is cached and decreases over time.",
+                "summary": "List all requests with 4-stage tracking and filtering",
+                "description": "Retrieve all requests with comprehensive order tracking. Users see only their own requests, admins see all requests. Supports filtering by status and insurance requests. Latitude/longitude come from user location info, time_needed_to_arrive is cached and decreases over time.",
                 "operationId": "d8762545247b9ed012f00e992cbfa665",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by request status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "submitted",
+                                "assigned",
+                                "in_progress",
+                                "completed",
+                                "canceled"
+                            ],
+                            "example": "submitted"
+                        }
+                    },
+                    {
+                        "name": "request_with_insurance",
+                        "in": "query",
+                        "description": "Filter by insurance requests (true/false). Only applies to Category 2 (Tests) requests.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false",
+                                "1",
+                                "0"
+                            ],
+                            "example": "true"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Requests retrieved successfully",
@@ -20226,7 +20822,7 @@
                     "Users"
                 ],
                 "summary": "Get user dashboard",
-                "description": "Retrieve user dashboard with active requests count and recent services",
+                "description": "Retrieve user dashboard with active requests count, recent services, most requested services (manually selected by admin), suggested doctors (manually selected by admin), and trusted images (managed by admin). All data is automatically included.",
                 "operationId": "e0d9d9b7d7bbe83f6bd0bcf21f4395b2",
                 "responses": {
                     "200": {
@@ -20269,23 +20865,127 @@
                                                         "type": "string",
                                                         "format": "date-time"
                                                     },
-                                                    "service": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
+                                                    "services": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Home Nursing"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 50
+                                                                }
                                                             },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "Home Nursing"
-                                                            },
-                                                            "price": {
-                                                                "type": "number",
-                                                                "format": "float",
-                                                                "example": 50
-                                                            }
-                                                        },
-                                                        "type": "object"
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "area": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "most_requested_services": {
+                                            "description": "Most requested services manually selected by admin",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Home Nursing"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/services/..."
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "suggested_doctors": {
+                                            "description": "Suggested doctors manually selected by admin from Category 8",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Dr. John Smith"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/doctors/..."
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 150
+                                                    },
+                                                    "specification": {
+                                                        "type": "string",
+                                                        "example": "Cardiologist"
+                                                    },
+                                                    "job_name": {
+                                                        "type": "string",
+                                                        "example": "Senior Cardiologist"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "years_of_experience": {
+                                                        "type": "integer",
+                                                        "example": 15
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "trusted_images": {
+                                            "description": "Trusted images managed by admin",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/trusted-images/..."
                                                     }
                                                 },
                                                 "type": "object"
@@ -21095,6 +21795,10 @@
             "description": "API Endpoints for managing Machines (Admin only)"
         },
         {
+            "name": "Admin - Most Requested Services",
+            "description": "API Endpoints for managing Most Requested Services (Admin only)"
+        },
+        {
             "name": "Admin - Nurse Visits",
             "description": "API Endpoints for managing Nurse Visits (Admin only)"
         },
@@ -21115,12 +21819,20 @@
             "description": "API Endpoints for managing Rays (Admin only)"
         },
         {
+            "name": "Admin - Suggested Doctors",
+            "description": "API Endpoints for managing Suggested Doctors (Admin only)"
+        },
+        {
             "name": "Admin - Tests",
             "description": "API Endpoints for Test management (Admin only)"
         },
         {
             "name": "Admin - Test Packages",
             "description": "API Endpoints for Test Package management (Admin only)"
+        },
+        {
+            "name": "Admin - Trusted Images",
+            "description": "API Endpoints for managing Trusted Images (Admin only)"
         },
         {
             "name": "Stream.io Chat",
