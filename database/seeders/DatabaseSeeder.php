@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             OfferSeeder::class, // Category 6: Offers
             Category7Seeder::class, // Category 7: Duties (Nurse Visits, Duties, Babysitters)
             DoctorSeeder::class, // Category 8: Doctors
+            DashboardSeeder::class, // Dashboard: Most Requested Services, Suggested Doctors, Trusted Images
         ]);
     }
 }

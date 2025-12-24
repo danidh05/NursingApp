@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('trusted_images', function (Blueprint $table) {
             $table->id();
-            $table->string('image')->comment('Image path stored in storage');
+            $table->string('image')->nullable()->comment('Image path stored in storage');
             $table->integer('order')->default(0)->comment('Display order for sorting');
             $table->timestamps();
             
