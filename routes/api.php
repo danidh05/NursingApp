@@ -43,6 +43,9 @@ use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
 use App\Http\Controllers\Admin\DoctorAvailabilityController as AdminDoctorAvailabilityController;
 use App\Http\Controllers\Admin\DoctorOperationController as AdminDoctorOperationController;
 use App\Http\Controllers\Admin\DoctorOperationAreaPriceController as AdminDoctorOperationAreaPriceController;
+use App\Http\Controllers\Admin\MostRequestedServiceController;
+use App\Http\Controllers\Admin\SuggestedDoctorController;
+use App\Http\Controllers\Admin\TrustedImageController;
 use App\Http\Controllers\DoctorCategoryController;
 use App\Http\Controllers\DoctorController;
 use Illuminate\Support\Facades\Broadcast;
@@ -428,6 +431,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/settings/{id}', [\App\Http\Controllers\SettingsController::class, 'update']); // Update setting
         Route::delete('/settings/{id}', [\App\Http\Controllers\SettingsController::class, 'destroy']); // Delete setting
         Route::post('/settings/{id}/toggle', [\App\Http\Controllers\SettingsController::class, 'toggleActive']); // Toggle setting active status
+
+        // Dashboard Management
+        // Most Requested Services
+        Route::get('/most-requested-services', [MostRequestedServiceController::class, 'index']);
+        Route::post('/most-requested-services', [MostRequestedServiceController::class, 'store']);
+        Route::put('/most-requested-services/{mostRequestedService}', [MostRequestedServiceController::class, 'update']);
+        Route::delete('/most-requested-services/{mostRequestedService}', [MostRequestedServiceController::class, 'destroy']);
+
+        // Suggested Doctors
+        Route::get('/suggested-doctors', [SuggestedDoctorController::class, 'index']);
+        Route::post('/suggested-doctors', [SuggestedDoctorController::class, 'store']);
+        Route::put('/suggested-doctors/{suggestedDoctor}', [SuggestedDoctorController::class, 'update']);
+        Route::delete('/suggested-doctors/{suggestedDoctor}', [SuggestedDoctorController::class, 'destroy']);
+
+        // Trusted Images
+        Route::get('/trusted-images', [TrustedImageController::class, 'index']);
+        Route::post('/trusted-images', [TrustedImageController::class, 'store']);
+        Route::match(['put', 'post'], '/trusted-images/{trustedImage}', [TrustedImageController::class, 'update']);
+        Route::delete('/trusted-images/{trustedImage}', [TrustedImageController::class, 'destroy']);
 
             });
 

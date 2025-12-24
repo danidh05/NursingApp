@@ -220,7 +220,7 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/api/user/dashboard",
      *     summary="Get user dashboard",
-     *     description="Retrieve user dashboard with active requests count and recent services",
+     *     description="Retrieve user dashboard with active requests count, recent services, most requested services (manually selected by admin), suggested doctors (manually selected by admin), and trusted images (managed by admin). All data is automatically included.",
      *     tags={"Users"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -235,12 +235,36 @@ class UserController extends Controller
      *                 @OA\Property(property="problem_description", type="string", example="Need nursing care"),
      *                 @OA\Property(property="status", type="string", example="pending"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
-     *                 @OA\Property(property="service", type="object",
+     *                 @OA\Property(property="services", type="array", @OA\Items(
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Home Nursing"),
      *                     @OA\Property(property="price", type="number", format="float", example=50.00)
-     *                 )
-     *             ), description="Recent 5 service requests")
+     *                 )),
+     *                 @OA\Property(property="area", type="object", nullable=true)
+     *             ), description="Recent 5 service requests"),
+     *             @OA\Property(property="most_requested_services", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/..."),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="description", type="string", nullable=true),
+     *                 @OA\Property(property="category_id", type="integer", example=1)
+     *             ), description="Most requested services manually selected by admin"),
+     *             @OA\Property(property="suggested_doctors", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/doctors/..."),
+     *                 @OA\Property(property="price", type="number", format="float", example=150.00),
+     *                 @OA\Property(property="specification", type="string", example="Cardiologist"),
+     *                 @OA\Property(property="job_name", type="string", example="Senior Cardiologist"),
+     *                 @OA\Property(property="description", type="string", nullable=true),
+     *                 @OA\Property(property="years_of_experience", type="integer", example=15),
+     *                 @OA\Property(property="category_id", type="integer", example=1)
+     *             ), description="Suggested doctors manually selected by admin from Category 8"),
+     *             @OA\Property(property="trusted_images", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/trusted-images/...")
+     *             ), description="Trusted images managed by admin")
      *         )
      *     ),
      *     @OA\Response(
@@ -256,6 +280,7 @@ class UserController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
+        $locale = app()->getLocale() ?: 'en';
 
         // Get all user requests with relationships in a single query
         $requests = $user->requests()
@@ -293,9 +318,59 @@ class UserController extends Controller
                 ];
             });
 
+        // Get Most Requested Services
+        $mostRequestedServices = \App\Models\MostRequestedService::with(['service.areaPrices.area', 'service.category'])
+            ->orderBy('order')
+            ->get()
+            ->map(function ($item) use ($locale) {
+                $service = $item->service;
+                $translation = $service ? $service->translate($locale) : null;
+                return [
+                    'id' => $service->id,
+                    'name' => $translation?->name ?? $service->name,
+                    'image' => $service->image_url,
+                    'price' => $service->price,
+                    'description' => $translation?->description ?? $service->description,
+                    'category_id' => $service->category_id,
+                ];
+            });
+
+        // Get Suggested Doctors
+        $suggestedDoctors = \App\Models\SuggestedDoctor::with(['doctor.doctorCategory', 'doctor.areaPrices.area'])
+            ->orderBy('order')
+            ->get()
+            ->map(function ($item) use ($locale) {
+                $doctor = $item->doctor;
+                $translation = $doctor ? $doctor->translate($locale) : null;
+                return [
+                    'id' => $doctor->id,
+                    'name' => $doctor->name,
+                    'image' => $doctor->image_url,
+                    'price' => $doctor->price,
+                    'specification' => $translation?->specification ?? $doctor->specification,
+                    'job_name' => $translation?->job_name ?? $doctor->job_name,
+                    'description' => $translation?->description ?? $doctor->description,
+                    'years_of_experience' => $doctor->years_of_experience,
+                    'category_id' => $doctor->doctor_category_id,
+                ];
+            });
+
+        // Get Trusted Images
+        $trustedImages = \App\Models\TrustedImage::orderBy('order')
+            ->get()
+            ->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'image' => $image->image_url,
+                ];
+            });
+
         return response()->json([
             'active_requests' => $activeRequests,
             'recent_services' => $recentServices,
+            'most_requested_services' => $mostRequestedServices,
+            'suggested_doctors' => $suggestedDoctors,
+            'trusted_images' => $trustedImages,
         ], 200);
     }
 
