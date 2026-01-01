@@ -164,7 +164,92 @@ class RequestController extends Controller
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         description="For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
+     *         description="For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'. DEFAULT EXAMPLE: Array of 2 requests (JSON).",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 title="Create Multiple Requests - Array Example (Default)",
+     *                 description="Example: Array of 2 requests with different categories. This is the recommended format for creating multiple requests at once.",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="category_id", type="integer", example=1, description="Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors)"),
+     *                     @OA\Property(property="service_id", type="integer", example=1, description="REQUIRED for Category 1: Single service ID"),
+     *                     @OA\Property(property="area_id", type="integer", example=1, description="Optional: Area ID for region-specific pricing"),
+     *                     @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name"),
+     *                     @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
+     *                     @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description"),
+     *                     @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
+     *                     @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
+     *                     @OA\Property(property="additional_information", type="string", example="Additional notes", description="Optional"),
+     *                     @OA\Property(property="use_saved_address", type="boolean", example=false, description="Flag to use saved user address"),
+     *                     @OA\Property(property="address_city", type="string", example="Beirut", description="City (required for Category 1 if use_saved_address is false)"),
+     *                     @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address"),
+     *                     @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information"),
+     *                     @OA\Property(property="address_additional_information", type="string", example="Apartment 5", description="Additional address info"),
+     *                     @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates"),
+     *                     @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Optional for Category 1"),
+     *                     @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Optional for Category 1"),
+     *                     @OA\Property(property="test_package_id", type="integer", example=1, description="REQUIRED for Category 2: Test package ID"),
+     *                     @OA\Property(property="notes", type="string", example="Patient has allergies", description="Optional for Category 2"),
+     *                     @OA\Property(property="request_with_insurance", type="boolean", example=true, description="Optional for Category 2"),
+     *                     @OA\Property(property="ray_id", type="integer", example=1, description="REQUIRED for Category 3: Ray ID"),
+     *                     @OA\Property(property="machine_id", type="integer", example=1, description="REQUIRED for Category 4: Machine ID"),
+     *                     @OA\Property(property="from_date", type="string", format="date", example="2026-01-15", description="Optional for Category 4"),
+     *                     @OA\Property(property="to_date", type="string", format="date", example="2026-01-20", description="Optional for Category 4"),
+     *                     @OA\Property(property="physiotherapist_id", type="integer", example=1, description="REQUIRED for Category 5: Physiotherapist ID"),
+     *                     @OA\Property(property="sessions_per_month", type="integer", example=8, description="REQUIRED for Category 5"),
+     *                     @OA\Property(property="machines_included", type="boolean", example=false, description="Optional for Category 5"),
+     *                     @OA\Property(property="physio_machines", type="array", @OA\Items(type="integer"), description="Optional for Category 5: Array of physio machine IDs"),
+     *                     @OA\Property(property="nurse_visit_id", type="integer", example=1, description="REQUIRED for Category 7 (Nurse Visits): Nurse visit ID"),
+     *                     @OA\Property(property="visits_per_day", type="integer", example=2, description="REQUIRED with nurse_visit_id: visits per day (1-4)"),
+     *                     @OA\Property(property="duty_id", type="integer", example=1, description="REQUIRED for Category 7 (Duties): Duty ID"),
+     *                     @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true"),
+     *                     @OA\Property(property="is_continuous_care", type="boolean", example=false, description="Category 7 (Duties): Continuous care"),
+     *                     @OA\Property(property="is_day_shift", type="boolean", example=true, description="Category 7: Day shift (true) or night shift (false)"),
+     *                     @OA\Property(property="babysitter_id", type="integer", example=1, description="REQUIRED for Category 7 (Babysitter): Babysitter ID"),
+     *                     @OA\Property(property="doctor_id", type="integer", example=1, description="REQUIRED for Category 8: Doctor ID"),
+     *                     @OA\Property(property="slot_id", type="integer", example=10, description="REQUIRED for Category 8: Availability slot ID"),
+     *                     @OA\Property(property="appointment_type", type="string", example="check_at_home", enum={"check_at_home","check_at_clinic","video_call"}, description="REQUIRED for Category 8: Appointment type")
+     *                 ),
+     *                 example={
+     *                     {
+     *                         "category_id": 1,
+     *                         "service_id": 1,
+     *                         "area_id": 1,
+     *                         "full_name": "John Doe",
+     *                         "phone_number": "+1234567890",
+     *                         "problem_description": "Need nursing care for elderly parent",
+     *                         "nurse_gender": "female",
+     *                         "name": "Emergency Home Care",
+     *                         "additional_information": "Patient needs assistance with daily activities",
+     *                         "use_saved_address": false,
+     *                         "address_city": "Beirut",
+     *                         "address_street": "Fouad Chehab Street",
+     *                         "address_building": "Hamood Center, 3rd floor",
+     *                         "address_additional_information": "Apartment 5, ring the bell",
+     *                         "location": "33.8938,35.5018",
+     *                         "time_type": "full-time",
+     *                         "scheduled_time": "2024-01-15T10:00:00Z"
+     *                     },
+     *                     {
+     *                         "category_id": 2,
+     *                         "test_package_id": 1,
+     *                         "full_name": "Jane Smith",
+     *                         "phone_number": "+1987654321",
+     *                         "problem_description": "Need blood test package",
+     *                         "notes": "Patient has allergies to certain medications",
+     *                         "request_with_insurance": true,
+     *                         "additional_information": "Please fast before the test",
+     *                         "use_saved_address": false,
+     *                         "address_city": "Beirut",
+     *                         "address_street": "Hamra Street",
+     *                         "address_building": "Building 10, 2nd floor",
+     *                         "address_additional_information": "Near the pharmacy"
+     *                     }
+     *                 }
+     *             )
+     *         ),
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
@@ -225,42 +310,83 @@ class RequestController extends Controller
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Request created successfully",
+     *         description="Request(s) created successfully. For single request: returns the created request object. For multiple requests: returns an object with success status, total count, created count, failed count, data array, and errors array (if any).",
      *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="category_id", type="integer", example=1, description="Category ID (defaults to 1: Service Request)"),
-     *             @OA\Property(property="area_id", type="integer", example=1, description="Area ID for region-specific pricing"),
-     *             @OA\Property(property="first_name", type="string", example="John", nullable=true),
-     *             @OA\Property(property="last_name", type="string", example="Doe", nullable=true),
-     *             @OA\Property(property="full_name", type="string", example="John Doe", nullable=true),
-     *             @OA\Property(property="phone_number", type="string", example="+1234567890"),
-     *             @OA\Property(property="name", type="string", example="Emergency Home Care", nullable=true),
-     *             @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent"),
-     *             @OA\Property(property="status", type="string", example="submitted", enum={"submitted","assigned","in_progress","completed","canceled"}),
-     *             @OA\Property(property="nurse_gender", type="string", example="female"),
-     *             @OA\Property(property="time_type", type="string", example="full-time"),
-     *             @OA\Property(property="scheduled_time", type="string", format="date-time"),
-     *             @OA\Property(property="location", type="string", example="33.8938,35.5018"),
-     *             @OA\Property(property="use_saved_address", type="boolean", example=false),
-     *             @OA\Property(property="address_city", type="string", example="Beirut", nullable=true),
-     *             @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", nullable=true),
-     *             @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", nullable=true),
-     *             @OA\Property(property="address_additional_information", type="string", example="Apartment 5", nullable=true),
-     *             @OA\Property(property="latitude", type="number", format="float", example=40.7128, nullable=true, description="From user location info"),
-     *             @OA\Property(property="longitude", type="number", format="float", example=-74.0060, nullable=true, description="From user location info"),
-     *             @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on selected area"),
-     *             @OA\Property(property="created_at", type="string", format="date-time"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time"),
-     *             @OA\Property(property="area", type="object", description="Area information for the request",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Beirut")
-     *             ),
-     *             @OA\Property(property="services", type="array", @OA\Items(
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
-     *                 @OA\Property(property="price", type="number", format="float", example=50.00)
-     *             ))
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     title="Single Request Response",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="user_id", type="integer", example=1),
+     *                     @OA\Property(property="category_id", type="integer", example=1, description="Category ID (defaults to 1: Service Request)"),
+     *                     @OA\Property(property="area_id", type="integer", example=1, description="Area ID for region-specific pricing"),
+     *                     @OA\Property(property="first_name", type="string", example="John", nullable=true),
+     *                     @OA\Property(property="last_name", type="string", example="Doe", nullable=true),
+     *                     @OA\Property(property="full_name", type="string", example="John Doe", nullable=true),
+     *                     @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *                     @OA\Property(property="name", type="string", example="Emergency Home Care", nullable=true),
+     *                     @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent"),
+     *                     @OA\Property(property="status", type="string", example="submitted", enum={"submitted","assigned","in_progress","completed","canceled"}),
+     *                     @OA\Property(property="nurse_gender", type="string", example="female"),
+     *                     @OA\Property(property="time_type", type="string", example="full-time"),
+     *                     @OA\Property(property="scheduled_time", type="string", format="date-time"),
+     *                     @OA\Property(property="location", type="string", example="33.8938,35.5018"),
+     *                     @OA\Property(property="use_saved_address", type="boolean", example=false),
+     *                     @OA\Property(property="address_city", type="string", example="Beirut", nullable=true),
+     *                     @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", nullable=true),
+     *                     @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", nullable=true),
+     *                     @OA\Property(property="address_additional_information", type="string", example="Apartment 5", nullable=true),
+     *                     @OA\Property(property="latitude", type="number", format="float", example=40.7128, nullable=true, description="From user location info"),
+     *                     @OA\Property(property="longitude", type="number", format="float", example=-74.0060, nullable=true, description="From user location info"),
+     *                     @OA\Property(property="total_price", type="number", format="float", example=150.00, description="Price calculated based on selected area"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time"),
+     *                     @OA\Property(property="area", type="object", description="Area information for the request",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Beirut")
+     *                     ),
+     *                     @OA\Property(property="services", type="array", @OA\Items(
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                         @OA\Property(property="price", type="number", format="float", example=50.00)
+     *                     ))
+     *                 ),
+     *                 @OA\Schema(
+     *                     title="Multiple Requests Response",
+     *                     @OA\Property(property="success", type="boolean", example=true, description="Whether all requests were created successfully"),
+     *                     @OA\Property(property="total", type="integer", example=2, description="Total number of requests in the array"),
+     *                     @OA\Property(property="created", type="integer", example=2, description="Number of successfully created requests"),
+     *                     @OA\Property(property="failed", type="integer", example=0, description="Number of failed requests"),
+     *                     @OA\Property(property="data", type="array", description="Array of successfully created request objects",
+     *                         @OA\Items(
+     *                             @OA\Property(property="id", type="integer", example=1),
+     *                             @OA\Property(property="user_id", type="integer", example=1),
+     *                             @OA\Property(property="category_id", type="integer", example=1),
+     *                             @OA\Property(property="status", type="string", example="submitted"),
+     *                             @OA\Property(property="full_name", type="string", example="John Doe"),
+     *                             @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *                             @OA\Property(property="total_price", type="number", format="float", example=150.00),
+     *                             @OA\Property(property="created_at", type="string", format="date-time")
+     *                         )
+     *                     ),
+     *                     @OA\Property(property="errors", type="array", description="Array of errors for failed requests (only present if failed > 0). Each error can have either 'errors' (validation errors object) or 'error' (exception message string).",
+     *                         @OA\Items(
+     *                             oneOf={
+     *                                 @OA\Schema(
+     *                                     @OA\Property(property="index", type="integer", example=0, description="Index of the failed request in the original array"),
+     *                                     @OA\Property(property="errors", type="object", description="Validation errors for that request",
+     *                                         @OA\Property(property="category_id", type="array", @OA\Items(type="string"), example={"The category id field is required."}),
+     *                                         @OA\Property(property="service_id", type="array", @OA\Items(type="string"), example={"The service id field is required when category id is 1."})
+     *                                     )
+     *                                 ),
+     *                                 @OA\Schema(
+     *                                     @OA\Property(property="index", type="integer", example=1, description="Index of the failed request in the original array"),
+     *                                     @OA\Property(property="error", type="string", example="Database connection failed", description="Exception error message")
+     *                                 )
+     *                             }
+     *                         )
+     *                     )
+     *                 )
+     *             }
      *         )
      *     ),
      *     @OA\Response(
