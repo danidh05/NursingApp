@@ -16257,6 +16257,35 @@
                                                         "example": 1,
                                                         "nullable": true
                                                     },
+                                                    "category": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Service Request"
+                                                            },
+                                                            "image_url": {
+                                                                "type": "string",
+                                                                "example": "https://firebasestorage.googleapis.com/...",
+                                                                "nullable": true
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "nullable": true
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
                                                     "image": {
                                                         "type": "string",
                                                         "example": "http://localhost:8000/storage/offers/..."
@@ -16355,6 +16384,108 @@
                                             "example": true
                                         },
                                         "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Special Service Offer"
+                                                },
+                                                "offer_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 10
+                                                },
+                                                "old_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 20
+                                                },
+                                                "base_offer_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 10
+                                                },
+                                                "base_old_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 20
+                                                },
+                                                "offer_available_until": {
+                                                    "type": "string",
+                                                    "example": "3 Days"
+                                                },
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                },
+                                                "category": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Service Request"
+                                                        },
+                                                        "image_url": {
+                                                            "type": "string",
+                                                            "example": "https://firebasestorage.googleapis.com/...",
+                                                            "nullable": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "nullable": true
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/offers/..."
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "area_prices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "area_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "area_name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            },
+                                                            "offer_price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 12
+                                                            },
+                                                            "old_price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 25
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -16462,6 +16593,48 @@
                                                         "type": "number",
                                                         "format": "float",
                                                         "example": 20
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "category": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Service Request"
+                                                            },
+                                                            "image_url": {
+                                                                "type": "string",
+                                                                "example": "https://firebasestorage.googleapis.com/...",
+                                                                "nullable": true
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "nullable": true
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/offers/..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
                                                     },
                                                     "has_area_pricing": {
                                                         "type": "boolean",
@@ -17506,150 +17679,21 @@
                     "Requests"
                 ],
                 "summary": "Create a new request or multiple requests",
-                "description": "Create one or multiple service requests. Supports multiple categories with different payloads. Can accept either: 1) A single request object (multipart/form-data or JSON), or 2) An array of request objects (JSON only). For single requests with file uploads, use multipart/form-data. For multiple requests or JSON-only single requests, use application/json. Only accessible by users.",
+                "description": "Create one or multiple service requests. Supports multiple categories with different payloads. Use multipart/form-data for file uploads (single request only). Use application/json for multiple requests or JSON-only single requests. NOTE: For multiple requests with files, send them separately using multipart/form-data. Only accessible by users.",
                 "operationId": "b78212afe2734cba4b079913cc3d3855",
                 "requestBody": {
-                    "description": "For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'.",
+                    "description": "MULTIPLE REQUESTS WITH FILE UPLOADS: Use multipart/form-data with bracket notation (requests[0][field], requests[1][field], etc.) to send multiple requests, each with their own file uploads. ALL fields must use bracket notation for multiple requests. Example: requests[0][category_id]=1, requests[0][service_id]=1, requests[0][request_details_files][]=file1.pdf, requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][request_details_files][]=file2.pdf, requests[1][attach_front_face]=front.jpg. For single request, omit bracket notation. Boolean values must be sent as strings: 'true' or 'false'.",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "title": "Create Request - All Categories",
-                                "description": "Common fields for all categories. Category-specific required fields are listed below.",
+                                "title": "Multiple Requests with File Uploads - REQUIRED FORMAT",
+                                "description": "CRITICAL: For multiple requests with file uploads, ALL fields MUST use bracket notation: requests[0][field], requests[1][field], etc. EXAMPLE - 2 Requests with Files: Request 0 (Category 1): requests[0][category_id]=1, requests[0][service_id]=1, requests[0][full_name]=John Doe, requests[0][use_saved_address]=false, requests[0][address_city]=Beirut. Request 1 (Category 2 with Files): requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][full_name]=Jane Smith, requests[1][request_details_files][]=FILE, requests[1][request_details_files][]=FILE, requests[1][attach_front_face]=FILE, requests[1][attach_back_face]=FILE, requests[1][request_with_insurance]=true, requests[1][use_saved_address]=false, requests[1][address_city]=Beirut. All categories support file uploads. Files: Category 2 (request_details_files[], attach_front_face, attach_back_face), Category 3 (request_details_files[]), Category 5 (request_details), Category 7 (request_details_files[]), Category 8 (request_details_files[]).",
                                 "properties": {
                                     "category_id": {
                                         "description": "REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided.",
                                         "type": "integer",
-                                        "example": 1
-                                    },
-                                    "machine_id": {
-                                        "description": "REQUIRED for Category 4 only: Machine ID",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "from_date": {
-                                        "description": "Optional for Category 4 only: Rental start date (YYYY-MM-DD)",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2026-01-15"
-                                    },
-                                    "to_date": {
-                                        "description": "Optional for Category 4 only: Rental end date (YYYY-MM-DD, must be after from_date)",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2026-01-20"
-                                    },
-                                    "first_name": {
-                                        "description": "Optional: First name",
-                                        "type": "string",
-                                        "example": "John"
-                                    },
-                                    "last_name": {
-                                        "description": "Optional: Last name",
-                                        "type": "string",
-                                        "example": "Doe"
-                                    },
-                                    "full_name": {
-                                        "description": "Optional: Full name (can be built from first_name + last_name)",
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "phone_number": {
-                                        "description": "Optional: Contact phone number",
-                                        "type": "string",
-                                        "example": "+1234567890"
-                                    },
-                                    "problem_description": {
-                                        "description": "Optional: Description of the problem/care needed",
-                                        "type": "string",
-                                        "example": "Need nursing care for elderly parent"
-                                    },
-                                    "nurse_gender": {
-                                        "description": "Optional: Preferred nurse gender",
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female",
-                                            "any"
-                                        ],
-                                        "example": "female"
-                                    },
-                                    "name": {
-                                        "description": "Optional request name/title",
-                                        "type": "string",
-                                        "example": "Emergency Home Care"
-                                    },
-                                    "additional_information": {
-                                        "description": "Optional additional information for all categories",
-                                        "type": "string",
-                                        "example": "Additional notes"
-                                    },
-                                    "use_saved_address": {
-                                        "description": "Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1.",
-                                        "type": "string",
-                                        "enum": [
-                                            "true",
-                                            "false",
-                                            "0",
-                                            "1"
-                                        ],
-                                        "example": "false"
-                                    },
-                                    "address_city": {
-                                        "description": "City (required for Category 1 if use_saved_address is false, optional for other categories)",
-                                        "type": "string",
-                                        "example": "Beirut"
-                                    },
-                                    "address_street": {
-                                        "description": "Street address (required for Category 1 if use_saved_address is false, optional for other categories)",
-                                        "type": "string",
-                                        "example": "Fouad Chehab Street"
-                                    },
-                                    "address_building": {
-                                        "description": "Building information (optional)",
-                                        "type": "string",
-                                        "example": "Hamood Center, 3rd floor"
-                                    },
-                                    "address_additional_information": {
-                                        "description": "Additional address information (optional)",
-                                        "type": "string",
-                                        "example": "Apartment 5, ring the bell"
-                                    },
-                                    "location": {
-                                        "description": "Location coordinates (latitude,longitude) or address string (optional)",
-                                        "type": "string",
-                                        "example": "33.8938,35.5018"
-                                    },
-                                    "service_id": {
-                                        "description": "REQUIRED for Category 1 only: Single service ID",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "area_id": {
-                                        "description": "Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "time_type": {
-                                        "description": "Optional for Category 1: Type of time commitment needed",
-                                        "type": "string",
-                                        "enum": [
-                                            "full-time",
-                                            "part-time"
-                                        ],
-                                        "example": "full-time"
-                                    },
-                                    "scheduled_time": {
-                                        "description": "Optional for Category 1: For immediate requests: use now(). For scheduled: use future time",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15T10:00:00Z"
-                                    },
-                                    "ending_time": {
-                                        "description": "Optional for Category 1: Required only for scheduled appointments (not immediate requests)",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15T12:00:00Z"
+                                        "example": 2
                                     },
                                     "test_package_id": {
                                         "description": "REQUIRED for Category 2: Test package ID",
@@ -17657,7 +17701,7 @@
                                         "example": 1
                                     },
                                     "request_details_files[]": {
-                                        "description": "Optional for Category 2: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports",
+                                        "description": "Optional for Category 2, 3, 7, 8: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports",
                                         "type": "array",
                                         "items": {
                                             "type": "string",
@@ -17689,6 +17733,33 @@
                                         "description": "Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "service_id": {
+                                        "description": "REQUIRED for Category 1 only: Single service ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "ray_id": {
+                                        "description": "REQUIRED for Category 3: Ray ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "machine_id": {
+                                        "description": "REQUIRED for Category 4 only: Machine ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "from_date": {
+                                        "description": "Optional for Category 4 only: Rental start date (YYYY-MM-DD)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-15"
+                                    },
+                                    "to_date": {
+                                        "description": "Optional for Category 4 only: Rental end date (YYYY-MM-DD, must be after from_date)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-20"
                                     },
                                     "physiotherapist_id": {
                                         "description": "REQUIRED for Category 5: Physiotherapist ID",
@@ -17789,182 +17860,719 @@
                                             "video_call"
                                         ],
                                         "example": "check_at_home"
+                                    },
+                                    "first_name": {
+                                        "description": "Optional: First name",
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "description": "Optional: Last name",
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "full_name": {
+                                        "description": "Optional: Full name (can be built from first_name + last_name)",
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "phone_number": {
+                                        "description": "Optional: Contact phone number",
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "problem_description": {
+                                        "description": "Optional: Description of the problem/care needed",
+                                        "type": "string",
+                                        "example": "Need nursing care for elderly parent"
+                                    },
+                                    "nurse_gender": {
+                                        "description": "Optional: Preferred nurse gender",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "any"
+                                        ],
+                                        "example": "female"
+                                    },
+                                    "name": {
+                                        "description": "Optional request name/title",
+                                        "type": "string",
+                                        "example": "Emergency Home Care"
+                                    },
+                                    "additional_information": {
+                                        "description": "Optional additional information for all categories",
+                                        "type": "string",
+                                        "example": "Additional notes"
+                                    },
+                                    "use_saved_address": {
+                                        "description": "Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1.",
+                                        "type": "string",
+                                        "enum": [
+                                            "true",
+                                            "false",
+                                            "0",
+                                            "1"
+                                        ],
+                                        "example": "false"
+                                    },
+                                    "address_city": {
+                                        "description": "City (required for Category 1 if use_saved_address is false, optional for other categories)",
+                                        "type": "string",
+                                        "example": "Beirut"
+                                    },
+                                    "address_street": {
+                                        "description": "Street address (required for Category 1 if use_saved_address is false, optional for other categories)",
+                                        "type": "string",
+                                        "example": "Fouad Chehab Street"
+                                    },
+                                    "address_building": {
+                                        "description": "Building information (optional)",
+                                        "type": "string",
+                                        "example": "Hamood Center, 3rd floor"
+                                    },
+                                    "address_additional_information": {
+                                        "description": "Additional address information (optional)",
+                                        "type": "string",
+                                        "example": "Apartment 5, ring the bell"
+                                    },
+                                    "location": {
+                                        "description": "Location coordinates (latitude,longitude) or address string (optional)",
+                                        "type": "string",
+                                        "example": "33.8938,35.5018"
+                                    },
+                                    "area_id": {
+                                        "description": "Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "time_type": {
+                                        "description": "Optional for Category 1: Type of time commitment needed",
+                                        "type": "string",
+                                        "enum": [
+                                            "full-time",
+                                            "part-time"
+                                        ],
+                                        "example": "full-time"
+                                    },
+                                    "scheduled_time": {
+                                        "description": "Optional for Category 1: For immediate requests: use now(). For scheduled: use future time",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T10:00:00Z"
+                                    },
+                                    "ending_time": {
+                                        "description": "Optional for Category 1: Required only for scheduled appointments (not immediate requests)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15T12:00:00Z"
+                                    },
+                                    "requests": {
+                                        "description": "For multiple requests: Use bracket notation. Example: requests[0][category_id]=1, requests[0][service_id]=1, requests[0][request_details_files][]=file1.pdf, requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][request_details_files][]=file2.pdf. Each request in the array uses the same field structure as single requests, but with bracket notation: requests[0][field], requests[1][field], etc.",
+                                        "type": "array",
+                                        "items": {
+                                            "description": "Each request in the array. Use bracket notation: requests[0][category_id], requests[0][service_id], requests[0][request_details_files][], etc.",
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "requests[0][category_id]": 1,
+                                "requests[0][service_id]": 1,
+                                "requests[0][area_id]": 1,
+                                "requests[0][full_name]": "John Doe",
+                                "requests[0][phone_number]": "+1234567890",
+                                "requests[0][problem_description]": "Need nursing care for elderly parent",
+                                "requests[0][nurse_gender]": "female",
+                                "requests[0][name]": "Emergency Home Care",
+                                "requests[0][additional_information]": "Patient needs assistance with daily activities",
+                                "requests[0][use_saved_address]": "false",
+                                "requests[0][address_city]": "Beirut",
+                                "requests[0][address_street]": "Fouad Chehab Street",
+                                "requests[0][address_building]": "Hamood Center, 3rd floor",
+                                "requests[0][address_additional_information]": "Apartment 5, ring the bell",
+                                "requests[0][location]": "33.8938,35.5018",
+                                "requests[0][time_type]": "full-time",
+                                "requests[0][scheduled_time]": "2024-01-15T10:00:00Z",
+                                "requests[1][category_id]": 2,
+                                "requests[1][test_package_id]": 1,
+                                "requests[1][full_name]": "Jane Smith",
+                                "requests[1][phone_number]": "+1987654321",
+                                "requests[1][problem_description]": "Need blood test package",
+                                "requests[1][notes]": "Patient has allergies to certain medications",
+                                "requests[1][request_with_insurance]": "true",
+                                "requests[1][additional_information]": "Please fast before the test",
+                                "requests[1][use_saved_address]": "false",
+                                "requests[1][address_city]": "Beirut",
+                                "requests[1][address_street]": "Hamra Street",
+                                "requests[1][address_building]": "Building 10, 2nd floor",
+                                "requests[1][address_additional_information]": "Near the pharmacy",
+                                "requests[1][request_details_files][]": "file1.pdf",
+                                "requests[1][attach_front_face]": "front.jpg",
+                                "requests[1][attach_back_face]": "back.jpg"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "title": "Create Multiple Requests - Array Example",
+                                "description": "Example: Array of 2 requests with different categories. Use this format for creating multiple requests at once. NOTE: File uploads are NOT supported in JSON arrays. For requests requiring files, send them separately using multipart/form-data.",
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "category_id": {
+                                            "description": "Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors)",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "service_id": {
+                                            "description": "REQUIRED for Category 1: Single service ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "area_id": {
+                                            "description": "Optional: Area ID for region-specific pricing",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "full_name": {
+                                            "description": "Optional: Full name",
+                                            "type": "string",
+                                            "example": "John Doe"
+                                        },
+                                        "phone_number": {
+                                            "description": "Optional: Contact phone number",
+                                            "type": "string",
+                                            "example": "+1234567890"
+                                        },
+                                        "problem_description": {
+                                            "description": "Optional: Description",
+                                            "type": "string",
+                                            "example": "Need nursing care for elderly parent"
+                                        },
+                                        "nurse_gender": {
+                                            "description": "Optional: Preferred nurse gender",
+                                            "type": "string",
+                                            "enum": [
+                                                "male",
+                                                "female",
+                                                "any"
+                                            ],
+                                            "example": "female"
+                                        },
+                                        "name": {
+                                            "description": "Optional request name/title",
+                                            "type": "string",
+                                            "example": "Emergency Home Care"
+                                        },
+                                        "additional_information": {
+                                            "description": "Optional",
+                                            "type": "string",
+                                            "example": "Additional notes"
+                                        },
+                                        "use_saved_address": {
+                                            "description": "Flag to use saved user address",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "address_city": {
+                                            "description": "City (required for Category 1 if use_saved_address is false)",
+                                            "type": "string",
+                                            "example": "Beirut"
+                                        },
+                                        "address_street": {
+                                            "description": "Street address",
+                                            "type": "string",
+                                            "example": "Fouad Chehab Street"
+                                        },
+                                        "address_building": {
+                                            "description": "Building information",
+                                            "type": "string",
+                                            "example": "Hamood Center, 3rd floor"
+                                        },
+                                        "address_additional_information": {
+                                            "description": "Additional address info",
+                                            "type": "string",
+                                            "example": "Apartment 5"
+                                        },
+                                        "location": {
+                                            "description": "Location coordinates",
+                                            "type": "string",
+                                            "example": "33.8938,35.5018"
+                                        },
+                                        "time_type": {
+                                            "description": "Optional for Category 1",
+                                            "type": "string",
+                                            "enum": [
+                                                "full-time",
+                                                "part-time"
+                                            ],
+                                            "example": "full-time"
+                                        },
+                                        "scheduled_time": {
+                                            "description": "Optional for Category 1",
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2024-01-15T10:00:00Z"
+                                        },
+                                        "test_package_id": {
+                                            "description": "REQUIRED for Category 2: Test package ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "notes": {
+                                            "description": "Optional for Category 2",
+                                            "type": "string",
+                                            "example": "Patient has allergies"
+                                        },
+                                        "request_with_insurance": {
+                                            "description": "Optional for Category 2",
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "ray_id": {
+                                            "description": "REQUIRED for Category 3: Ray ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "machine_id": {
+                                            "description": "REQUIRED for Category 4: Machine ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "from_date": {
+                                            "description": "Optional for Category 4",
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-01-15"
+                                        },
+                                        "to_date": {
+                                            "description": "Optional for Category 4",
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-01-20"
+                                        },
+                                        "physiotherapist_id": {
+                                            "description": "REQUIRED for Category 5: Physiotherapist ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "sessions_per_month": {
+                                            "description": "REQUIRED for Category 5",
+                                            "type": "integer",
+                                            "example": 8
+                                        },
+                                        "machines_included": {
+                                            "description": "Optional for Category 5",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "physio_machines": {
+                                            "description": "Optional for Category 5: Array of physio machine IDs",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "nurse_visit_id": {
+                                            "description": "REQUIRED for Category 7 (Nurse Visits): Nurse visit ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "visits_per_day": {
+                                            "description": "REQUIRED with nurse_visit_id: visits per day (1-4)",
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "duty_id": {
+                                            "description": "REQUIRED for Category 7 (Duties): Duty ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "duration_hours": {
+                                            "description": "REQUIRED with duty_id unless is_continuous_care=true",
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "is_continuous_care": {
+                                            "description": "Category 7 (Duties): Continuous care",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "is_day_shift": {
+                                            "description": "Category 7: Day shift (true) or night shift (false)",
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "babysitter_id": {
+                                            "description": "REQUIRED for Category 7 (Babysitter): Babysitter ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "doctor_id": {
+                                            "description": "REQUIRED for Category 8: Doctor ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "slot_id": {
+                                            "description": "REQUIRED for Category 8: Availability slot ID",
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "appointment_type": {
+                                            "description": "REQUIRED for Category 8: Appointment type",
+                                            "type": "string",
+                                            "enum": [
+                                                "check_at_home",
+                                                "check_at_clinic",
+                                                "video_call"
+                                            ],
+                                            "example": "check_at_home"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": [
+                                    {
+                                        "category_id": 1,
+                                        "service_id": 1,
+                                        "area_id": 1,
+                                        "full_name": "John Doe",
+                                        "phone_number": "+1234567890",
+                                        "problem_description": "Need nursing care for elderly parent",
+                                        "nurse_gender": "female",
+                                        "name": "Emergency Home Care",
+                                        "additional_information": "Patient needs assistance with daily activities",
+                                        "use_saved_address": false,
+                                        "address_city": "Beirut",
+                                        "address_street": "Fouad Chehab Street",
+                                        "address_building": "Hamood Center, 3rd floor",
+                                        "address_additional_information": "Apartment 5, ring the bell",
+                                        "location": "33.8938,35.5018",
+                                        "time_type": "full-time",
+                                        "scheduled_time": "2024-01-15T10:00:00Z"
+                                    },
+                                    {
+                                        "category_id": 2,
+                                        "test_package_id": 1,
+                                        "full_name": "Jane Smith",
+                                        "phone_number": "+1987654321",
+                                        "problem_description": "Need blood test package",
+                                        "notes": "Patient has allergies to certain medications",
+                                        "request_with_insurance": true,
+                                        "additional_information": "Please fast before the test",
+                                        "use_saved_address": false,
+                                        "address_city": "Beirut",
+                                        "address_street": "Hamra Street",
+                                        "address_building": "Building 10, 2nd floor",
+                                        "address_additional_information": "Near the pharmacy"
+                                    }
+                                ]
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Request created successfully",
+                        "description": "Request(s) created successfully. For single request: returns the created request object. For multiple requests: returns an object with success status, total count, created count, failed count, data array, and errors array (if any).",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "category_id": {
-                                            "description": "Category ID (defaults to 1: Service Request)",
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "area_id": {
-                                            "description": "Area ID for region-specific pricing",
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "first_name": {
-                                            "type": "string",
-                                            "example": "John",
-                                            "nullable": true
-                                        },
-                                        "last_name": {
-                                            "type": "string",
-                                            "example": "Doe",
-                                            "nullable": true
-                                        },
-                                        "full_name": {
-                                            "type": "string",
-                                            "example": "John Doe",
-                                            "nullable": true
-                                        },
-                                        "phone_number": {
-                                            "type": "string",
-                                            "example": "+1234567890"
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Emergency Home Care",
-                                            "nullable": true
-                                        },
-                                        "problem_description": {
-                                            "type": "string",
-                                            "example": "Need nursing care for elderly parent"
-                                        },
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "submitted",
-                                                "assigned",
-                                                "in_progress",
-                                                "completed",
-                                                "canceled"
-                                            ],
-                                            "example": "submitted"
-                                        },
-                                        "nurse_gender": {
-                                            "type": "string",
-                                            "example": "female"
-                                        },
-                                        "time_type": {
-                                            "type": "string",
-                                            "example": "full-time"
-                                        },
-                                        "scheduled_time": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "location": {
-                                            "type": "string",
-                                            "example": "33.8938,35.5018"
-                                        },
-                                        "use_saved_address": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "address_city": {
-                                            "type": "string",
-                                            "example": "Beirut",
-                                            "nullable": true
-                                        },
-                                        "address_street": {
-                                            "type": "string",
-                                            "example": "Fouad Chehab Street",
-                                            "nullable": true
-                                        },
-                                        "address_building": {
-                                            "type": "string",
-                                            "example": "Hamood Center, 3rd floor",
-                                            "nullable": true
-                                        },
-                                        "address_additional_information": {
-                                            "type": "string",
-                                            "example": "Apartment 5",
-                                            "nullable": true
-                                        },
-                                        "latitude": {
-                                            "description": "From user location info",
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 40.7128,
-                                            "nullable": true
-                                        },
-                                        "longitude": {
-                                            "description": "From user location info",
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": -74.006,
-                                            "nullable": true
-                                        },
-                                        "total_price": {
-                                            "description": "Price calculated based on selected area",
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 150
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "area": {
-                                            "description": "Area information for the request",
+                                    "oneOf": [
+                                        {
+                                            "title": "Single Request Response",
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "category_id": {
+                                                    "description": "Category ID (defaults to 1: Service Request)",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_id": {
+                                                    "description": "Area ID for region-specific pricing",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "John",
+                                                    "nullable": true
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Doe",
+                                                    "nullable": true
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "John Doe",
+                                                    "nullable": true
+                                                },
+                                                "phone_number": {
+                                                    "type": "string",
+                                                    "example": "+1234567890"
+                                                },
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Beirut"
+                                                    "example": "Emergency Home Care",
+                                                    "nullable": true
+                                                },
+                                                "problem_description": {
+                                                    "type": "string",
+                                                    "example": "Need nursing care for elderly parent"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "submitted",
+                                                        "assigned",
+                                                        "in_progress",
+                                                        "completed",
+                                                        "canceled"
+                                                    ],
+                                                    "example": "submitted"
+                                                },
+                                                "nurse_gender": {
+                                                    "type": "string",
+                                                    "example": "female"
+                                                },
+                                                "time_type": {
+                                                    "type": "string",
+                                                    "example": "full-time"
+                                                },
+                                                "scheduled_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "33.8938,35.5018"
+                                                },
+                                                "use_saved_address": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "address_city": {
+                                                    "type": "string",
+                                                    "example": "Beirut",
+                                                    "nullable": true
+                                                },
+                                                "address_street": {
+                                                    "type": "string",
+                                                    "example": "Fouad Chehab Street",
+                                                    "nullable": true
+                                                },
+                                                "address_building": {
+                                                    "type": "string",
+                                                    "example": "Hamood Center, 3rd floor",
+                                                    "nullable": true
+                                                },
+                                                "address_additional_information": {
+                                                    "type": "string",
+                                                    "example": "Apartment 5",
+                                                    "nullable": true
+                                                },
+                                                "latitude": {
+                                                    "description": "From user location info",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 40.7128,
+                                                    "nullable": true
+                                                },
+                                                "longitude": {
+                                                    "description": "From user location info",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": -74.006,
+                                                    "nullable": true
+                                                },
+                                                "total_price": {
+                                                    "description": "Price calculated based on selected area",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "area": {
+                                                    "description": "Area information for the request",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Beirut"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Home Nursing"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 50
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
                                         },
-                                        "services": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Home Nursing"
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 50
+                                        {
+                                            "title": "Multiple Requests Response",
+                                            "properties": {
+                                                "success": {
+                                                    "description": "Whether all requests were created successfully",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "total": {
+                                                    "description": "Total number of requests in the array",
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "created": {
+                                                    "description": "Number of successfully created requests",
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "failed": {
+                                                    "description": "Number of failed requests",
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "data": {
+                                                    "description": "Array of successfully created request objects",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "category_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "submitted"
+                                                            },
+                                                            "full_name": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "phone_number": {
+                                                                "type": "string",
+                                                                "example": "+1234567890"
+                                                            },
+                                                            "total_price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 150
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
-                                                "type": "object"
-                                            }
+                                                "errors": {
+                                                    "description": "Array of errors for failed requests (only present if failed > 0). Each error can have either 'errors' (validation errors object) or 'error' (exception message string).",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "oneOf": [
+                                                            {
+                                                                "properties": {
+                                                                    "index": {
+                                                                        "description": "Index of the failed request in the original array",
+                                                                        "type": "integer",
+                                                                        "example": 0
+                                                                    },
+                                                                    "errors": {
+                                                                        "description": "Validation errors for that request",
+                                                                        "properties": {
+                                                                            "category_id": {
+                                                                                "type": "array",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "example": [
+                                                                                    "The category id field is required."
+                                                                                ]
+                                                                            },
+                                                                            "service_id": {
+                                                                                "type": "array",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "example": [
+                                                                                    "The service id field is required when category id is 1."
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            {
+                                                                "properties": {
+                                                                    "index": {
+                                                                        "description": "Index of the failed request in the original array",
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "error": {
+                                                                        "description": "Exception error message",
+                                                                        "type": "string",
+                                                                        "example": "Database connection failed"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
-                                    },
-                                    "type": "object"
+                                    ]
                                 }
                             }
                         }

@@ -159,17 +159,111 @@ class RequestController extends Controller
      * @OA\Post(
      *     path="/api/requests",
      *     summary="Create a new request or multiple requests",
-     *     description="Create one or multiple service requests. Supports multiple categories with different payloads. Can accept either: 1) A single request object (multipart/form-data or JSON), or 2) An array of request objects (JSON only). For single requests with file uploads, use multipart/form-data. For multiple requests or JSON-only single requests, use application/json. Only accessible by users.",
+     *     description="Create one or multiple service requests. Supports multiple categories with different payloads. Use multipart/form-data for file uploads (single request only). Use application/json for multiple requests or JSON-only single requests. NOTE: For multiple requests with files, send them separately using multipart/form-data. Only accessible by users.",
      *     tags={"Requests"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         description="For single request: Use multipart/form-data (for file uploads) or application/json. For multiple requests: Use application/json with an array of request objects. Required fields vary by category_id. Boolean values should be sent as strings: 'true' or 'false'. DEFAULT EXAMPLE: Array of 2 requests (JSON).",
+     *         description="MULTIPLE REQUESTS WITH FILE UPLOADS: Use multipart/form-data with bracket notation (requests[0][field], requests[1][field], etc.) to send multiple requests, each with their own file uploads. ALL fields must use bracket notation for multiple requests. Example: requests[0][category_id]=1, requests[0][service_id]=1, requests[0][request_details_files][]=file1.pdf, requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][request_details_files][]=file2.pdf, requests[1][attach_front_face]=front.jpg. For single request, omit bracket notation. Boolean values must be sent as strings: 'true' or 'false'.",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 title="Multiple Requests with File Uploads - REQUIRED FORMAT",
+     *                 description="CRITICAL: For multiple requests with file uploads, ALL fields MUST use bracket notation: requests[0][field], requests[1][field], etc. EXAMPLE - 2 Requests with Files: Request 0 (Category 1): requests[0][category_id]=1, requests[0][service_id]=1, requests[0][full_name]=John Doe, requests[0][use_saved_address]=false, requests[0][address_city]=Beirut. Request 1 (Category 2 with Files): requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][full_name]=Jane Smith, requests[1][request_details_files][]=FILE, requests[1][request_details_files][]=FILE, requests[1][attach_front_face]=FILE, requests[1][attach_back_face]=FILE, requests[1][request_with_insurance]=true, requests[1][use_saved_address]=false, requests[1][address_city]=Beirut. All categories support file uploads. Files: Category 2 (request_details_files[], attach_front_face, attach_back_face), Category 3 (request_details_files[]), Category 5 (request_details), Category 7 (request_details_files[]), Category 8 (request_details_files[]).",
+     *                 @OA\Property(property="category_id", type="integer", example=2, description="REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided."),
+     *                 @OA\Property(property="test_package_id", type="integer", example=1, description="REQUIRED for Category 2: Test package ID"),
+     *                 @OA\Property(property="request_details_files[]", type="array", @OA\Items(type="string", format="binary"), description="Optional for Category 2, 3, 7, 8: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports"),
+     *                 @OA\Property(property="notes", type="string", example="Patient has allergies", description="Optional for Category 2: Notes"),
+     *                 @OA\Property(property="request_with_insurance", type="string", example="true", enum={"true","false","0","1"}, description="Optional for Category 2: Request with insurance option. Send as string: 'true' or 'false'"),
+     *                 @OA\Property(property="attach_front_face", type="string", format="binary", description="Optional for Category 2: Insurance card front face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
+     *                 @OA\Property(property="attach_back_face", type="string", format="binary", description="Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
+     *                 @OA\Property(property="service_id", type="integer", example=1, description="REQUIRED for Category 1 only: Single service ID"),
+     *                 @OA\Property(property="ray_id", type="integer", example=1, description="REQUIRED for Category 3: Ray ID"),
+     *                 @OA\Property(property="machine_id", type="integer", example=1, description="REQUIRED for Category 4 only: Machine ID"),
+     *                 @OA\Property(property="from_date", type="string", format="date", example="2026-01-15", description="Optional for Category 4 only: Rental start date (YYYY-MM-DD)"),
+     *                 @OA\Property(property="to_date", type="string", format="date", example="2026-01-20", description="Optional for Category 4 only: Rental end date (YYYY-MM-DD, must be after from_date)"),
+     *                 @OA\Property(property="physiotherapist_id", type="integer", example=1, description="REQUIRED for Category 5: Physiotherapist ID"),
+     *                 @OA\Property(property="sessions_per_month", type="integer", example=8, description="REQUIRED for Category 5: Sessions per month"),
+     *                 @OA\Property(property="machines_included", type="string", example="false", enum={"true","false","0","1"}, description="Optional for Category 5: Whether machines are included (send as string)"),
+     *                 @OA\Property(property="physio_machines[]", type="array", @OA\Items(type="integer"), description="Optional for Category 5: Array of physio machine IDs"),
+     *                 @OA\Property(property="request_details", type="string", format="binary", description="Optional for Category 5: Single PDF file (max 5MB)"),
+     *                 @OA\Property(property="nurse_visit_id", type="integer", example=1, description="REQUIRED for Category 7 (Nurse Visits subcategory): Nurse visit ID"),
+     *                 @OA\Property(property="visits_per_day", type="integer", example=2, description="REQUIRED with nurse_visit_id: visits per day (1-4)"),
+     *                 @OA\Property(property="duty_id", type="integer", example=1, description="REQUIRED for Category 7 (Duties subcategory): Duty ID"),
+     *                 @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24"),
+     *                 @OA\Property(property="is_continuous_care", type="string", example="false", enum={"true","false","0","1"}, description="Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required"),
+     *                 @OA\Property(property="is_day_shift", type="string", example="true", enum={"true","false","0","1"}, description="Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)"),
+     *                 @OA\Property(property="babysitter_id", type="integer", example=1, description="REQUIRED for Category 7 (Babysitter subcategory): Babysitter ID"),
+     *                 @OA\Property(property="doctor_id", type="integer", example=1, description="REQUIRED for Category 8: Doctor ID"),
+     *                 @OA\Property(property="slot_id", type="integer", example=10, description="REQUIRED for Category 8: Availability slot ID"),
+     *                 @OA\Property(property="appointment_type", type="string", example="check_at_home", enum={"check_at_home","check_at_clinic","video_call"}, description="REQUIRED for Category 8: Appointment type"),
+     *                 @OA\Property(property="first_name", type="string", example="John", description="Optional: First name"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name"),
+     *                 @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name (can be built from first_name + last_name)"),
+     *                 @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
+     *                 @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
+     *                 @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
+     *                 @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
+     *                 @OA\Property(property="additional_information", type="string", example="Additional notes", description="Optional additional information for all categories"),
+     *                 @OA\Property(property="use_saved_address", type="string", example="false", enum={"true","false","0","1"}, description="Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1."),
+     *                 @OA\Property(property="address_city", type="string", example="Beirut", description="City (required for Category 1 if use_saved_address is false, optional for other categories)"),
+     *                 @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address (required for Category 1 if use_saved_address is false, optional for other categories)"),
+     *                 @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information (optional)"),
+     *                 @OA\Property(property="address_additional_information", type="string", example="Apartment 5, ring the bell", description="Additional address information (optional)"),
+     *                 @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates (latitude,longitude) or address string (optional)"),
+     *                 @OA\Property(property="area_id", type="integer", example=1, description="Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area"),
+     *                 @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Optional for Category 1: Type of time commitment needed"),
+     *                 @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Optional for Category 1: For immediate requests: use now(). For scheduled: use future time"),
+     *                 @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Optional for Category 1: Required only for scheduled appointments (not immediate requests)"),
+     *                 
+     *                 @OA\Property(property="requests", type="array", description="For multiple requests: Use bracket notation. Example: requests[0][category_id]=1, requests[0][service_id]=1, requests[0][request_details_files][]=file1.pdf, requests[1][category_id]=2, requests[1][test_package_id]=1, requests[1][request_details_files][]=file2.pdf. Each request in the array uses the same field structure as single requests, but with bracket notation: requests[0][field], requests[1][field], etc.",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         description="Each request in the array. Use bracket notation: requests[0][category_id], requests[0][service_id], requests[0][request_details_files][], etc."
+     *                     )
+     *                 )
+     *             ),
+     *             example={
+     *                 "requests[0][category_id]": 1,
+     *                 "requests[0][service_id]": 1,
+     *                 "requests[0][area_id]": 1,
+     *                 "requests[0][full_name]": "John Doe",
+     *                 "requests[0][phone_number]": "+1234567890",
+     *                 "requests[0][problem_description]": "Need nursing care for elderly parent",
+     *                 "requests[0][nurse_gender]": "female",
+     *                 "requests[0][name]": "Emergency Home Care",
+     *                 "requests[0][additional_information]": "Patient needs assistance with daily activities",
+     *                 "requests[0][use_saved_address]": "false",
+     *                 "requests[0][address_city]": "Beirut",
+     *                 "requests[0][address_street]": "Fouad Chehab Street",
+     *                 "requests[0][address_building]": "Hamood Center, 3rd floor",
+     *                 "requests[0][address_additional_information]": "Apartment 5, ring the bell",
+     *                 "requests[0][location]": "33.8938,35.5018",
+     *                 "requests[0][time_type]": "full-time",
+     *                 "requests[0][scheduled_time]": "2024-01-15T10:00:00Z",
+     *                 "requests[1][category_id]": 2,
+     *                 "requests[1][test_package_id]": 1,
+     *                 "requests[1][full_name]": "Jane Smith",
+     *                 "requests[1][phone_number]": "+1987654321",
+     *                 "requests[1][problem_description]": "Need blood test package",
+     *                 "requests[1][notes]": "Patient has allergies to certain medications",
+     *                 "requests[1][request_with_insurance]": "true",
+     *                 "requests[1][additional_information]": "Please fast before the test",
+     *                 "requests[1][use_saved_address]": "false",
+     *                 "requests[1][address_city]": "Beirut",
+     *                 "requests[1][address_street]": "Hamra Street",
+     *                 "requests[1][address_building]": "Building 10, 2nd floor",
+     *                 "requests[1][address_additional_information]": "Near the pharmacy",
+     *                 "requests[1][request_details_files][]": "file1.pdf",
+     *                 "requests[1][attach_front_face]": "front.jpg",
+     *                 "requests[1][attach_back_face]": "back.jpg"
+     *             }
+     *         ),
      *         @OA\MediaType(
      *             mediaType="application/json",
      *             @OA\Schema(
-     *                 title="Create Multiple Requests - Array Example (Default)",
-     *                 description="Example: Array of 2 requests with different categories. This is the recommended format for creating multiple requests at once.",
+     *                 title="Create Multiple Requests - Array Example",
+     *                 description="Example: Array of 2 requests with different categories. Use this format for creating multiple requests at once. NOTE: File uploads are NOT supported in JSON arrays. For requests requiring files, send them separately using multipart/form-data.",
      *                 type="array",
      *                 @OA\Items(
      *                     type="object",
@@ -248,63 +342,6 @@ class RequestController extends Controller
      *                         "address_additional_information": "Near the pharmacy"
      *                     }
      *                 }
-     *             )
-     *         ),
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 title="Create Request - All Categories",
-     *                 description="Common fields for all categories. Category-specific required fields are listed below.",
-     *                 @OA\Property(property="category_id", type="integer", example=1, description="REQUIRED: Category ID (1=Service Request, 2=Tests, 3=Rays, 4=Machines, 5=Physiotherapist, 6=Offers, 7=Duties, 8=Doctors). Defaults to 1 if not provided."),
-     *                 @OA\Property(property="machine_id", type="integer", example=1, description="REQUIRED for Category 4 only: Machine ID"),
-     *                 @OA\Property(property="from_date", type="string", format="date", example="2026-01-15", description="Optional for Category 4 only: Rental start date (YYYY-MM-DD)"),
-     *                 @OA\Property(property="to_date", type="string", format="date", example="2026-01-20", description="Optional for Category 4 only: Rental end date (YYYY-MM-DD, must be after from_date)"),
-     *                 @OA\Property(property="first_name", type="string", example="John", description="Optional: First name"),
-     *                 @OA\Property(property="last_name", type="string", example="Doe", description="Optional: Last name"),
-     *                 @OA\Property(property="full_name", type="string", example="John Doe", description="Optional: Full name (can be built from first_name + last_name)"),
-     *                 @OA\Property(property="phone_number", type="string", example="+1234567890", description="Optional: Contact phone number"),
-     *                 @OA\Property(property="problem_description", type="string", example="Need nursing care for elderly parent", description="Optional: Description of the problem/care needed"),
-     *                 @OA\Property(property="nurse_gender", type="string", example="female", enum={"male","female","any"}, description="Optional: Preferred nurse gender"),
-     *                 @OA\Property(property="name", type="string", example="Emergency Home Care", description="Optional request name/title"),
-     *                 @OA\Property(property="additional_information", type="string", example="Additional notes", description="Optional additional information for all categories"),
-     *                 @OA\Property(property="use_saved_address", type="string", example="false", enum={"true","false","0","1"}, description="Flag to use saved user address. Send as string: 'true' or 'false'. If 'false', address fields are required for Category 1."),
-     *                 @OA\Property(property="address_city", type="string", example="Beirut", description="City (required for Category 1 if use_saved_address is false, optional for other categories)"),
-     *                 @OA\Property(property="address_street", type="string", example="Fouad Chehab Street", description="Street address (required for Category 1 if use_saved_address is false, optional for other categories)"),
-     *                 @OA\Property(property="address_building", type="string", example="Hamood Center, 3rd floor", description="Building information (optional)"),
-     *                 @OA\Property(property="address_additional_information", type="string", example="Apartment 5, ring the bell", description="Additional address information (optional)"),
-     *                 @OA\Property(property="location", type="string", example="33.8938,35.5018", description="Location coordinates (latitude,longitude) or address string (optional)"),
-     *                 
-     *                 @OA\Property(property="service_id", type="integer", example=1, description="REQUIRED for Category 1 only: Single service ID"),
-     *                 @OA\Property(property="area_id", type="integer", example=1, description="Optional for Category 1: Area ID for region-specific pricing. If not provided, uses user's registered area"),
-     *                 @OA\Property(property="time_type", type="string", example="full-time", enum={"full-time","part-time"}, description="Optional for Category 1: Type of time commitment needed"),
-     *                 @OA\Property(property="scheduled_time", type="string", format="date-time", example="2024-01-15T10:00:00Z", description="Optional for Category 1: For immediate requests: use now(). For scheduled: use future time"),
-     *                 @OA\Property(property="ending_time", type="string", format="date-time", example="2024-01-15T12:00:00Z", description="Optional for Category 1: Required only for scheduled appointments (not immediate requests)"),
-     *                 
-     *                 @OA\Property(property="test_package_id", type="integer", example=1, description="REQUIRED for Category 2: Test package ID"),
-     *                 @OA\Property(property="request_details_files[]", type="array", @OA\Items(type="string", format="binary"), description="Optional for Category 2: Array of files (PDF, JPG, PNG, max 5MB each) - x-rays, prescriptions, lab reports"),
-     *                 @OA\Property(property="notes", type="string", example="Patient has allergies", description="Optional for Category 2: Notes"),
-     *                 @OA\Property(property="request_with_insurance", type="string", example="true", enum={"true","false","0","1"}, description="Optional for Category 2: Request with insurance option. Send as string: 'true' or 'false'"),
-     *                 @OA\Property(property="attach_front_face", type="string", format="binary", description="Optional for Category 2: Insurance card front face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
-     *                 @OA\Property(property="attach_back_face", type="string", format="binary", description="Optional for Category 2: Insurance card back face (PDF, JPG, PNG, max 5MB) - Required if request_with_insurance is 'true'"),
-     *                 
-     *                 @OA\Property(property="physiotherapist_id", type="integer", example=1, description="REQUIRED for Category 5: Physiotherapist ID"),
-     *                 @OA\Property(property="sessions_per_month", type="integer", example=8, description="REQUIRED for Category 5: Sessions per month"),
-     *                 @OA\Property(property="machines_included", type="string", example="false", enum={"true","false","0","1"}, description="Optional for Category 5: Whether machines are included (send as string)"),
-     *                 @OA\Property(property="physio_machines[]", type="array", @OA\Items(type="integer"), description="Optional for Category 5: Array of physio machine IDs"),
-     *                 @OA\Property(property="request_details", type="string", format="binary", description="Optional for Category 5: Single PDF file (max 5MB)"),
-     *                 
-     *                 @OA\Property(property="nurse_visit_id", type="integer", example=1, description="REQUIRED for Category 7 (Nurse Visits subcategory): Nurse visit ID"),
-     *                 @OA\Property(property="visits_per_day", type="integer", example=2, description="REQUIRED with nurse_visit_id: visits per day (1-4)"),
-     *                 @OA\Property(property="duty_id", type="integer", example=1, description="REQUIRED for Category 7 (Duties subcategory): Duty ID"),
-     *                 @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24"),
-     *                 @OA\Property(property="is_continuous_care", type="string", example="false", enum={"true","false","0","1"}, description="Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required"),
-     *                 @OA\Property(property="is_day_shift", type="string", example="true", enum={"true","false","0","1"}, description="Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)"),
-     *                 @OA\Property(property="babysitter_id", type="integer", example=1, description="REQUIRED for Category 7 (Babysitter subcategory): Babysitter ID"),
-     *                 
-     *                 
-     *                 @OA\Property(property="doctor_id", type="integer", example=1, description="REQUIRED for Category 8: Doctor ID"),
-     *                 @OA\Property(property="slot_id", type="integer", example=10, description="REQUIRED for Category 8: Availability slot ID"),
-     *                 @OA\Property(property="appointment_type", type="string", example="check_at_home", enum={"check_at_home","check_at_clinic","video_call"}, description="REQUIRED for Category 8: Appointment type"),
      *             )
      *         )
      *     ),
@@ -408,27 +445,360 @@ class RequestController extends Controller
      */
     public function store(CreateRequestRequest $httpRequest): JsonResponse
     {
+        Log::info('========================================');
+        Log::info('=== REQUEST CONTROLLER: store() START ===');
+        Log::info('Content-Type: ' . ($httpRequest->header('Content-Type') ?? 'NOT SET'));
+        Log::info('Request Method: ' . $httpRequest->method());
+        Log::info('Is JSON: ' . ($httpRequest->isJson() ? 'YES' : 'NO'));
+        
         // Check if the request body is a JSON array
         $jsonContent = $httpRequest->getContent();
         $isJsonArray = false;
         $requestsData = null;
         
         if ($httpRequest->isJson() && !empty($jsonContent)) {
+            Log::info('--- JSON REQUEST DETECTED ---');
             $decoded = json_decode($jsonContent, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && isset($decoded[0])) {
                 // It's a JSON array
                 $isJsonArray = true;
                 $requestsData = $decoded;
+                Log::info('JSON Array detected - count: ' . count($decoded));
             }
         }
         
-        // If it's an array, process each request
+        // Check if it's a multipart/form-data array (requests[0][field] format)
+        if (!$isJsonArray) {
+            Log::info('--- MULTIPART/FORM-DATA REQUEST DETECTED ---');
+            
+            // Get ALL input to see what Laravel received
+            $allInput = $httpRequest->all();
+            $allKeys = array_keys($allInput);
+            
+            Log::info('=== RAW INPUT ANALYSIS ===');
+            Log::info('Total input keys: ' . count($allKeys));
+            Log::info('All input keys: ' . json_encode($allKeys, JSON_PRETTY_PRINT));
+            
+            // Check for bracket notation patterns
+            $bracketKeys = [];
+            $normalKeys = [];
+            foreach ($allKeys as $key) {
+                if (preg_match('/^requests\[\d+\]\[/', $key)) {
+                    $bracketKeys[] = $key;
+                } else {
+                    $normalKeys[] = $key;
+                }
+            }
+            
+            Log::info('Keys with bracket notation (requests[X][field]): ' . count($bracketKeys));
+            if (!empty($bracketKeys)) {
+                Log::info('Bracket keys found: ' . json_encode(array_slice($bracketKeys, 0, 10))); // Show first 10
+            }
+            Log::info('Normal keys (no bracket): ' . count($normalKeys));
+            if (!empty($normalKeys)) {
+                Log::info('Normal keys: ' . json_encode($normalKeys));
+            }
+            
+            // Method 1: Try Laravel's native parsing
+            $requestsArray = $httpRequest->input('requests', []);
+            Log::info('=== LARAVEL NATIVE PARSING ===');
+            Log::info('$request->input("requests") result: ' . (is_array($requestsArray) ? 'ARRAY with ' . count($requestsArray) . ' items' : gettype($requestsArray)));
+            
+            if (is_array($requestsArray) && !empty($requestsArray)) {
+                Log::info('✅ Laravel auto-parsed requests array successfully!');
+                Log::info('First request keys: ' . json_encode(array_keys($requestsArray[0] ?? $requestsArray['0'] ?? [])));
+            } else {
+                Log::warning('❌ Laravel did NOT auto-parse requests array');
+                
+                // Check if 'requests' key exists in allInput
+                if (isset($allInput['requests'])) {
+                    Log::info('But "requests" key exists in $request->all() - value type: ' . gettype($allInput['requests']));
+                    if (is_array($allInput['requests'])) {
+                        $requestsArray = $allInput['requests'];
+                        Log::info('Using requests from $request->all() - count: ' . count($requestsArray));
+                    }
+                } else {
+                    Log::warning('"requests" key NOT found in $request->all()');
+                    
+                    // Manual parsing fallback
+                    if (!empty($bracketKeys)) {
+                        Log::info('=== ATTEMPTING MANUAL PARSING ===');
+                        $manuallyParsed = $this->manuallyParseBracketNotation($httpRequest);
+                        if (isset($manuallyParsed['requests']) && !empty($manuallyParsed['requests'])) {
+                            $requestsArray = $manuallyParsed['requests'];
+                            Log::info('✅ Manual parsing successful - count: ' . count($requestsArray));
+                        } else {
+                            Log::error('❌ Manual parsing FAILED');
+                        }
+                    }
+                }
+            }
+            
+            // Process the requests array if we found one
+            if (!empty($requestsArray) && is_array($requestsArray)) {
+                Log::info('=== PROCESSING REQUESTS ARRAY ===');
+                $parsedRequests = $this->processLaravelParsedArray($requestsArray, $httpRequest);
+                
+                if (!empty($parsedRequests)) {
+                    Log::info('✅ Successfully processed ' . count($parsedRequests) . ' requests');
+                    return $this->processMultipleRequests($parsedRequests, $httpRequest);
+                } else {
+                    Log::error('❌ processLaravelParsedArray returned empty array');
+                }
+            } else {
+                Log::warning('⚠️ No requests array found - will process as single request');
+                Log::info('=== PAYLOAD FORMAT GUIDE ===');
+                Log::info('For MULTIPLE requests, use bracket notation in Postman form-data:');
+                Log::info('  Key: requests[0][category_id]  Value: 2');
+                Log::info('  Key: requests[0][test_package_id]  Value: 1');
+                Log::info('  Key: requests[0][use_saved_address]  Value: false');
+                Log::info('  Key: requests[0][address_city]  Value: Beirut');
+                Log::info('  Key: requests[0][address_street]  Value: Street Name');
+                Log::info('  Key: requests[0][request_details_files][]  Type: File');
+                Log::info('  Key: requests[1][category_id]  Value: 1');
+                Log::info('  Key: requests[1][service_id]  Value: 1');
+                Log::info('  ... etc');
+                Log::info('ALL fields must use bracket notation: requests[0][field], requests[1][field]');
+            }
+        }
+        
+        // If it's a JSON array, process each request
         if ($isJsonArray && is_array($requestsData)) {
+            Log::info('Processing as JSON array');
             return $this->processMultipleRequests($requestsData);
         }
         
         // Otherwise, process as a single request (existing behavior)
+        Log::info('Processing as single request');
         return $this->processSingleRequest($httpRequest);
+    }
+    
+    /**
+     * Process Laravel's natively parsed requests array.
+     * Laravel automatically converts requests[0][field] to nested arrays when using $request->input('requests')
+     * This is the STANDARD Laravel way - no manual parsing needed!
+     */
+    private function processLaravelParsedArray(array $requestsArray, $httpRequest): array
+    {
+        $processedRequests = [];
+        
+        foreach ($requestsArray as $index => $requestData) {
+            if (!is_array($requestData)) {
+                continue;
+            }
+            
+            // Ensure category_id is an integer (Laravel might parse it as string)
+            $requestData['category_id'] = isset($requestData['category_id']) 
+                ? (int)$requestData['category_id'] 
+                : 1;
+            
+            // Normalize boolean values from form-data (Laravel receives them as strings)
+            $booleanFields = ['use_saved_address', 'request_with_insurance', 'machines_included', 'is_continuous_care', 'is_day_shift'];
+            foreach ($booleanFields as $field) {
+                if (isset($requestData[$field])) {
+                    $value = $requestData[$field];
+                    if (is_string($value)) {
+                        $lowerValue = strtolower(trim($value));
+                        $requestData[$field] = in_array($lowerValue, ['true', '1', 'on', 'yes'], true);
+                    }
+                }
+            }
+            
+            // Handle files - Laravel automatically parses requests[0][file] to $request->file('requests.0.file')
+            // Access via allFiles() which returns the parsed structure
+            $allFiles = $httpRequest->allFiles();
+            $fileIndex = is_numeric($index) ? (int)$index : $index;
+            
+            if (isset($allFiles['requests'][$fileIndex])) {
+                $requestFiles = $allFiles['requests'][$fileIndex];
+                foreach ($requestFiles as $fileKey => $file) {
+                    // Handle both single files and arrays of files
+                    if (is_array($file)) {
+                        $requestData[$fileKey] = $file; // Already an array
+                    } else {
+                        $requestData[$fileKey] = $file; // Single file
+                    }
+                }
+            }
+            
+            // Debug first request
+            if ($index === 0 || $index === '0') {
+                Log::info('=== PROCESSED REQUEST[0] DETAILS ===');
+                Log::info('category_id: ' . ($requestData['category_id'] ?? 'NOT SET') . ' (type: ' . gettype($requestData['category_id'] ?? null) . ')');
+                Log::info('use_saved_address: ' . var_export($requestData['use_saved_address'] ?? null, true) . ' (type: ' . gettype($requestData['use_saved_address'] ?? null) . ')');
+                Log::info('address_city: ' . ($requestData['address_city'] ?? 'NOT SET'));
+                Log::info('address_street: ' . ($requestData['address_street'] ?? 'NOT SET'));
+                Log::info('test_package_id: ' . ($requestData['test_package_id'] ?? 'NOT SET'));
+                Log::info('service_id: ' . ($requestData['service_id'] ?? 'NOT SET'));
+                Log::info('All request[0] keys: ' . json_encode(array_keys($requestData)));
+            }
+            
+            if (!empty($requestData) && isset($requestData['category_id'])) {
+                $processedRequests[] = $requestData;
+            }
+        }
+        
+        return $processedRequests;
+    }
+    
+    /**
+     * Parse multipart/form-data array format (requests[0][field], requests[1][field], etc.)
+     * DEPRECATED: Use processLaravelParsedArray() instead - Laravel handles this natively
+     */
+    private function parseMultipartArray(array $allInput, $httpRequest): ?array
+    {
+        // Check if we have requests[0] pattern
+        // Laravel might parse requests[0] as requests['0'] (string key) or requests[0] (int key)
+        $requestsData = [];
+        
+        if (!isset($allInput["requests"])) {
+            Log::warning('parseMultipartArray: requests key not found in allInput');
+            return null;
+        }
+        
+        $requestsArray = $allInput["requests"];
+        Log::info('parseMultipartArray: requests structure type - ' . gettype($requestsArray));
+        Log::info('parseMultipartArray: requests keys - ' . json_encode(array_keys($requestsArray)));
+        
+        // Handle both string keys ('0', '1') and integer keys (0, 1)
+        foreach ($requestsArray as $key => $requestData) {
+            $index = is_numeric($key) ? (int)$key : $key;
+            
+            // CRITICAL: Ensure category_id is an integer (defaults to 1 if not set)
+            // This must be done FIRST before any validation
+            if (isset($requestData['category_id'])) {
+                $requestData['category_id'] = (int)$requestData['category_id'];
+            } else {
+                $requestData['category_id'] = 1; // Default to Category 1
+            }
+            
+            // Normalize boolean values from form-data (strings "true"/"false" to actual booleans)
+            // This is critical for validation rules like "required_without:use_saved_address"
+            $booleanFields = ['use_saved_address', 'request_with_insurance', 'machines_included', 'is_continuous_care', 'is_day_shift'];
+            foreach ($booleanFields as $field) {
+                if (isset($requestData[$field])) {
+                    $value = $requestData[$field];
+                    if (is_string($value)) {
+                        $lowerValue = strtolower(trim($value));
+                        // Convert string booleans to actual booleans
+                        if (in_array($lowerValue, ['true', '1', 'on', 'yes'], true)) {
+                            $requestData[$field] = true;
+                        } elseif (in_array($lowerValue, ['false', '0', 'off', 'no', ''], true)) {
+                            $requestData[$field] = false;
+                        } else {
+                            // Try filter_var as fallback
+                            $requestData[$field] = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+                        }
+                    }
+                }
+            }
+            
+            // Debug log for first request
+            if ($index === 0) {
+                Log::info('=== PARSED REQUEST[0] DEBUG ===');
+                Log::info('category_id: ' . $requestData['category_id'] . ' (type: ' . gettype($requestData['category_id']) . ')');
+                Log::info('use_saved_address: ' . var_export($requestData['use_saved_address'] ?? 'NOT SET', true) . ' (type: ' . gettype($requestData['use_saved_address'] ?? null) . ')');
+                Log::info('address_city: ' . ($requestData['address_city'] ?? 'NOT SET'));
+                Log::info('address_street: ' . ($requestData['address_street'] ?? 'NOT SET'));
+            }
+            
+            // Handle file uploads for this request index
+            $allFiles = $httpRequest->allFiles();
+            if (isset($allFiles["requests"][$index])) {
+                $requestFiles = $allFiles["requests"][$index];
+                
+                // Merge files into request data
+                foreach ($requestFiles as $fileKey => $file) {
+                    $requestData[$fileKey] = $file;
+                }
+            }
+            
+            // Only add if we have at least category_id or some meaningful data
+            if (!empty($requestData) && (isset($requestData['category_id']) || count($requestData) > 0)) {
+                $requestsData[] = $requestData;
+            }
+        }
+        
+        // Return null if no array data found, otherwise return the parsed array
+        return count($requestsData) > 0 ? $requestsData : null;
+    }
+    
+    /**
+     * Manually parse bracket notation if Laravel didn't auto-parse it.
+     * This handles cases where requests[0][field] format isn't automatically converted.
+     */
+    private function manuallyParseBracketNotation($httpRequest): array
+    {
+        $parsed = ['requests' => []];
+        $allInput = $httpRequest->all();
+        
+        Log::info('=== MANUAL BRACKET PARSING ===');
+        Log::info('Raw input keys: ' . json_encode(array_keys($allInput)));
+        
+        // Look for keys matching requests[0][field], requests[1][field], etc.
+        foreach ($allInput as $key => $value) {
+            // Match pattern: requests[0][category_id] or requests[0][field] or requests[0][field][]
+            if (preg_match('/^requests\[(\d+)\]\[(.+?)\](\[\])?$/', $key, $matches)) {
+                $index = (int)$matches[1];
+                $field = $matches[2];
+                $isArray = isset($matches[3]) && $matches[3] === '[]';
+                
+                if (!isset($parsed['requests'][$index])) {
+                    $parsed['requests'][$index] = [];
+                }
+                
+                // Handle array fields (e.g., physio_machines[])
+                if ($isArray) {
+                    if (!isset($parsed['requests'][$index][$field]) || !is_array($parsed['requests'][$index][$field])) {
+                        $parsed['requests'][$index][$field] = [];
+                    }
+                    $parsed['requests'][$index][$field][] = $value;
+                } else {
+                    $parsed['requests'][$index][$field] = $value;
+                }
+                
+                $valueStr = is_string($value) ? substr($value, 0, 50) : (is_array($value) ? 'array' : gettype($value));
+                Log::info("Parsed: $key -> requests[$index][$field]" . ($isArray ? '[]' : '') . " = $valueStr");
+            }
+        }
+        
+        // Also handle files
+        $allFiles = $httpRequest->allFiles();
+        foreach ($allFiles as $key => $file) {
+            if (preg_match('/^requests\[(\d+)\]\[(.+?)\](\[\])?$/', $key, $matches)) {
+                $index = (int)$matches[1];
+                $field = $matches[2];
+                $isArray = isset($matches[3]) && $matches[3] === '[]';
+                
+                if (!isset($parsed['requests'][$index])) {
+                    $parsed['requests'][$index] = [];
+                }
+                
+                if ($isArray) {
+                    if (!isset($parsed['requests'][$index][$field]) || !is_array($parsed['requests'][$index][$field])) {
+                        $parsed['requests'][$index][$field] = [];
+                    }
+                    if (is_array($file)) {
+                        $parsed['requests'][$index][$field] = array_merge($parsed['requests'][$index][$field], $file);
+                    } else {
+                        $parsed['requests'][$index][$field][] = $file;
+                    }
+                } else {
+                    $parsed['requests'][$index][$field] = $file;
+                }
+                
+                Log::info("Parsed file: $key -> requests[$index][$field]" . ($isArray ? '[]' : ''));
+            }
+        }
+        
+        Log::info('Parsed structure - requests count: ' . count($parsed['requests']));
+        if (isset($parsed['requests'][0])) {
+            Log::info('Parsed requests[0] keys: ' . json_encode(array_keys($parsed['requests'][0])));
+            Log::info('Parsed requests[0][category_id]: ' . ($parsed['requests'][0]['category_id'] ?? 'NOT SET'));
+        }
+        
+        // Return the parsed structure
+        return !empty($parsed['requests']) ? $parsed : $allInput;
     }
     
     /**
@@ -557,19 +927,46 @@ class RequestController extends Controller
     }
     
     /**
-     * Process multiple requests from a JSON array.
+     * Process multiple requests from a JSON array or multipart/form-data array.
      */
-    private function processMultipleRequests(array $requestsData): JsonResponse
+    private function processMultipleRequests(array $requestsData, $httpRequest = null): JsonResponse
     {
+        Log::info('=== processMultipleRequests() START ===');
+        Log::info('Total requests to process: ' . count($requestsData));
+        
         $results = [];
         $errors = [];
         
         foreach ($requestsData as $index => $requestData) {
             try {
+                Log::info("--- Processing Request[$index] ---");
+                Log::info('Raw request data keys: ' . json_encode(array_keys($requestData)));
+                Log::info('Full request data (first 500 chars): ' . substr(json_encode($requestData, JSON_PRETTY_PRINT), 0, 500));
+                
+                // Get validation rules for this category
+                $categoryId = $requestData['category_id'] ?? 1;
+                $validationRules = $this->getValidationRulesForRequest($requestData);
+                
+                Log::info("=== VALIDATION FOR REQUEST[$index] ===");
+                Log::info("Category ID: $categoryId (type: " . gettype($categoryId) . ")");
+                Log::info("Validation rules count: " . count($validationRules));
+                Log::info("Key validation rules:");
+                Log::info("  - category_id: " . json_encode($validationRules['category_id'] ?? 'NOT SET'));
+                Log::info("  - use_saved_address: " . json_encode($validationRules['use_saved_address'] ?? 'NOT SET'));
+                Log::info("  - address_city: " . json_encode($validationRules['address_city'] ?? 'NOT SET'));
+                Log::info("  - address_street: " . json_encode($validationRules['address_street'] ?? 'NOT SET'));
+                
                 // Validate each request individually
-                $validator = \Illuminate\Support\Facades\Validator::make($requestData, $this->getValidationRulesForRequest($requestData));
+                $validator = \Illuminate\Support\Facades\Validator::make($requestData, $validationRules);
                 
                 if ($validator->fails()) {
+                    Log::error("❌ VALIDATION FAILED for request[$index]");
+                    Log::error('Validation errors: ' . json_encode($validator->errors()->toArray(), JSON_PRETTY_PRINT));
+                    Log::error('Request data that failed validation:');
+                    Log::error('  - category_id: ' . var_export($requestData['category_id'] ?? 'MISSING', true) . ' (type: ' . gettype($requestData['category_id'] ?? null) . ')');
+                    Log::error('  - use_saved_address: ' . var_export($requestData['use_saved_address'] ?? 'MISSING', true) . ' (type: ' . gettype($requestData['use_saved_address'] ?? null) . ')');
+                    Log::error('  - address_city: ' . var_export($requestData['address_city'] ?? 'MISSING', true));
+                    Log::error('  - address_street: ' . var_export($requestData['address_street'] ?? 'MISSING', true));
                     $errors[] = [
                         'index' => $index,
                         'errors' => $validator->errors()->toArray(),
@@ -579,9 +976,13 @@ class RequestController extends Controller
                 
                 // Process the validated request
                 $validated = $validator->validated();
+                Log::info("✅ Validation PASSED for request[$index]");
+                Log::info("Creating request with category_id: " . ($validated['category_id'] ?? 'NOT SET'));
+                
                 $request = $this->requestService->createRequest($validated, Auth::user());
                 
                 $results[] = $request;
+                Log::info("✅ Request[$index] created successfully - ID: " . ($request->id ?? 'N/A'));
             } catch (\Exception $e) {
                 $errors[] = [
                     'index' => $index,
@@ -591,6 +992,18 @@ class RequestController extends Controller
         }
         
         // Return response with results and any errors
+        Log::info('=== PROCESSING COMPLETE ===');
+        Log::info('Total requests: ' . count($requestsData));
+        Log::info('Successfully created: ' . count($results));
+        Log::info('Failed: ' . count($errors));
+        
+        if (count($errors) > 0) {
+            Log::error('=== VALIDATION ERRORS SUMMARY ===');
+            foreach ($errors as $error) {
+                Log::error('Request[' . ($error['index'] ?? '?') . '] errors: ' . json_encode($error['errors'] ?? $error['error'] ?? 'Unknown error', JSON_PRETTY_PRINT));
+            }
+        }
+        
         $response = [
             'success' => count($errors) === 0,
             'total' => count($requestsData),
@@ -605,6 +1018,9 @@ class RequestController extends Controller
         
         $statusCode = count($results) > 0 ? 201 : 422;
         
+        Log::info('Response status: ' . $statusCode);
+        Log::info('=== processMultipleRequests() END ===');
+        
         return response()->json($response, $statusCode);
     }
     
@@ -613,7 +1029,9 @@ class RequestController extends Controller
      */
     private function getValidationRulesForRequest(array $requestData): array
     {
-        $categoryId = $requestData['category_id'] ?? 1;
+        // CRITICAL: Cast to integer to ensure proper category matching
+        $categoryId = isset($requestData['category_id']) ? (int)$requestData['category_id'] : 1;
+        Log::info("getValidationRulesForRequest: category_id = $categoryId (type: " . gettype($categoryId) . ")");
         return \App\Services\CategoryHandlers\CategoryRequestHandlerFactory::getValidationRules($categoryId);
     }
 

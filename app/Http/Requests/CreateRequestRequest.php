@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Request;
 use App\Services\CategoryHandlers\CategoryRequestHandlerFactory;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class CreateRequestRequest extends FormRequest
 {
@@ -14,7 +15,7 @@ class CreateRequestRequest extends FormRequest
     }
     
     /**
-     * Determine if the request should skip validation for JSON arrays.
+     * Determine if the request should skip validation for JSON arrays or multipart/form-data arrays.
      * Arrays will be validated individually in the controller.
      */
     protected function shouldSkipValidation(): bool
@@ -24,9 +25,30 @@ class CreateRequestRequest extends FormRequest
         if ($this->isJson() && !empty($this->getContent())) {
             $decoded = json_decode($this->getContent(), true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && isset($decoded[0])) {
+                Log::info('shouldSkipValidation: JSON array detected - skipping Form Request validation');
                 return true; // Skip validation for arrays
             }
         }
+        
+        // Check for multipart/form-data arrays (requests[0][field] format)
+        // Laravel should auto-parse this, but if it doesn't, check raw input keys
+        $allInput = $this->all();
+        $allKeys = array_keys($allInput);
+        
+        // Check if Laravel parsed it as requests array
+        if (isset($allInput['requests']) && is_array($allInput['requests']) && !empty($allInput['requests'])) {
+            Log::info('shouldSkipValidation: Multipart array detected (requests key exists) - skipping Form Request validation');
+            return true;
+        }
+        
+        // Check for bracket notation in keys (requests[0][field])
+        foreach ($allKeys as $key) {
+            if (preg_match('/^requests\[\d+\]\[/', $key)) {
+                Log::info('shouldSkipValidation: Bracket notation detected in keys - skipping Form Request validation');
+                return true;
+            }
+        }
+        
         return false;
     }
 
@@ -95,11 +117,17 @@ class CreateRequestRequest extends FormRequest
         }
         
         // Get category_id from request (defaults to 1: Service Request)
-        $categoryId = $this->input('category_id', 1);
+        // CRITICAL: Cast to integer to ensure proper category matching
+        $categoryIdInput = $this->input('category_id');
+        $categoryId = isset($categoryIdInput) ? (int)$categoryIdInput : 1;
+        
+        Log::info('CreateRequestRequest::rules() - category_id: ' . $categoryId . ' (type: ' . gettype($categoryId) . ')');
         
         // Get category-specific validation rules
         try {
-            return CategoryRequestHandlerFactory::getValidationRules($categoryId);
+            $rules = CategoryRequestHandlerFactory::getValidationRules($categoryId);
+            Log::info('Validation rules for category ' . $categoryId . ' - key count: ' . count($rules));
+            return $rules;
         } catch (\InvalidArgumentException $e) {
             // If category handler doesn't exist, return basic rules
             return [
@@ -115,9 +143,24 @@ class CreateRequestRequest extends FormRequest
 
     public function withValidator($validator)
     {
+        // Skip validation logic if this is an array request (will be validated in controller)
+        if ($this->shouldSkipValidation()) {
+            Log::info('=== CreateRequestRequest::withValidator() SKIPPED (array request) ===');
+            return; // Don't run validation - controller will handle it
+        }
+        
         $validator->after(function ($validator) {
             $data = $validator->getData();
-            $categoryId = $data['category_id'] ?? 1;
+            // CRITICAL: Ensure category_id is an integer for proper comparison
+            $categoryId = isset($data['category_id']) ? (int)$data['category_id'] : 1;
+            
+            // Debug logging
+            Log::info('=== CreateRequestRequest::withValidator() ===');
+            Log::info('category_id from data: ' . var_export($data['category_id'] ?? 'NOT SET', true) . ' (type: ' . gettype($data['category_id'] ?? null) . ')');
+            Log::info('category_id after casting: ' . $categoryId . ' (type: ' . gettype($categoryId) . ')');
+            Log::info('use_saved_address: ' . var_export($data['use_saved_address'] ?? 'NOT SET', true) . ' (type: ' . gettype($data['use_saved_address'] ?? null) . ')');
+            Log::info('address_city: ' . var_export($data['address_city'] ?? 'NOT SET', true));
+            Log::info('address_street: ' . var_export($data['address_street'] ?? 'NOT SET', true));
             
             // Category 2: Validate request_details_files if present
             if ($categoryId === 2 && isset($data['request_details_files'])) {
@@ -167,9 +210,15 @@ class CreateRequestRequest extends FormRequest
             // Category 1 specific validations
             if ($categoryId === 1) {
                 // Normalize boolean from form-data (may be string "true"/"false")
-                $useSavedAddress = filter_var($data['use_saved_address'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $useSavedAddressValue = $data['use_saved_address'] ?? null;
+                if (is_string($useSavedAddressValue)) {
+                    $lowerValue = strtolower(trim($useSavedAddressValue));
+                    $useSavedAddress = in_array($lowerValue, ['true', '1', 'on', 'yes'], true);
+                } else {
+                    $useSavedAddress = filter_var($useSavedAddressValue, FILTER_VALIDATE_BOOLEAN);
+                }
                 
-                // Address validation: if use_saved_address is false, new address fields are required
+                // Address validation: if use_saved_address is false or null, new address fields are required
                 if (!$useSavedAddress) {
                     if (empty($data['address_city'])) {
                         $validator->errors()->add('address_city', 'City is required when not using saved address.');
@@ -193,7 +242,8 @@ class CreateRequestRequest extends FormRequest
 
                 // Validate that the selected area has pricing for the requested service (Category 1 only)
                 // If area_id is not provided, use the authenticated user's registered area
-                $areaId = $data['area_id'] ?? auth()->user()?->area_id;
+                $user = \Illuminate\Support\Facades\Auth::user();
+                $areaId = $data['area_id'] ?? ($user ? $user->area_id : null);
                 
                 if (!empty($areaId) && !empty($data['service_id'])) {
                     $serviceId = $data['service_id'];
@@ -205,6 +255,27 @@ class CreateRequestRequest extends FormRequest
                     if (!$hasPricing) {
                         $validator->errors()->add('area_id', 'The selected area does not have pricing configured for the requested service.');
                     }
+                }
+            }
+            
+            // Category 2, 3, 4, 5, 7, 8: Address validation (same logic as Category 1)
+            if (in_array($categoryId, [2, 3, 4, 5, 7, 8])) {
+                // Address validation: if use_saved_address is false or null, new address fields are required
+                if (!$useSavedAddress) {
+                    Log::info("Category $categoryId: Checking address fields (use_saved_address = false)");
+                    Log::info("  address_city: " . var_export($data['address_city'] ?? 'NOT SET', true));
+                    Log::info("  address_street: " . var_export($data['address_street'] ?? 'NOT SET', true));
+                    
+                    if (empty($data['address_city'])) {
+                        Log::error("  ❌ address_city is EMPTY - adding validation error");
+                        $validator->errors()->add('address_city', 'City is required when not using saved address.');
+                    }
+                    if (empty($data['address_street'])) {
+                        Log::error("  ❌ address_street is EMPTY - adding validation error");
+                        $validator->errors()->add('address_street', 'Street is required when not using saved address.');
+                    }
+                } else {
+                    Log::info("Category $categoryId: use_saved_address = true, skipping address validation");
                 }
             }
             
