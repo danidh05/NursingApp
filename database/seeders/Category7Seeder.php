@@ -85,6 +85,7 @@ class Category7Seeder extends Seeder
                 'night_shift_price_6_hours' => 140.00,
                 'night_shift_price_8_hours' => 180.00,
                 'night_shift_price_12_hours' => 250.00,
+                'price_24_hours' => 400.00, // 24-hour shift price (not day/night specific)
                 'continuous_care_price' => 5000.00,
                 'translations' => [
                     'en' => [
@@ -131,6 +132,7 @@ class Category7Seeder extends Seeder
                     'night_shift_price_6_hours' => $dutyData['night_shift_price_6_hours'],
                     'night_shift_price_8_hours' => $dutyData['night_shift_price_8_hours'],
                     'night_shift_price_12_hours' => $dutyData['night_shift_price_12_hours'],
+                    'price_24_hours' => $dutyData['price_24_hours'],
                     'continuous_care_price' => $dutyData['continuous_care_price'],
                 ]);
             }
@@ -141,9 +143,10 @@ class Category7Seeder extends Seeder
             [
                 'name' => 'Baby Sitter',
                 'day_shift_price_12_hours' => 150.00,
-                'day_shift_price_24_hours' => 280.00,
+                'day_shift_price_24_hours' => 280.00, // Deprecated: kept for backward compatibility
                 'night_shift_price_12_hours' => 180.00,
-                'night_shift_price_24_hours' => 340.00,
+                'night_shift_price_24_hours' => 340.00, // Deprecated: kept for backward compatibility
+                'price_24_hours' => 310.00, // 24-hour shift price (not day/night specific) - USE THIS
                 'translations' => [
                     'en' => [
                         'about' => 'Professional babysitting services for your children.',
@@ -182,9 +185,10 @@ class Category7Seeder extends Seeder
                     'babysitter_id' => $babysitter->id,
                     'area_id' => $area->id,
                     'day_shift_price_12_hours' => $babysitterData['day_shift_price_12_hours'],
-                    'day_shift_price_24_hours' => $babysitterData['day_shift_price_24_hours'],
+                    'day_shift_price_24_hours' => $babysitterData['day_shift_price_24_hours'], // Deprecated
                     'night_shift_price_12_hours' => $babysitterData['night_shift_price_12_hours'],
-                    'night_shift_price_24_hours' => $babysitterData['night_shift_price_24_hours'],
+                    'night_shift_price_24_hours' => $babysitterData['night_shift_price_24_hours'], // Deprecated
+                    'price_24_hours' => $babysitterData['price_24_hours'],
                 ]);
             }
         }
