@@ -153,7 +153,33 @@ class BabysitterController extends Controller
      *     tags={"Babysitters"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="area_id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Babysitters filtered by area")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Babysitters filtered by area",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Baby Sitter"),
+     *                     @OA\Property(property="image", type="string", nullable=true),
+     *                     @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
+     *                     @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+     *                     @OA\Property(property="night_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
+     *                     @OA\Property(property="price_24_hours", type="number", format="float", description="24-hour shift price (separate from day/night, not day/night specific) - USE THIS"),
+     *                     @OA\Property(property="about", type="string", nullable=true),
+     *                     @OA\Property(property="terms_and_conditions", type="string", nullable=true),
+     *                     @OA\Property(property="additional_instructions", type="string", nullable=true),
+     *                     @OA\Property(property="service_include", type="string", nullable=true),
+     *                     @OA\Property(property="description", type="string", nullable=true),
+     *                     @OA\Property(property="additional_information", type="string", nullable=true)
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
     public function getBabysittersByArea(int $areaId): JsonResponse
@@ -175,9 +201,10 @@ class BabysitterController extends Controller
                     'name' => $babysitter->name,
                     'image' => $babysitter->image_url,
                     'day_shift_price_12_hours' => $areaPrice ? $areaPrice->day_shift_price_12_hours : $babysitter->day_shift_price_12_hours,
-                    'day_shift_price_24_hours' => $areaPrice ? $areaPrice->day_shift_price_24_hours : $babysitter->day_shift_price_24_hours,
+                    'day_shift_price_24_hours' => $areaPrice ? $areaPrice->day_shift_price_24_hours : $babysitter->day_shift_price_24_hours, // Deprecated
                     'night_shift_price_12_hours' => $areaPrice ? $areaPrice->night_shift_price_12_hours : $babysitter->night_shift_price_12_hours,
-                    'night_shift_price_24_hours' => $areaPrice ? $areaPrice->night_shift_price_24_hours : $babysitter->night_shift_price_24_hours,
+                    'night_shift_price_24_hours' => $areaPrice ? $areaPrice->night_shift_price_24_hours : $babysitter->night_shift_price_24_hours, // Deprecated
+                    'price_24_hours' => $areaPrice ? $areaPrice->price_24_hours : $babysitter->price_24_hours,
                     'about' => $translation?->about,
                     'terms_and_conditions' => $translation?->terms_and_conditions,
                     'additional_instructions' => $translation?->additional_instructions,
