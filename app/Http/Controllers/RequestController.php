@@ -609,15 +609,84 @@ class RequestController extends Controller
             $allFiles = $httpRequest->allFiles();
             $fileIndex = is_numeric($index) ? (int)$index : $index;
             
-            if (isset($allFiles['requests'][$fileIndex])) {
-                $requestFiles = $allFiles['requests'][$fileIndex];
-                foreach ($requestFiles as $fileKey => $file) {
-                    // Handle both single files and arrays of files
-                    if (is_array($file)) {
-                        $requestData[$fileKey] = $file; // Already an array
+            Log::info("=== FILE UPLOAD PROCESSING FOR REQUEST[$index] ===");
+            Log::info("allFiles() keys: " . json_encode(array_keys($allFiles)));
+            
+            // Check if requests array exists in files
+            if (isset($allFiles['requests'])) {
+                Log::info("allFiles['requests'] exists - type: " . gettype($allFiles['requests']));
+                if (is_array($allFiles['requests'])) {
+                    Log::info("allFiles['requests'] keys: " . json_encode(array_keys($allFiles['requests'])));
+                    
+                    // Check for both numeric and string keys
+                    $fileIndexStr = (string)$fileIndex;
+                    if (isset($allFiles['requests'][$fileIndex])) {
+                        $requestFiles = $allFiles['requests'][$fileIndex];
+                        Log::info("Found files for requests[$fileIndex] - keys: " . json_encode(array_keys($requestFiles)));
+                        
+                        foreach ($requestFiles as $fileKey => $file) {
+                            Log::info("Processing file field: $fileKey");
+                            Log::info("  - Type: " . gettype($file));
+                            Log::info("  - Is array: " . (is_array($file) ? 'YES' : 'NO'));
+                            
+                            if (is_array($file)) {
+                                Log::info("  - Array count: " . count($file));
+                                Log::info("  - First item type: " . (isset($file[0]) ? gettype($file[0]) : 'N/A'));
+                                Log::info("  - First item is UploadedFile: " . (isset($file[0]) && $file[0] instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+                                if (isset($file[0]) && $file[0] instanceof \Illuminate\Http\UploadedFile) {
+                                    Log::info("  - First file name: " . $file[0]->getClientOriginalName());
+                                }
+                                $requestData[$fileKey] = $file; // Already an array
+                            } else {
+                                Log::info("  - Is UploadedFile: " . ($file instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+                                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                                    Log::info("  - File name: " . $file->getClientOriginalName());
+                                    Log::info("  - File size: " . $file->getSize() . " bytes");
+                                }
+                                $requestData[$fileKey] = $file; // Single file
+                            }
+                        }
+                    } elseif (isset($allFiles['requests'][$fileIndexStr])) {
+                        // Try string key
+                        $requestFiles = $allFiles['requests'][$fileIndexStr];
+                        Log::info("Found files for requests['$fileIndexStr'] - keys: " . json_encode(array_keys($requestFiles)));
+                        
+                        foreach ($requestFiles as $fileKey => $file) {
+                            Log::info("Processing file field: $fileKey");
+                            if (is_array($file)) {
+                                $requestData[$fileKey] = $file;
+                            } else {
+                                $requestData[$fileKey] = $file;
+                            }
+                        }
                     } else {
-                        $requestData[$fileKey] = $file; // Single file
+                        Log::warning("No files found for requests[$fileIndex] or requests['$fileIndexStr']");
                     }
+                }
+            } else {
+                Log::warning("allFiles['requests'] does NOT exist");
+                // Check for bracket notation in file keys
+                $bracketFileKeys = [];
+                foreach ($allFiles as $key => $file) {
+                    if (preg_match('/^requests\[(\d+)\]\[(.+?)\](\[\])?$/', $key, $matches)) {
+                        $bracketFileKeys[] = $key;
+                    }
+                }
+                if (!empty($bracketFileKeys)) {
+                    Log::info("Found bracket notation file keys: " . json_encode($bracketFileKeys));
+                    Log::warning("Files exist with bracket notation but weren't parsed into requests array - manual parsing needed");
+                } else {
+                    Log::warning("No files found at all in allFiles()");
+                }
+            }
+            
+            // Log what files we have after processing
+            $fileFields = ['request_details_files', 'attach_front_face', 'attach_back_face', 'request_details'];
+            foreach ($fileFields as $field) {
+                if (isset($requestData[$field])) {
+                    Log::info("After processing - $field exists: " . (is_array($requestData[$field]) ? 'ARRAY[' . count($requestData[$field]) . ']' : gettype($requestData[$field])));
+                } else {
+                    Log::info("After processing - $field: NOT SET");
                 }
             }
             
@@ -702,14 +771,41 @@ class RequestController extends Controller
                 Log::info('address_street: ' . ($requestData['address_street'] ?? 'NOT SET'));
             }
             
-            // Handle file uploads for this request index
+            // Handle file uploads for this request index (parseMultipartArray method)
             $allFiles = $httpRequest->allFiles();
+            Log::info("parseMultipartArray: Checking files for index $index");
+            Log::info("parseMultipartArray: allFiles keys: " . json_encode(array_keys($allFiles)));
+            
             if (isset($allFiles["requests"][$index])) {
                 $requestFiles = $allFiles["requests"][$index];
+                Log::info("parseMultipartArray: Found files for requests[$index] - keys: " . json_encode(array_keys($requestFiles)));
                 
                 // Merge files into request data
                 foreach ($requestFiles as $fileKey => $file) {
+                    Log::info("parseMultipartArray: Merging file field '$fileKey'");
+                    Log::info("  - Type: " . gettype($file));
+                    Log::info("  - Is array: " . (is_array($file) ? 'YES (count: ' . count($file) . ')' : 'NO'));
+                    if (is_array($file) && isset($file[0])) {
+                        Log::info("  - First item is UploadedFile: " . ($file[0] instanceof \Illuminate\Http\UploadedFile ? 'YES' : 'NO'));
+                        if ($file[0] instanceof \Illuminate\Http\UploadedFile) {
+                            Log::info("  - First file name: " . $file[0]->getClientOriginalName());
+                        }
+                    } elseif ($file instanceof \Illuminate\Http\UploadedFile) {
+                        Log::info("  - File name: " . $file->getClientOriginalName());
+                        Log::info("  - File size: " . $file->getSize() . " bytes");
+                    }
                     $requestData[$fileKey] = $file;
+                }
+            } else {
+                Log::warning("parseMultipartArray: No files found for requests[$index]");
+                // Check for string key
+                $indexStr = (string)$index;
+                if (isset($allFiles["requests"][$indexStr])) {
+                    Log::info("parseMultipartArray: Found files for requests['$indexStr']");
+                    $requestFiles = $allFiles["requests"][$indexStr];
+                    foreach ($requestFiles as $fileKey => $file) {
+                        $requestData[$fileKey] = $file;
+                    }
                 }
             }
             
