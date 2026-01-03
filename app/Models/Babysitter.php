@@ -15,16 +15,18 @@ class Babysitter extends Model
         'name',
         'image',
         'day_shift_price_12_hours',
-        'day_shift_price_24_hours',
+        'day_shift_price_24_hours', // Deprecated: kept for backward compatibility
         'night_shift_price_12_hours',
-        'night_shift_price_24_hours',
+        'night_shift_price_24_hours', // Deprecated: kept for backward compatibility
+        'price_24_hours', // Separate 24-hour pricing (not day/night specific) - USE THIS
     ];
 
     protected $casts = [
         'day_shift_price_12_hours' => 'decimal:2',
-        'day_shift_price_24_hours' => 'decimal:2',
+        'day_shift_price_24_hours' => 'decimal:2', // Deprecated
         'night_shift_price_12_hours' => 'decimal:2',
-        'night_shift_price_24_hours' => 'decimal:2',
+        'night_shift_price_24_hours' => 'decimal:2', // Deprecated
+        'price_24_hours' => 'decimal:2',
     ];
 
     /**
@@ -65,9 +67,23 @@ class Babysitter extends Model
 
     /**
      * Get price for a specific duration and shift.
+     * For 24-hour shifts, uses separate price_24_hours field (not day/night specific).
      */
     public function getPriceForDuration(int $durationHours, bool $isDayShift, ?int $areaId = null): float
     {
+        // 24-hour shifts use separate pricing (not day/night specific)
+        if ($durationHours === 24) {
+            if ($areaId) {
+                $areaPrice = $this->areaPrices()->where('area_id', $areaId)->first();
+                if ($areaPrice && $areaPrice->price_24_hours) {
+                    return $areaPrice->price_24_hours;
+                }
+            }
+            // Fallback to base price
+            return $this->price_24_hours ?? 0;
+        }
+
+        // For 12 hours: use day/night shift pricing
         if ($areaId) {
             $areaPrice = $this->areaPrices()->where('area_id', $areaId)->first();
             if ($areaPrice) {

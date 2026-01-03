@@ -40,6 +40,7 @@ class DutyController extends Controller
                      @OA\Property(property="night_shift_price_6_hours", type="number", format="float"),
                      @OA\Property(property="night_shift_price_8_hours", type="number", format="float"),
                      @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+                     @OA\Property(property="price_24_hours", type="number", format="float", description="24-hour shift price (separate from day/night, not day/night specific)"),
                      @OA\Property(property="continuous_care_price", type="number", format="float"),
                      @OA\Property(
                          property="area_prices",
@@ -55,6 +56,7 @@ class DutyController extends Controller
                              @OA\Property(property="night_shift_price_6_hours", type="number", format="float"),
                              @OA\Property(property="night_shift_price_8_hours", type="number", format="float"),
                              @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
+                             @OA\Property(property="price_24_hours", type="number", format="float", description="24-hour shift price (separate from day/night, not day/night specific)"),
                              @OA\Property(property="continuous_care_price", type="number", format="float")
                          )
                      )
@@ -86,6 +88,7 @@ class DutyController extends Controller
                     'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                     'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                     'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                    'price_24_hours' => $duty->price_24_hours,
                     'continuous_care_price' => $duty->continuous_care_price,
                     'area_prices' => $duty->areaPrices->map(function ($areaPrice) {
                         return [
@@ -99,6 +102,7 @@ class DutyController extends Controller
                             'night_shift_price_6_hours' => $areaPrice->night_shift_price_6_hours,
                             'night_shift_price_8_hours' => $areaPrice->night_shift_price_8_hours,
                             'night_shift_price_12_hours' => $areaPrice->night_shift_price_12_hours,
+                            'price_24_hours' => $areaPrice->price_24_hours,
                             'continuous_care_price' => $areaPrice->continuous_care_price,
                         ];
                     }),
@@ -144,6 +148,7 @@ class DutyController extends Controller
                 'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                 'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                 'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                'price_24_hours' => $duty->price_24_hours,
                 'continuous_care_price' => $duty->continuous_care_price,
                 'area_prices' => $duty->areaPrices->map(function ($areaPrice) {
                     return [
@@ -157,6 +162,7 @@ class DutyController extends Controller
                         'night_shift_price_6_hours' => $areaPrice->night_shift_price_6_hours,
                         'night_shift_price_8_hours' => $areaPrice->night_shift_price_8_hours,
                         'night_shift_price_12_hours' => $areaPrice->night_shift_price_12_hours,
+                        'price_24_hours' => $areaPrice->price_24_hours,
                         'continuous_care_price' => $areaPrice->continuous_care_price,
                     ];
                 }),
@@ -206,6 +212,7 @@ class DutyController extends Controller
                     'night_shift_price_6_hours' => $areaPrice ? $areaPrice->night_shift_price_6_hours : $duty->night_shift_price_6_hours,
                     'night_shift_price_8_hours' => $areaPrice ? $areaPrice->night_shift_price_8_hours : $duty->night_shift_price_8_hours,
                     'night_shift_price_12_hours' => $areaPrice ? $areaPrice->night_shift_price_12_hours : $duty->night_shift_price_12_hours,
+                    'price_24_hours' => $areaPrice ? $areaPrice->price_24_hours : $duty->price_24_hours,
                     'continuous_care_price' => $areaPrice ? $areaPrice->continuous_care_price : $duty->continuous_care_price,
                     'about' => $translation?->about,
                     'terms_and_conditions' => $translation?->terms_and_conditions,
@@ -244,7 +251,7 @@ class DutyController extends Controller
     {
         $validated = $request->validate([
             'duty_id' => 'required|exists:duties,id',
-            'duration_hours' => 'nullable|integer|in:4,6,8,12',
+            'duration_hours' => 'nullable|integer|in:4,6,8,12,24',
             'is_continuous_care' => 'nullable|boolean',
             'is_day_shift' => 'nullable|boolean',
             'from_date' => 'required|date',

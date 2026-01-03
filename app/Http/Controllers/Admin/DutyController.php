@@ -47,6 +47,7 @@ class DutyController extends Controller
                     'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                     'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                     'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                    'price_24_hours' => $duty->price_24_hours,
                     'continuous_care_price' => $duty->continuous_care_price,
                     'about' => $translation?->about,
                     'terms_and_conditions' => $translation?->terms_and_conditions,
@@ -71,6 +72,7 @@ class DutyController extends Controller
             'night_shift_price_6_hours' => 'required|numeric|min:0',
             'night_shift_price_8_hours' => 'required|numeric|min:0',
             'night_shift_price_12_hours' => 'required|numeric|min:0',
+            'price_24_hours' => 'nullable|numeric|min:0',
             'continuous_care_price' => 'required|numeric|min:0',
             'locale' => 'nullable|string|in:en,ar',
             'about' => 'nullable|string',
@@ -99,6 +101,7 @@ class DutyController extends Controller
             'night_shift_price_6_hours' => $validated['night_shift_price_6_hours'],
             'night_shift_price_8_hours' => $validated['night_shift_price_8_hours'],
             'night_shift_price_12_hours' => $validated['night_shift_price_12_hours'],
+            'price_24_hours' => $validated['price_24_hours'] ?? null,
             'continuous_care_price' => $validated['continuous_care_price'],
         ]);
 
@@ -126,6 +129,7 @@ class DutyController extends Controller
                 'night_shift_price_6_hours' => $validated['night_shift_price_6_hours'],
                 'night_shift_price_8_hours' => $validated['night_shift_price_8_hours'],
                 'night_shift_price_12_hours' => $validated['night_shift_price_12_hours'],
+                'price_24_hours' => $validated['price_24_hours'] ?? null,
                 'continuous_care_price' => $validated['continuous_care_price'],
             ]);
         }
@@ -147,6 +151,7 @@ class DutyController extends Controller
                 'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                 'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                 'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                'price_24_hours' => $duty->price_24_hours,
                 'continuous_care_price' => $duty->continuous_care_price,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,
@@ -177,6 +182,7 @@ class DutyController extends Controller
                 'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                 'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                 'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                'price_24_hours' => $duty->price_24_hours,
                 'continuous_care_price' => $duty->continuous_care_price,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,
@@ -200,6 +206,7 @@ class DutyController extends Controller
             'night_shift_price_6_hours' => 'nullable|numeric|min:0',
             'night_shift_price_8_hours' => 'nullable|numeric|min:0',
             'night_shift_price_12_hours' => 'nullable|numeric|min:0',
+            'price_24_hours' => 'nullable|numeric|min:0',
             'continuous_care_price' => 'nullable|numeric|min:0',
             'locale' => 'nullable|string|in:en,ar',
             'about' => 'nullable|string',
@@ -263,6 +270,7 @@ class DutyController extends Controller
                 'night_shift_price_6_hours' => $duty->night_shift_price_6_hours,
                 'night_shift_price_8_hours' => $duty->night_shift_price_8_hours,
                 'night_shift_price_12_hours' => $duty->night_shift_price_12_hours,
+                'price_24_hours' => $duty->price_24_hours,
                 'continuous_care_price' => $duty->continuous_care_price,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,

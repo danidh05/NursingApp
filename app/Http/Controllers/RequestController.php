@@ -190,7 +190,7 @@ class RequestController extends Controller
      *                 @OA\Property(property="nurse_visit_id", type="integer", example=1, description="REQUIRED for Category 7 (Nurse Visits subcategory): Nurse visit ID"),
      *                 @OA\Property(property="visits_per_day", type="integer", example=2, description="REQUIRED with nurse_visit_id: visits per day (1-4)"),
      *                 @OA\Property(property="duty_id", type="integer", example=1, description="REQUIRED for Category 7 (Duties subcategory): Duty ID"),
-     *                 @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24"),
+     *                 @OA\Property(property="duration_hours", type="integer", example=12, description="REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24. Note: 24-hour shifts use separate price_24_hours field (not day/night specific, is_day_shift is ignored)"),
      *                 @OA\Property(property="is_continuous_care", type="string", example="false", enum={"true","false","0","1"}, description="Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required"),
      *                 @OA\Property(property="is_day_shift", type="string", example="true", enum={"true","false","0","1"}, description="Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)"),
      *                 @OA\Property(property="babysitter_id", type="integer", example=1, description="REQUIRED for Category 7 (Babysitter subcategory): Babysitter ID"),

@@ -22,6 +22,7 @@ class DutyAreaPrice extends Model
         'night_shift_price_6_hours',
         'night_shift_price_8_hours',
         'night_shift_price_12_hours',
+        'price_24_hours', // Separate 24-hour pricing (not day/night specific)
         'continuous_care_price',
     ];
 
@@ -34,6 +35,7 @@ class DutyAreaPrice extends Model
         'night_shift_price_6_hours' => 'decimal:2',
         'night_shift_price_8_hours' => 'decimal:2',
         'night_shift_price_12_hours' => 'decimal:2',
+        'price_24_hours' => 'decimal:2',
         'continuous_care_price' => 'decimal:2',
     ];
 

@@ -40,9 +40,10 @@ class BabysitterController extends Controller
                     'name' => $babysitter->name,
                     'image' => $babysitter->image_url,
                     'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                    'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                    'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                     'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                    'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                    'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                    'price_24_hours' => $babysitter->price_24_hours,
                     'about' => $translation?->about,
                     'terms_and_conditions' => $translation?->terms_and_conditions,
                     'additional_instructions' => $translation?->additional_instructions,
@@ -59,9 +60,10 @@ class BabysitterController extends Controller
         $validated = $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'day_shift_price_12_hours' => 'required|numeric|min:0',
-            'day_shift_price_24_hours' => 'required|numeric|min:0',
+            'day_shift_price_24_hours' => 'nullable|numeric|min:0', // Deprecated: kept for backward compatibility
             'night_shift_price_12_hours' => 'required|numeric|min:0',
-            'night_shift_price_24_hours' => 'required|numeric|min:0',
+            'night_shift_price_24_hours' => 'nullable|numeric|min:0', // Deprecated: kept for backward compatibility
+            'price_24_hours' => 'nullable|numeric|min:0', // Use this for 24-hour pricing (not day/night specific)
             'locale' => 'nullable|string|in:en,ar',
             'about' => 'nullable|string',
             'terms_and_conditions' => 'nullable|string',
@@ -82,9 +84,10 @@ class BabysitterController extends Controller
             'name' => 'Baby Sitter',
             'image' => $imagePath,
             'day_shift_price_12_hours' => $validated['day_shift_price_12_hours'],
-            'day_shift_price_24_hours' => $validated['day_shift_price_24_hours'],
+            'day_shift_price_24_hours' => $validated['day_shift_price_24_hours'] ?? null, // Deprecated
             'night_shift_price_12_hours' => $validated['night_shift_price_12_hours'],
-            'night_shift_price_24_hours' => $validated['night_shift_price_24_hours'],
+            'night_shift_price_24_hours' => $validated['night_shift_price_24_hours'] ?? null, // Deprecated
+            'price_24_hours' => $validated['price_24_hours'] ?? null,
         ]);
 
         $babysitter->translations()->create([
@@ -104,9 +107,10 @@ class BabysitterController extends Controller
                 'babysitter_id' => $babysitter->id,
                 'area_id' => $area->id,
                 'day_shift_price_12_hours' => $validated['day_shift_price_12_hours'],
-                'day_shift_price_24_hours' => $validated['day_shift_price_24_hours'],
+                'day_shift_price_24_hours' => $validated['day_shift_price_24_hours'] ?? null, // Deprecated
                 'night_shift_price_12_hours' => $validated['night_shift_price_12_hours'],
-                'night_shift_price_24_hours' => $validated['night_shift_price_24_hours'],
+                'night_shift_price_24_hours' => $validated['night_shift_price_24_hours'] ?? null, // Deprecated
+                'price_24_hours' => $validated['price_24_hours'] ?? null,
             ]);
         }
 
@@ -120,9 +124,10 @@ class BabysitterController extends Controller
                 'name' => $babysitter->name,
                 'image' => $babysitter->image_url,
                 'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                 'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                'price_24_hours' => $babysitter->price_24_hours,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,
                 'additional_instructions' => $translation?->additional_instructions,
@@ -145,9 +150,10 @@ class BabysitterController extends Controller
                 'name' => $babysitter->name,
                 'image' => $babysitter->image_url,
                 'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                 'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                'price_24_hours' => $babysitter->price_24_hours,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,
                 'additional_instructions' => $translation?->additional_instructions,
@@ -163,9 +169,10 @@ class BabysitterController extends Controller
         $validated = $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'day_shift_price_12_hours' => 'nullable|numeric|min:0',
-            'day_shift_price_24_hours' => 'nullable|numeric|min:0',
+            'day_shift_price_24_hours' => 'nullable|numeric|min:0', // Deprecated
             'night_shift_price_12_hours' => 'nullable|numeric|min:0',
-            'night_shift_price_24_hours' => 'nullable|numeric|min:0',
+            'night_shift_price_24_hours' => 'nullable|numeric|min:0', // Deprecated
+            'price_24_hours' => 'nullable|numeric|min:0', // Use this for 24-hour pricing (not day/night specific)
             'locale' => 'nullable|string|in:en,ar',
             'about' => 'nullable|string',
             'terms_and_conditions' => 'nullable|string',
@@ -221,9 +228,10 @@ class BabysitterController extends Controller
                 'name' => $babysitter->name,
                 'image' => $babysitter->image_url,
                 'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                 'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                'price_24_hours' => $babysitter->price_24_hours,
                 'about' => $translation?->about,
                 'terms_and_conditions' => $translation?->terms_and_conditions,
                 'additional_instructions' => $translation?->additional_instructions,

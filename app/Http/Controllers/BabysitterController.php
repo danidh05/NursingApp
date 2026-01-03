@@ -33,9 +33,10 @@ class BabysitterController extends Controller
      *                     @OA\Property(property="name", type="string", example="Baby Sitter"),
      *                     @OA\Property(property="image", type="string", nullable=true),
      *                     @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
-     *                     @OA\Property(property="day_shift_price_24_hours", type="number", format="float"),
+     *                     @OA\Property(property="day_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
      *                     @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
-     *                     @OA\Property(property="night_shift_price_24_hours", type="number", format="float"),
+     *                     @OA\Property(property="night_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
+     *                     @OA\Property(property="price_24_hours", type="number", format="float", description="24-hour shift price (separate from day/night, not day/night specific) - USE THIS"),
      *                     @OA\Property(
      *                         property="area_prices",
      *                         type="array",
@@ -43,9 +44,10 @@ class BabysitterController extends Controller
      *                             @OA\Property(property="area_id", type="integer", example=1),
      *                             @OA\Property(property="area_name", type="string", example="Beirut"),
      *                             @OA\Property(property="day_shift_price_12_hours", type="number", format="float"),
-     *                             @OA\Property(property="day_shift_price_24_hours", type="number", format="float"),
+     *                             @OA\Property(property="day_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
      *                             @OA\Property(property="night_shift_price_12_hours", type="number", format="float"),
-     *                             @OA\Property(property="night_shift_price_24_hours", type="number", format="float")
+     *                             @OA\Property(property="night_shift_price_24_hours", type="number", format="float", description="Deprecated: Use price_24_hours instead"),
+     *                             @OA\Property(property="price_24_hours", type="number", format="float", description="24-hour shift price (separate from day/night) - USE THIS")
      *                         )
      *                     )
      *                 )
@@ -69,17 +71,19 @@ class BabysitterController extends Controller
                     'name' => $babysitter->name,
                     'image' => $babysitter->image_url,
                     'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                    'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                    'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                     'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                    'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                    'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                    'price_24_hours' => $babysitter->price_24_hours,
                     'area_prices' => $babysitter->areaPrices->map(function ($areaPrice) {
                         return [
                             'area_id' => $areaPrice->area_id,
                             'area_name' => $areaPrice->area->name ?? null,
                             'day_shift_price_12_hours' => $areaPrice->day_shift_price_12_hours,
-                            'day_shift_price_24_hours' => $areaPrice->day_shift_price_24_hours,
+                            'day_shift_price_24_hours' => $areaPrice->day_shift_price_24_hours, // Deprecated
                             'night_shift_price_12_hours' => $areaPrice->night_shift_price_12_hours,
-                            'night_shift_price_24_hours' => $areaPrice->night_shift_price_24_hours,
+                            'night_shift_price_24_hours' => $areaPrice->night_shift_price_24_hours, // Deprecated
+                            'price_24_hours' => $areaPrice->price_24_hours,
                         ];
                     }),
                     'about' => $translation?->about,
@@ -117,17 +121,19 @@ class BabysitterController extends Controller
                 'name' => $babysitter->name,
                 'image' => $babysitter->image_url,
                 'day_shift_price_12_hours' => $babysitter->day_shift_price_12_hours,
-                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours,
+                'day_shift_price_24_hours' => $babysitter->day_shift_price_24_hours, // Deprecated
                 'night_shift_price_12_hours' => $babysitter->night_shift_price_12_hours,
-                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours,
+                'night_shift_price_24_hours' => $babysitter->night_shift_price_24_hours, // Deprecated
+                'price_24_hours' => $babysitter->price_24_hours,
                 'area_prices' => $babysitter->areaPrices->map(function ($areaPrice) {
                     return [
                         'area_id' => $areaPrice->area_id,
                         'area_name' => $areaPrice->area->name ?? null,
                         'day_shift_price_12_hours' => $areaPrice->day_shift_price_12_hours,
-                        'day_shift_price_24_hours' => $areaPrice->day_shift_price_24_hours,
+                        'day_shift_price_24_hours' => $areaPrice->day_shift_price_24_hours, // Deprecated
                         'night_shift_price_12_hours' => $areaPrice->night_shift_price_12_hours,
-                        'night_shift_price_24_hours' => $areaPrice->night_shift_price_24_hours,
+                        'night_shift_price_24_hours' => $areaPrice->night_shift_price_24_hours, // Deprecated
+                        'price_24_hours' => $areaPrice->price_24_hours,
                     ];
                 }),
                 'about' => $translation?->about,
