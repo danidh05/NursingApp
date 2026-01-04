@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NurseVisit;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
