@@ -68,115 +68,119 @@ Route::get('/areas', [AreaController::class, 'index']);
 // Public settings route (accessible without authentication)
 Route::get('/settings/public', [\App\Http\Controllers\SettingsController::class, 'getPublic']); // Get public settings for frontend
 
-// Authenticated routes
-Route::middleware(['auth:sanctum'])->group(function () {
-    // Contact form submission (requires authentication)
-    Route::post('/contact', [ContactController::class, 'store']);
-});
-
-
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 
 // ** Password Reset Routes **
 Route::post('/send-password-reset-otp', [AuthController::class, 'sendPasswordResetOTP']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+// ============================================
+// PUBLIC GET ROUTES (Guest Accessible)
+// ============================================
+// These routes are accessible without authentication for browsing purposes
+Route::middleware(['detect.language'])->group(function () {
+    // Nurses (browsing)
+    Route::get('/nurses', [NurseController::class, 'index']); // View all nurses
+    Route::get('/nurses/{id}', [NurseController::class, 'show']); // View a specific nurse's details
 
-// Protected routes (require auth and verified email)
+    // Services (Category 1)
+    Route::get('/services', [ServiceController::class, 'index']); // List all services
+    Route::get('/services/area/{area_id}', [ServiceController::class, 'getServicesByArea']); // Get all services for a specific area with pricing
+    Route::get('/services/quote', [ServiceController::class, 'quote']); // Get pricing quote for services in specific area
+    Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
+    
+    // Tests and Test Packages (Category 2)
+    Route::get('/tests', [TestController::class, 'index']); // List all tests
+    Route::get('/tests/{id}', [TestController::class, 'show']); // View a specific test
+    Route::get('/test-packages', [TestPackageController::class, 'index']); // List all test packages
+    Route::get('/test-packages/{id}', [TestPackageController::class, 'show']); // View a specific test package
+    
+    // Rays (Category 3)
+    Route::get('/rays', [RayController::class, 'index']); // List all rays
+    Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get all rays for a specific area with pricing
+    Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
+    
+    // Machines (Category 4)
+    Route::get('/machines', [MachineController::class, 'index']); // List all machines
+    Route::get('/machines/area/{area_id}', [MachineController::class, 'getMachinesByArea']); // Get all machines for a specific area with pricing
+    Route::get('/machines/{id}', [MachineController::class, 'show']); // View a specific machine
+    
+    // Physiotherapists (Category 5)
+    Route::get('/physiotherapists', [PhysiotherapistController::class, 'index']); // List all physiotherapists
+    Route::get('/physiotherapists/area/{area_id}', [PhysiotherapistController::class, 'getPhysiotherapistsByArea']); // Get all physiotherapists for a specific area with pricing
+    Route::get('/physiotherapists/{id}', [PhysiotherapistController::class, 'show']); // View a specific physiotherapist
+    
+    // Physio Machines (for Category 5)
+    Route::get('/physio-machines', [\App\Http\Controllers\PhysioMachineController::class, 'index']); // List all physio machines
+    Route::get('/physio-machines/{id}', [\App\Http\Controllers\PhysioMachineController::class, 'show']); // View a specific physio machine
+    
+    // Offers (Category 6)
+    Route::get('/offers', [OfferController::class, 'index']); // List all offers
+    Route::get('/offers/area/{area_id}', [OfferController::class, 'getOffersByArea']); // Get all offers for a specific area with pricing
+    Route::get('/offers/{id}', [OfferController::class, 'show']); // View a specific offer
+    
+    // Duties (Category 7) - Nurse Visits, Duties, Babysitters
+    Route::get('/nurse-visits', [\App\Http\Controllers\NurseVisitController::class, 'index']); // List all nurse visits
+    Route::get('/nurse-visits/area/{area_id}', [\App\Http\Controllers\NurseVisitController::class, 'getNurseVisitsByArea']); // Get all nurse visits for a specific area
+    Route::get('/nurse-visits/{id}', [\App\Http\Controllers\NurseVisitController::class, 'show']); // View a specific nurse visit
+    
+    Route::get('/duties', [\App\Http\Controllers\DutyController::class, 'index']); // List all duties
+    Route::get('/duties/area/{area_id}', [\App\Http\Controllers\DutyController::class, 'getDutiesByArea']); // Get all duties for a specific area
+    Route::get('/duties/{id}', [\App\Http\Controllers\DutyController::class, 'show']); // View a specific duty
+    
+    Route::get('/babysitters', [\App\Http\Controllers\BabysitterController::class, 'index']); // List all babysitters
+    Route::get('/babysitters/area/{area_id}', [\App\Http\Controllers\BabysitterController::class, 'getBabysittersByArea']); // Get all babysitters for a specific area
+    Route::get('/babysitters/{id}', [\App\Http\Controllers\BabysitterController::class, 'show']); // View a specific babysitter
+    
+    // Doctors (Category 8) - area based
+    Route::get('/doctor-categories', [DoctorCategoryController::class, 'index']);
+    Route::get('/doctor-categories/{doctorCategory}', [DoctorCategoryController::class, 'show']);
+    Route::get('/doctor-categories/{doctorCategory}/doctors', [DoctorController::class, 'getDoctorsByCategory']);
+    Route::get('/doctors/{id}', [DoctorController::class, 'show']); // Includes area price, operations, availabilities
+    
+    // FAQ APIs
+    Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
+    Route::get('/faqs/{id}', [FAQController::class, 'show']); // Get a specific FAQ
+    
+    // Categories
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+    // About
+    Route::get('/about', [AboutController::class, 'index']);
+    
+    // Content APIs
+    Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
+    Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
+});
+
+// ============================================
+// PROTECTED ROUTES (Require Authentication)
+// ============================================
 Route::middleware(['auth:sanctum'])->group(function () {
+    // Contact form submission (requires authentication)
+    Route::post('/contact', [ContactController::class, 'store']);
 
     Route::post('/logout', [AuthController::class, 'logout']); // Logout route
 
-    // Routes for authenticated users
+    // User-specific routes (require authentication)
     Route::get('/me', [UserController::class, 'show']); // Fetch authenticated user's details
     Route::put('/users/{id}', [UserController::class, 'update']); // Update user details
 
-    // Notifications routes for authenticated users
+    // Notifications routes (user-specific)
     Route::get('/notifications', [NotificationsController::class, 'index']); // List notifications
     Route::post('/notifications/{id}/read', [NotificationsController::class, 'markAsRead']); // Mark a notification as read
     Route::delete('/notifications/{id}', [NotificationsController::class, 'destroy']); // Delete a notification
     
-    // Routes accessible by both users and admins (with translation support)
-    Route::get('/nurses', [NurseController::class, 'index']); // View all nurses
-    Route::get('/nurses/{id}', [NurseController::class, 'show']); // View a specific nurse's details
-
-    // Services accessible by both users and admins (with translation support)
-    Route::middleware(['auth:sanctum', 'detect.language'])->group(function () {
-        Route::get('/services', [ServiceController::class, 'index']); // List all services
-        Route::get('/services/area/{area_id}', [ServiceController::class, 'getServicesByArea']); // Get all services for a specific area with pricing
-        Route::get('/services/quote', [ServiceController::class, 'quote']); // Get pricing quote for services in specific area
-        Route::get('/services/{service}', [ServiceController::class, 'show']); // View a specific service's details
-        
-        // Tests and Test Packages (Category 2)
-        Route::get('/tests', [TestController::class, 'index']); // List all tests
-        Route::get('/tests/{id}', [TestController::class, 'show']); // View a specific test
-        Route::get('/test-packages', [TestPackageController::class, 'index']); // List all test packages
-        Route::get('/test-packages/{id}', [TestPackageController::class, 'show']); // View a specific test package
-        
-        // Rays (Category 3)
-        Route::get('/rays', [RayController::class, 'index']); // List all rays
-        Route::get('/rays/area/{area_id}', [RayController::class, 'getRaysByArea']); // Get all rays for a specific area with pricing
-        Route::get('/rays/{id}', [RayController::class, 'show']); // View a specific ray
-        
-        // Machines (Category 4)
-        Route::get('/machines', [MachineController::class, 'index']); // List all machines
-        Route::get('/machines/area/{area_id}', [MachineController::class, 'getMachinesByArea']); // Get all machines for a specific area with pricing
-        Route::get('/machines/{id}', [MachineController::class, 'show']); // View a specific machine
-        
-        // Physiotherapists (Category 5)
-        Route::get('/physiotherapists', [PhysiotherapistController::class, 'index']); // List all physiotherapists
-        Route::get('/physiotherapists/area/{area_id}', [PhysiotherapistController::class, 'getPhysiotherapistsByArea']); // Get all physiotherapists for a specific area with pricing
-        Route::get('/physiotherapists/{id}', [PhysiotherapistController::class, 'show']); // View a specific physiotherapist
-        
-        // Physio Machines (for Category 5) - User accessible
-        Route::get('/physio-machines', [\App\Http\Controllers\PhysioMachineController::class, 'index']); // List all physio machines
-        Route::get('/physio-machines/{id}', [\App\Http\Controllers\PhysioMachineController::class, 'show']); // View a specific physio machine
-        
-        // Offers (Category 6)
-        Route::get('/offers', [OfferController::class, 'index']); // List all offers
-        Route::get('/offers/area/{area_id}', [OfferController::class, 'getOffersByArea']); // Get all offers for a specific area with pricing
-        Route::get('/offers/{id}', [OfferController::class, 'show']); // View a specific offer
-        
-        // Duties (Category 7) - Nurse Visits, Duties, Babysitters
-        Route::get('/nurse-visits', [\App\Http\Controllers\NurseVisitController::class, 'index']); // List all nurse visits
-        Route::get('/nurse-visits/area/{area_id}', [\App\Http\Controllers\NurseVisitController::class, 'getNurseVisitsByArea']); // Get all nurse visits for a specific area
-        Route::get('/nurse-visits/{id}', [\App\Http\Controllers\NurseVisitController::class, 'show']); // View a specific nurse visit
-        Route::post('/nurse-visits/calculate-price', [\App\Http\Controllers\NurseVisitController::class, 'calculatePrice']); // Calculate price for nurse visits
-        
-        Route::get('/duties', [\App\Http\Controllers\DutyController::class, 'index']); // List all duties
-        Route::get('/duties/area/{area_id}', [\App\Http\Controllers\DutyController::class, 'getDutiesByArea']); // Get all duties for a specific area
-        Route::get('/duties/{id}', [\App\Http\Controllers\DutyController::class, 'show']); // View a specific duty
-        Route::post('/duties/calculate-price', [\App\Http\Controllers\DutyController::class, 'calculatePrice']); // Calculate price for duties
-        
-        Route::get('/babysitters', [\App\Http\Controllers\BabysitterController::class, 'index']); // List all babysitters
-        Route::get('/babysitters/area/{area_id}', [\App\Http\Controllers\BabysitterController::class, 'getBabysittersByArea']); // Get all babysitters for a specific area
-        Route::get('/babysitters/{id}', [\App\Http\Controllers\BabysitterController::class, 'show']); // View a specific babysitter
-        Route::post('/babysitters/calculate-price', [\App\Http\Controllers\BabysitterController::class, 'calculatePrice']); // Calculate price for babysitters
-        
-        // Doctors (Category 8) - area based
-        Route::get('/doctor-categories', [DoctorCategoryController::class, 'index']);
-        Route::get('/doctor-categories/{doctorCategory}', [DoctorCategoryController::class, 'show']);
-        Route::get('/doctor-categories/{doctorCategory}/doctors', [DoctorController::class, 'getDoctorsByCategory']);
-        Route::get('/doctors/{id}', [DoctorController::class, 'show']); // Includes area price, operations, availabilities
-        
-        // FAQ APIs accessible by both users and admins (with translation support)
-        Route::get('/faqs', [FAQController::class, 'index']); // List all active FAQs
-        Route::get('/faqs/{id}', [FAQController::class, 'show']); // Get a specific FAQ
-    });
-
-    Route::get('/requests', [RequestController::class, 'index']); // List all requests
+    // Request routes (user-specific)
+    Route::get('/requests', [RequestController::class, 'index']); // List all requests (user's own requests)
     Route::get('/requests/default-area', [RequestController::class, 'getDefaultArea']); // Get user's default area for request creation
-    Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request
+    Route::get('/requests/{id}', [RequestController::class, 'show']); // Show a specific request (user's own)
     
-    // Users and admins can view categories
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/categories/{id}', [CategoryController::class, 'show']);
-
-    Route::get('/about', [AboutController::class, 'index']);//new
-    
-    // Content APIs accessible by both users and admins
-    Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
-    Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
+    // Calculate price endpoints (POST - require auth for consistency)
+    Route::post('/nurse-visits/calculate-price', [\App\Http\Controllers\NurseVisitController::class, 'calculatePrice']); // Calculate price for nurse visits
+    Route::post('/duties/calculate-price', [\App\Http\Controllers\DutyController::class, 'calculatePrice']); // Calculate price for duties
+    Route::post('/babysitters/calculate-price', [\App\Http\Controllers\BabysitterController::class, 'calculatePrice']); // Calculate price for babysitters
     
     // Stream.io Chat APIs
     Route::get('/stream/token', [StreamController::class, 'getToken']); // Get Stream.io token for authenticated user
