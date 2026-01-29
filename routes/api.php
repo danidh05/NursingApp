@@ -182,6 +182,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/duties/calculate-price', [\App\Http\Controllers\DutyController::class, 'calculatePrice']); // Calculate price for duties
     Route::post('/babysitters/calculate-price', [\App\Http\Controllers\BabysitterController::class, 'calculatePrice']); // Calculate price for babysitters
     
+    // Trusted Images (accessible to all authenticated users)
+    Route::get('/trusted-images', [\App\Http\Controllers\Admin\TrustedImageController::class, 'index']); // List all trusted images (authenticated users)
+    
     // Stream.io Chat APIs
     Route::get('/stream/token', [StreamController::class, 'getToken']); // Get Stream.io token for authenticated user
     Route::post('/stream/users', [StreamController::class, 'createUser']); // Create user in Stream.io
@@ -449,8 +452,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/suggested-doctors/{suggestedDoctor}', [SuggestedDoctorController::class, 'update']);
         Route::delete('/suggested-doctors/{suggestedDoctor}', [SuggestedDoctorController::class, 'destroy']);
 
-        // Trusted Images
-        Route::get('/trusted-images', [TrustedImageController::class, 'index']);
+        // Trusted Images (Admin CRUD)
+        Route::get('/trusted-images', [TrustedImageController::class, 'index']); // Admin can also access (public route also exists at /api/trusted-images)
         Route::post('/trusted-images', [TrustedImageController::class, 'store']);
         Route::match(['put', 'post'], '/trusted-images/{trustedImage}', [TrustedImageController::class, 'update']);
         Route::delete('/trusted-images/{trustedImage}', [TrustedImageController::class, 'destroy']);
