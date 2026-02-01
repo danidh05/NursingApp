@@ -12573,6 +12573,7 @@
                                                         "format": "float"
                                                     },
                                                     "day_shift_price_24_hours": {
+                                                        "description": "Deprecated: Use price_24_hours instead",
                                                         "type": "number",
                                                         "format": "float"
                                                     },
@@ -12581,6 +12582,12 @@
                                                         "format": "float"
                                                     },
                                                     "night_shift_price_24_hours": {
+                                                        "description": "Deprecated: Use price_24_hours instead",
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "price_24_hours": {
+                                                        "description": "24-hour shift price (separate from day/night, not day/night specific) - USE THIS",
                                                         "type": "number",
                                                         "format": "float"
                                                     },
@@ -12601,6 +12608,7 @@
                                                                     "format": "float"
                                                                 },
                                                                 "day_shift_price_24_hours": {
+                                                                    "description": "Deprecated: Use price_24_hours instead",
                                                                     "type": "number",
                                                                     "format": "float"
                                                                 },
@@ -12609,6 +12617,12 @@
                                                                     "format": "float"
                                                                 },
                                                                 "night_shift_price_24_hours": {
+                                                                    "description": "Deprecated: Use price_24_hours instead",
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "price_24_hours": {
+                                                                    "description": "24-hour shift price (separate from day/night) - USE THIS",
                                                                     "type": "number",
                                                                     "format": "float"
                                                                 }
@@ -12682,7 +12696,87 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Babysitters filtered by area"
+                        "description": "Babysitters filtered by area",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Baby Sitter"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "day_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "day_shift_price_24_hours": {
+                                                        "description": "Deprecated: Use price_24_hours instead",
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_12_hours": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "night_shift_price_24_hours": {
+                                                        "description": "Deprecated: Use price_24_hours instead",
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "price_24_hours": {
+                                                        "description": "24-hour shift price (separate from day/night, not day/night specific) - USE THIS",
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "about": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "terms_and_conditions": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_instructions": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "service_include": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "additional_information": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -14316,6 +14410,11 @@
                                                         "type": "number",
                                                         "format": "float"
                                                     },
+                                                    "price_24_hours": {
+                                                        "description": "24-hour shift price (separate from day/night, not day/night specific)",
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
                                                     "continuous_care_price": {
                                                         "type": "number",
                                                         "format": "float"
@@ -14361,6 +14460,11 @@
                                                                     "format": "float"
                                                                 },
                                                                 "night_shift_price_12_hours": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "price_24_hours": {
+                                                                    "description": "24-hour shift price (separate from day/night, not day/night specific)",
                                                                     "type": "number",
                                                                     "format": "float"
                                                                 },
@@ -17810,7 +17914,7 @@
                                         "example": 1
                                     },
                                     "duration_hours": {
-                                        "description": "REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24",
+                                        "description": "REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24. Note: 24-hour shifts use separate price_24_hours field (not day/night specific, is_day_shift is ignored)",
                                         "type": "integer",
                                         "example": 12
                                     },
