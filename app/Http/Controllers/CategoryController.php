@@ -41,6 +41,34 @@ class CategoryController extends Controller
      *         description="Forbidden - Access denied"
      *     )
      * )
+     * @OA\Get(
+     *     path="/api/admin/categories",
+     *     summary="List all categories (Admin)",
+     *     description="Retrieve a list of all categories. Admin-only endpoint.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Categories list retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="categories", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg", nullable=true, description="Firebase Storage URL for category image"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     )
+     * )
      */
     public function index()
     {
@@ -80,6 +108,45 @@ class CategoryController extends Controller
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Category not found"
+     *     )
+     * )
+     * @OA\Get(
+     *     path="/api/admin/categories/{id}",
+     *     summary="Get category details (Admin)",
+     *     description="Retrieve details of a specific category. Admin-only endpoint.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="category", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Care"),
+     *                 @OA\Property(property="image_url", type="string", example="https://firebasestorage.googleapis.com/v0/b/.../categories/image.jpg", nullable=true, description="Firebase Storage URL for category image"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
      *     ),
      *     @OA\Response(
      *         response=404,
