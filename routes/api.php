@@ -368,6 +368,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/babysitters/{babysitter}', [\App\Http\Controllers\Admin\BabysitterController::class, 'destroy']);
 
         // Category management routes
+        Route::get('/categories', [CategoryController::class, 'index']); // List all categories (admin)
+        Route::get('/categories/{category}', [CategoryController::class, 'show']); // Get a specific category (admin)
         Route::post('/categories', [CategoryController::class, 'store']);    // Create a new category
         Route::put('/categories/{category}', [CategoryController::class, 'update']);  // Update a category
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']); // Delete a category
