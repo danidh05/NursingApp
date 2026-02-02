@@ -230,7 +230,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/requests/{id}', [RequestController::class, 'destroy']); // Delete a request
 
         // Service management routes
+        Route::get('/services', [ServiceController::class, 'adminIndex']); // List all services (admin - no area filtering)
         Route::post('/services', [ServiceController::class, 'store']); // Create a new service
+        Route::get('/services/{service}', [ServiceController::class, 'adminShow']); // Get a specific service (admin)
         Route::match(['put', 'post'], '/services/{service}', [ServiceController::class, 'update'])->name('admin.services.update'); // Update a service (supports POST with _method=PUT for file uploads)
         Route::delete('/services/{service}', [ServiceController::class, 'destroy']); // Delete a service
         

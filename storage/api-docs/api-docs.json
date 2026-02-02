@@ -19524,6 +19524,150 @@
             }
         },
         "/api/admin/services": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all services (Admin only)",
+                "description": "Retrieve all services with all area prices for admin management. No area filtering applied - shows all services regardless of admin's area.",
+                "operationId": "43bf5115ac594b00f3461ca74fcef65c",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "en"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Services list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Home Nursing Care"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 50
+                                                    },
+                                                    "discount_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 45
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/services/..."
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "area_prices": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "area_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "area_name": {
+                                                                    "type": "string",
+                                                                    "example": "Beirut"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 55
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "translations": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "locale": {
+                                                                    "type": "string",
+                                                                    "example": "en"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Home Nursing Care"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "details": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "instructions": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "service_includes": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin role required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Admin"
@@ -19676,14 +19820,14 @@
                 ]
             }
         },
-        "/api/services/{id}": {
+        "/api/admin/services/{id}": {
             "get": {
                 "tags": [
-                    "Services"
+                    "Admin"
                 ],
-                "summary": "Get a specific service with area-based pricing and translations",
-                "description": "Retrieve a specific service with pricing based on user's area and content translated based on Accept-Language header.",
-                "operationId": "42775b582b563bc36a9e06ae850100bf",
+                "summary": "Get a specific service (Admin only)",
+                "description": "Retrieve a specific service with all area prices and translations for admin management.",
+                "operationId": "2edd9ad55b802b9732740bdbd2b0dc5d",
                 "parameters": [
                     {
                         "name": "id",
@@ -19698,11 +19842,11 @@
                     {
                         "name": "Accept-Language",
                         "in": "header",
-                        "description": "Language preference (en, ar) - affects service names",
+                        "description": "Language preference (en, ar)",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": "ar"
+                            "example": "en"
                         }
                     }
                 ],
@@ -19713,7 +19857,11 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "service": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
@@ -19721,16 +19869,12 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "رعاية التمريض المنزلية"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Professional nursing care at home"
+                                                    "example": "Home Nursing Care"
                                                 },
                                                 "price": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 120
+                                                    "example": 50
                                                 },
                                                 "discount_price": {
                                                     "type": "number",
@@ -19738,48 +19882,65 @@
                                                     "example": 45
                                                 },
                                                 "image": {
-                                                    "description": "Full URL to service image",
                                                     "type": "string",
-                                                    "example": "http://localhost:8000/storage/services/uuid_timestamp.jpg"
+                                                    "example": "http://localhost:8000/storage/services/..."
                                                 },
                                                 "category_id": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "area_name": {
-                                                    "description": "Area name (only included when showing area-specific pricing)",
-                                                    "type": "string",
-                                                    "example": "Beirut"
+                                                "area_prices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "area_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "area_name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 55
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 },
-                                                "translation": {
-                                                    "description": "Translation info (only included when translation exists)",
-                                                    "properties": {
-                                                        "locale": {
-                                                            "type": "string",
-                                                            "example": "ar"
+                                                "translations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "locale": {
+                                                                "type": "string",
+                                                                "example": "en"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Home Nursing Care"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "details": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "instructions": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "service_includes": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
                                                         },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "رعاية التمريض المنزلية"
-                                                        },
-                                                        "description": {
-                                                            "type": "string",
-                                                            "example": "رعاية تمريضية مهنية في المنزل"
-                                                        },
-                                                        "details": {
-                                                            "type": "string",
-                                                            "example": "خدمات تمريضية منزلية شاملة"
-                                                        },
-                                                        "instructions": {
-                                                            "type": "string",
-                                                            "example": "اتبع هذه التعليمات..."
-                                                        },
-                                                        "service_includes": {
-                                                            "type": "string",
-                                                            "example": "يشمل: الأدوية، المراقبة"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                        "type": "object"
+                                                    }
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -19798,11 +19959,14 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Service not found"
-                    },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin role required"
+                    },
+                    "404": {
+                        "description": "Service not found"
                     }
                 },
                 "security": [
@@ -19810,9 +19974,7 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        },
-        "/api/admin/services/{id}": {
+            },
             "put": {
                 "tags": [
                     "Admin"
@@ -20022,6 +20184,142 @@
                     },
                     "404": {
                         "description": "Service not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/services/{id}": {
+            "get": {
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get a specific service with area-based pricing and translations",
+                "description": "Retrieve a specific service with pricing based on user's area and content translated based on Accept-Language header.",
+                "operationId": "42775b582b563bc36a9e06ae850100bf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "Language preference (en, ar) - affects service names",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "service": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "رعاية التمريض المنزلية"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Professional nursing care at home"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 120
+                                                },
+                                                "discount_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 45
+                                                },
+                                                "image": {
+                                                    "description": "Full URL to service image",
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/services/uuid_timestamp.jpg"
+                                                },
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "area_name": {
+                                                    "description": "Area name (only included when showing area-specific pricing)",
+                                                    "type": "string",
+                                                    "example": "Beirut"
+                                                },
+                                                "translation": {
+                                                    "description": "Translation info (only included when translation exists)",
+                                                    "properties": {
+                                                        "locale": {
+                                                            "type": "string",
+                                                            "example": "ar"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "رعاية التمريض المنزلية"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "رعاية تمريضية مهنية في المنزل"
+                                                        },
+                                                        "details": {
+                                                            "type": "string",
+                                                            "example": "خدمات تمريضية منزلية شاملة"
+                                                        },
+                                                        "instructions": {
+                                                            "type": "string",
+                                                            "example": "اتبع هذه التعليمات..."
+                                                        },
+                                                        "service_includes": {
+                                                            "type": "string",
+                                                            "example": "يشمل: الأدوية، المراقبة"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [

@@ -111,6 +111,225 @@ class ServiceController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/admin/services",
+     *     summary="List all services (Admin only)",
+     *     description="Retrieve all services with all area prices for admin management. No area filtering applied - shows all services regardless of admin's area.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="en")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Services list retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/..."),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="area_prices", type="array", @OA\Items(
+     *                     @OA\Property(property="area_id", type="integer", example=1),
+     *                     @OA\Property(property="area_name", type="string", example="Beirut"),
+     *                     @OA\Property(property="price", type="number", format="float", example=55.00)
+     *                 )),
+     *                 @OA\Property(property="translations", type="array", @OA\Items(
+     *                     @OA\Property(property="locale", type="string", example="en"),
+     *                     @OA\Property(property="name", type="string", example="Home Nursing Care"),
+     *                     @OA\Property(property="description", type="string", nullable=true),
+     *                     @OA\Property(property="details", type="string", nullable=true),
+     *                     @OA\Property(property="instructions", type="string", nullable=true),
+     *                     @OA\Property(property="service_includes", type="string", nullable=true)
+     *                 )),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     )
+     * )
+     */
+    public function adminIndex()
+    {
+        $this->authorize('viewAny', Service::class);
+        $locale = app()->getLocale();
+
+        // Get all services with all area prices (no filtering)
+        $services = Service::with(['areaPrices.area:id,name', 'translations'])->get();
+
+        $services = $services->map(function ($service) use ($locale) {
+            $translation = $service->translate($locale);
+            
+            // Get all area prices for admin view
+            $areaPrices = $service->areaPrices->map(function ($areaPrice) {
+                return [
+                    'area_id' => $areaPrice->area_id,
+                    'area_name' => $areaPrice->area->name ?? null,
+                    'price' => $areaPrice->price,
+                ];
+            });
+
+            // Get all translations
+            $translations = $service->translations->map(function ($trans) {
+                return [
+                    'locale' => $trans->locale,
+                    'name' => $trans->name,
+                    'description' => $trans->description,
+                    'details' => $trans->details,
+                    'instructions' => $trans->instructions,
+                    'service_includes' => $trans->service_includes,
+                ];
+            });
+
+            return [
+                'id' => $service->id,
+                'name' => $translation ? $translation->name : $service->name,
+                'price' => $service->price,
+                'discount_price' => $service->discount_price,
+                'image' => $service->image_url,
+                'category_id' => $service->category_id,
+                'area_prices' => $areaPrices,
+                'translations' => $translations,
+                'created_at' => $service->created_at,
+                'updated_at' => $service->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $services,
+        ], 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/admin/services/{id}",
+     *     summary="Get a specific service (Admin only)",
+     *     description="Retrieve a specific service with all area prices and translations for admin management.",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Service ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="Accept-Language",
+     *         in="header",
+     *         description="Language preference (en, ar)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="en")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care"),
+     *                 @OA\Property(property="price", type="number", format="float", example=50.00),
+     *                 @OA\Property(property="discount_price", type="number", format="float", example=45.00),
+     *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/..."),
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="area_prices", type="array", @OA\Items(
+     *                     @OA\Property(property="area_id", type="integer", example=1),
+     *                     @OA\Property(property="area_name", type="string", example="Beirut"),
+     *                     @OA\Property(property="price", type="number", format="float", example=55.00)
+     *                 )),
+     *                 @OA\Property(property="translations", type="array", @OA\Items(
+     *                     @OA\Property(property="locale", type="string", example="en"),
+     *                     @OA\Property(property="name", type="string", example="Home Nursing Care"),
+     *                     @OA\Property(property="description", type="string", nullable=true),
+     *                     @OA\Property(property="details", type="string", nullable=true),
+     *                     @OA\Property(property="instructions", type="string", nullable=true),
+     *                     @OA\Property(property="service_includes", type="string", nullable=true)
+     *                 )),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Service not found"
+     *     )
+     * )
+     */
+    public function adminShow(Service $service)
+    {
+        $this->authorize('view', $service);
+        $locale = app()->getLocale();
+
+        // Load all area prices and translations
+        $service->load(['areaPrices.area:id,name', 'translations']);
+
+        $translation = $service->translate($locale);
+
+        // Get all area prices
+        $areaPrices = $service->areaPrices->map(function ($areaPrice) {
+            return [
+                'area_id' => $areaPrice->area_id,
+                'area_name' => $areaPrice->area->name ?? null,
+                'price' => $areaPrice->price,
+            ];
+        });
+
+        // Get all translations
+        $translations = $service->translations->map(function ($trans) {
+            return [
+                'locale' => $trans->locale,
+                'name' => $trans->name,
+                'description' => $trans->description,
+                'details' => $trans->details,
+                'instructions' => $trans->instructions,
+                'service_includes' => $trans->service_includes,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $service->id,
+                'name' => $translation ? $translation->name : $service->name,
+                'price' => $service->price,
+                'discount_price' => $service->discount_price,
+                'image' => $service->image_url,
+                'category_id' => $service->category_id,
+                'area_prices' => $areaPrices,
+                'translations' => $translations,
+                'created_at' => $service->created_at,
+                'updated_at' => $service->updated_at,
+            ],
+        ], 200);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/admin/services",
      *     summary="Create a new service (Admin only)",
