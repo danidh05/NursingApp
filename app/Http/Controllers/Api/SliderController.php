@@ -49,7 +49,10 @@ class SliderController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', \App\Models\Slider::class);
+        // Only authorize if a user is authenticated (for guests, skip authorization)
+        if (Auth::check()) {
+            $this->authorize('viewAny', \App\Models\Slider::class);
+        }
         
         $sliders = $this->sliderService->getAllSliders();
         return response()->json(['sliders' => $sliders], 200);

@@ -72,7 +72,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', Category::class);
+        // Only authorize if a user is authenticated (for guests, skip authorization)
+        if (auth()->check()) {
+            $this->authorize('viewAny', Category::class);
+        }
         $categories = Category::all();
         return response()->json(['categories' => $categories], 200);
     }
@@ -157,6 +160,10 @@ class CategoryController extends Controller
     public function show($id)
     {
         $category = Category::findOrFail($id);
+        // Only authorize if a user is authenticated (for guests, skip authorization)
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $this->authorize('view', $category);
+        }
         return response()->json(['category' => $category], 200);
     }
 

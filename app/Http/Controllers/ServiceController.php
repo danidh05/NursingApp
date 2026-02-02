@@ -91,8 +91,8 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $user = Auth::user()->fresh();
-        $userAreaId = $user->area_id;
+        $user = Auth::user(); // Can be null for guests
+        $userAreaId = $user ? $user->area_id : null; // Safely get area_id
         $locale = app()->getLocale();
 
         $services = Service::with(['areaPrices' => function ($query) use ($userAreaId) {
@@ -284,8 +284,8 @@ class ServiceController extends Controller
      */
     public function show($id)
     {
-        $user = Auth::user()->fresh();
-        $userAreaId = $user->area_id;
+        $user = Auth::user(); // Can be null for guests
+        $userAreaId = $user ? $user->area_id : null; // Safely get area_id
         $locale = app()->getLocale();
 
         $service = Service::with(['areaPrices' => function ($query) use ($userAreaId) {

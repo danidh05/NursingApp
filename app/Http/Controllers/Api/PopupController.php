@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\PopupService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class PopupController extends Controller
 {
@@ -59,9 +60,12 @@ class PopupController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', \App\Models\Popup::class);
+        // Only authorize if a user is authenticated (for guests, skip authorization)
+        if (Auth::check()) {
+            $this->authorize('viewAny', \App\Models\Popup::class);
+        }
         
-        $user = auth()->user();
+        $user = Auth::user(); // Can be null for guests
         $popup = $this->popupService->getActivePopup($user);
         
         if ($popup) {
