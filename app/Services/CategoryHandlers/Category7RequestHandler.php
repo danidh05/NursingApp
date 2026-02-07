@@ -43,8 +43,9 @@ class Category7RequestHandler extends BaseCategoryRequestHandler
             'visits_per_day' => ['nullable', 'integer', 'min:1', 'max:4', 'required_with:nurse_visit_id'],
             
             // Duties & Babysitter specific
-            'duration_hours' => ['nullable', 'integer', 'in:4,6,8,12,24', 'required_without:is_continuous_care'],
-            'is_continuous_care' => ['nullable', 'boolean', 'required_without:duration_hours'],
+            // Made nullable - frontend decides what to send based on subcategory
+            'duration_hours' => ['nullable', 'integer', 'in:4,6,8,12,24'],
+            'is_continuous_care' => ['nullable', 'boolean'],
             'is_day_shift' => ['nullable', 'boolean', 'required_without:nurse_visit_id'],
             
             'total_price' => ['nullable', 'numeric', 'min:0'], // Frontend-calculated total price

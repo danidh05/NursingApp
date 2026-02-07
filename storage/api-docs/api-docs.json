@@ -18041,12 +18041,13 @@
                                         "example": 1
                                     },
                                     "duration_hours": {
-                                        "description": "REQUIRED with duty_id unless is_continuous_care=true. Allowed: 4,6,8,12,24. Note: 24-hour shifts use separate price_24_hours field (not day/night specific, is_day_shift is ignored)",
+                                        "description": "Nullable. Allowed: 4,6,8,12,24. Note: 24-hour shifts use separate price_24_hours field (not day/night specific, is_day_shift is ignored). Frontend decides what to send based on subcategory.",
                                         "type": "integer",
-                                        "example": 12
+                                        "example": 12,
+                                        "nullable": true
                                     },
                                     "is_continuous_care": {
-                                        "description": "Category 7 (Duties): Continuous care (1 month). If true, duration_hours not required",
+                                        "description": "Nullable. Category 7 (Duties): Continuous care (1 month). Frontend decides what to send based on subcategory.",
                                         "type": "string",
                                         "enum": [
                                             "true",
@@ -18054,7 +18055,8 @@
                                             "0",
                                             "1"
                                         ],
-                                        "example": "false"
+                                        "example": "false",
+                                        "nullable": true
                                     },
                                     "is_day_shift": {
                                         "description": "Category 7 (Duties/Babysitter): Day shift (true) or night shift (false)",
@@ -18423,14 +18425,16 @@
                                             "example": 1
                                         },
                                         "duration_hours": {
-                                            "description": "REQUIRED with duty_id unless is_continuous_care=true",
+                                            "description": "Nullable. Frontend decides what to send based on subcategory.",
                                             "type": "integer",
-                                            "example": 12
+                                            "example": 12,
+                                            "nullable": true
                                         },
                                         "is_continuous_care": {
-                                            "description": "Category 7 (Duties): Continuous care",
+                                            "description": "Nullable. Frontend decides what to send based on subcategory.",
                                             "type": "boolean",
-                                            "example": false
+                                            "example": false,
+                                            "nullable": true
                                         },
                                         "is_day_shift": {
                                             "description": "Category 7: Day shift (true) or night shift (false)",
