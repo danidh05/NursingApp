@@ -152,6 +152,10 @@ Route::middleware(['detect.language'])->group(function () {
     // Content APIs
     Route::get('/sliders', [ApiSliderController::class, 'index']); // Homepage sliders
     Route::get('/popups', [ApiPopupController::class, 'index']); // App launch popups
+    
+    // Dashboard route (accessible to guests, users, and admins)
+    // Guests will get empty data for user-specific sections
+    Route::get('/user/dashboard', [UserController::class, 'dashboard']);
 });
 
 // ============================================
@@ -192,10 +196,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/stream/channels', [StreamController::class, 'createChannel']); // Create channel in Stream.io
     Route::post('/stream/channels/members', [StreamController::class, 'addChannelMembers']); // Add members to channel
     Route::post('/stream/messages', [StreamController::class, 'sendMessage']); // Send message to channel
-    
-    // Dashboard route (accessible to guests, users, and admins)
-    // Guests will get empty data for user-specific sections
-    Route::get('/user/dashboard', [UserController::class, 'dashboard']);
     
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
