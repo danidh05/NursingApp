@@ -11030,7 +11030,7 @@
                     "Sliders"
                 ],
                 "summary": "Get homepage sliders",
-                "description": "Retrieve all active sliders ordered by position for homepage display. Accessible to both users and admins.",
+                "description": "Retrieve all active sliders ordered by position for homepage display. Accessible to guests, users, and admins.",
                 "operationId": "949813c66d58cc2d0d1ee4d40eb5f228",
                 "responses": {
                     "200": {
@@ -11092,19 +11092,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Access denied"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/stream/token": {
@@ -21969,8 +21958,8 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get user dashboard",
-                "description": "Retrieve user dashboard with active requests count, recent services, most requested services (manually selected by admin), suggested doctors (manually selected by admin), and trusted images (managed by admin). All data is automatically included.",
+                "summary": "Get dashboard data",
+                "description": "Retrieve dashboard data including active requests count, recent services, most requested services, suggested doctors, and trusted images. Accessible to guests, users, and admins. For guests, user-specific data (active_requests, recent_services) will be empty.",
                 "operationId": "e0d9d9b7d7bbe83f6bd0bcf21f4395b2",
                 "responses": {
                     "200": {
@@ -21980,12 +21969,12 @@
                                 "schema": {
                                     "properties": {
                                         "active_requests": {
-                                            "description": "Number of pending requests",
+                                            "description": "Number of active requests (submitted, assigned, in_progress). Returns 0 for guests.",
                                             "type": "integer",
                                             "example": 3
                                         },
                                         "recent_services": {
-                                            "description": "Recent 5 service requests",
+                                            "description": "Recent 5 user requests. Returns empty array for guests.",
                                             "type": "array",
                                             "items": {
                                                 "properties": {
@@ -22007,7 +21996,7 @@
                                                     },
                                                     "status": {
                                                         "type": "string",
-                                                        "example": "pending"
+                                                        "example": "submitted"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -22023,7 +22012,7 @@
                                                                 },
                                                                 "name": {
                                                                     "type": "string",
-                                                                    "example": "Home Nursing"
+                                                                    "example": "Home Nursing Care"
                                                                 },
                                                                 "price": {
                                                                     "type": "number",
@@ -22035,6 +22024,16 @@
                                                         }
                                                     },
                                                     "area": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beirut"
+                                                            }
+                                                        },
                                                         "type": "object",
                                                         "nullable": true
                                                     }
@@ -22053,7 +22052,7 @@
                                                     },
                                                     "name": {
                                                         "type": "string",
-                                                        "example": "Home Nursing"
+                                                        "example": "Home Nursing Care"
                                                     },
                                                     "image": {
                                                         "type": "string",
@@ -22144,19 +22143,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - User role required"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/submit-location": {

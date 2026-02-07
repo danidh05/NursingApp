@@ -219,32 +219,34 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user/dashboard",
-     *     summary="Get user dashboard",
-     *     description="Retrieve user dashboard with active requests count, recent services, most requested services (manually selected by admin), suggested doctors (manually selected by admin), and trusted images (managed by admin). All data is automatically included.",
+     *     summary="Get dashboard data",
+     *     description="Retrieve dashboard data including active requests count, recent services, most requested services, suggested doctors, and trusted images. Accessible to guests, users, and admins. For guests, user-specific data (active_requests, recent_services) will be empty.",
      *     tags={"Users"},
-     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Dashboard data retrieved successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="active_requests", type="integer", example=3, description="Number of pending requests"),
+     *             @OA\Property(property="active_requests", type="integer", example=3, description="Number of active requests (submitted, assigned, in_progress). Returns 0 for guests."),
      *             @OA\Property(property="recent_services", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="full_name", type="string", example="John Doe"),
      *                 @OA\Property(property="phone_number", type="string", example="+1234567890"),
      *                 @OA\Property(property="problem_description", type="string", example="Need nursing care"),
-     *                 @OA\Property(property="status", type="string", example="pending"),
+     *                 @OA\Property(property="status", type="string", example="submitted"),
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="services", type="array", @OA\Items(
      *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                     @OA\Property(property="name", type="string", example="Home Nursing Care"),
      *                     @OA\Property(property="price", type="number", format="float", example=50.00)
      *                 )),
-     *                 @OA\Property(property="area", type="object", nullable=true)
-     *             ), description="Recent 5 service requests"),
+     *                 @OA\Property(property="area", type="object", nullable=true,
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Beirut")
+     *                 )
+     *             ), description="Recent 5 user requests. Returns empty array for guests."),
      *             @OA\Property(property="most_requested_services", type="array", @OA\Items(
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Home Nursing"),
+     *                 @OA\Property(property="name", type="string", example="Home Nursing Care"),
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/services/..."),
      *                 @OA\Property(property="price", type="number", format="float", example=50.00),
      *                 @OA\Property(property="description", type="string", nullable=true),
@@ -266,57 +268,55 @@ class UserController extends Controller
      *                 @OA\Property(property="image", type="string", example="http://localhost:8000/storage/trusted-images/...")
      *             ), description="Trusted images managed by admin")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User role required"
      *     )
      * )
      */
     public function dashboard()
     {
-        $user = Auth::user();
+        $user = Auth::user(); // Can be null for guests
         $locale = app()->getLocale() ?: 'en';
 
-        // Get all user requests with relationships in a single query
-        $requests = $user->requests()
-            ->with(['services', 'area'])
-            ->latest('created_at')
-            ->get();
+        // User-specific data (empty for guests)
+        $activeRequests = 0;
+        $recentServices = [];
 
-        // Count active requests from the same dataset
-        $activeRequests = $requests
-            ->whereIn('status', ['submitted', 'assigned', 'in_progress'])
-            ->count();
+        if ($user) {
+            // Get all user requests with relationships in a single query
+            $requests = $user->requests()
+                ->with(['services', 'area'])
+                ->latest('created_at')
+                ->get();
 
-        // Get recent 5 requests and format them
-        $recentServices = $requests
-            ->take(5)
-            ->map(function ($request) {
-                return [
-                    'id' => $request->id,
-                    'full_name' => $request->full_name,
-                    'phone_number' => $request->phone_number,
-                    'problem_description' => $request->problem_description,
-                    'status' => $request->status,
-                    'created_at' => $request->created_at,
-                    'services' => $request->services->map(function ($service) {
-                        return [
-                            'id' => $service->id,
-                            'name' => $service->name,
-                            'price' => $service->pivot->price ?? null, // If price is stored in pivot table
-                        ];
-                    }),
-                    'area' => $request->area ? [
-                        'id' => $request->area->id,
-                        'name' => $request->area->name,
-                    ] : null,
-                ];
-            });
+            // Count active requests from the same dataset
+            $activeRequests = $requests
+                ->whereIn('status', ['submitted', 'assigned', 'in_progress'])
+                ->count();
+
+            // Get recent 5 requests and format them
+            $recentServices = $requests
+                ->take(5)
+                ->map(function ($request) {
+                    return [
+                        'id' => $request->id,
+                        'full_name' => $request->full_name,
+                        'phone_number' => $request->phone_number,
+                        'problem_description' => $request->problem_description,
+                        'status' => $request->status,
+                        'created_at' => $request->created_at,
+                        'services' => $request->services->map(function ($service) {
+                            return [
+                                'id' => $service->id,
+                                'name' => $service->name,
+                                'price' => $service->pivot->price ?? null, // If price is stored in pivot table
+                            ];
+                        }),
+                        'area' => $request->area ? [
+                            'id' => $request->area->id,
+                            'name' => $request->area->name,
+                        ] : null,
+                    ];
+                });
+        }
 
         // Get Most Requested Services
         $mostRequestedServices = \App\Models\MostRequestedService::with(['service.areaPrices.area', 'service.category'])

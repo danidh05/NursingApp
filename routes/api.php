@@ -193,9 +193,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/stream/channels/members', [StreamController::class, 'addChannelMembers']); // Add members to channel
     Route::post('/stream/messages', [StreamController::class, 'sendMessage']); // Send message to channel
     
+    // Dashboard route (accessible to guests, users, and admins)
+    // Guests will get empty data for user-specific sections
+    Route::get('/user/dashboard', [UserController::class, 'dashboard']);
+    
     // Routes specific to "user" role
     Route::middleware('role:user')->group(function () {
-        Route::get('/user/dashboard', [UserController::class, 'dashboard']);
         Route::post('/submit-location', [UserController::class, 'submitLocationOnFirstLogin']);
        
 

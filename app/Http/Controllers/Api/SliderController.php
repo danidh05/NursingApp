@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\SliderService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class SliderController extends Controller
 {
@@ -18,9 +19,8 @@ class SliderController extends Controller
      * @OA\Get(
      *     path="/api/sliders",
      *     summary="Get homepage sliders",
-     *     description="Retrieve all active sliders ordered by position for homepage display. Accessible to both users and admins.",
+     *     description="Retrieve all active sliders ordered by position for homepage display. Accessible to guests, users, and admins.",
      *     tags={"Sliders"},
-     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Sliders retrieved successfully",
@@ -36,14 +36,6 @@ class SliderController extends Controller
      *                 @OA\Property(property="updated_at", type="string", format="date-time")
      *             ))
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - Access denied"
      *     )
      * )
      */
